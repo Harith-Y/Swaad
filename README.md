@@ -63,7 +63,7 @@ Run the start script which will automatically create a virtual environment and i
 ./start.sh
 ```
 
-Once complete, open your browser and go to **http://localhost:3000** — you're all set! 🎉
+Once complete, open your browser and go to **http://localhost:3000** – you're all set! 🎉
 
 ---
 
@@ -98,7 +98,13 @@ If the script doesn't work or you prefer manual setup, run these commands from t
    npm run dev --prefix ./frontend
    ```
 
-6. **Open your browser and go to** **http://localhost:3000** — done! 🎉
+6. **Open your browser and go to** **http://localhost:3000** – done! 🎉
+
+---
+
+## 🔬 Methodology
+
+![Methodology Flowchart](flowchart.png)
 
 ---
 
@@ -185,5 +191,3 @@ sharma.bhan@northeastern.edu
 ---
 
 Enjoy using Swaad! 🍽️
-
-
