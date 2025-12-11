@@ -59,7 +59,13 @@ const ChatInterface = () => {
       // Extract text from Yelp response
       const botResponse = data.response?.text || "Sorry, I couldn't understand that.";
       
-      setMessages(prev => [...prev, { text: botResponse, sender: 'bot' }]);
+      // Extract businesses if available
+      let businesses = [];
+      if (data.entities && data.entities.length > 0 && data.entities[0].businesses) {
+        businesses = data.entities[0].businesses;
+      }
+
+      setMessages(prev => [...prev, { text: botResponse, sender: 'bot', businesses }]);
     } catch (error) {
       console.error('Chat error:', error);
       setMessages(prev => [...prev, { text: "Sorry, something went wrong. Please try again.", sender: 'bot' }]);
@@ -78,8 +84,33 @@ const ChatInterface = () => {
           </div>
           <div className="chat-messages">
             {messages.map((msg, index) => (
-              <div key={index} className={`message ${msg.sender}`}>
-                {msg.text}
+              <div key={index} className={`message-container ${msg.sender}`}>
+                <div className={`message ${msg.sender}`}>
+                  {msg.text}
+                </div>
+                {msg.businesses && msg.businesses.length > 0 && (
+                  <div className="business-cards">
+                    {msg.businesses.map((business) => (
+                      <a 
+                        key={business.id} 
+                        href={business.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="business-card"
+                      >
+                        <div className="business-info">
+                          <h4>{business.name}</h4>
+                          {business.rating && <span className="rating">★ {business.rating}</span>}
+                        </div>
+                        {business.location && (
+                          <p className="business-address">
+                            {business.location.address1}, {business.location.city}
+                          </p>
+                        )}
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
             {isLoading && <div className="typing-indicator">Typing...</div>}
