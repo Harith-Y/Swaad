@@ -24,6 +24,13 @@ const ChatInterface = () => {
     setIsOpen(!isOpen);
   };
 
+  const handleNewChat = () => {
+    setChatId(null);
+    setMessages([
+      { text: "Hi! I can help you find restaurants using Yelp. What are you looking for?", sender: 'bot' }
+    ]);
+  };
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
@@ -80,7 +87,12 @@ const ChatInterface = () => {
         <div className="chat-window">
           <div className="chat-header">
             <h3>Swaad Assistant</h3>
-            <button className="close-btn" onClick={toggleChat}>×</button>
+            <div className="header-actions">
+              <button className="new-chat-btn" onClick={handleNewChat} title="Start New Chat">
+                +
+              </button>
+              <button className="close-btn" onClick={toggleChat}>×</button>
+            </div>
           </div>
           <div className="chat-messages">
             {messages.map((msg, index) => (
