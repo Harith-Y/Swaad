@@ -24,6 +24,8 @@ from auth import (
 )
 from dotenv import load_dotenv
 import os
+from groq import Groq
+import httpx
 
 # Load environment variables
 load_dotenv()
@@ -1201,6 +1203,92 @@ def search_recipes(query: str, limit: int = 10):
         })
     
     return {"recipes": results}
+
+class ChatRequest(BaseModel):
+    query: str
+    chat_id: Optional[str] = None
+
+@app.post("/api/chat")
+async def chat_with_yelp(request: ChatRequest):
+    groq_api_key = os.getenv("GROQ_API_KEY")
+    yelp_api_key = os.getenv("YELP_API_KEY")
+    
+    if not groq_api_key or not yelp_api_key:
+        raise HTTPException(status_code=500, detail="Missing API keys")
+
+    client = Groq(api_key=groq_api_key)
+    
+    # Prompt for Groq to convert query to Yelp API format
+    system_prompt = """
+    You are an assistant that converts natural language queries into a JSON body for the Yelp AI Chat API.
+    
+    The Yelp AI Chat API expects a POST body like this:
+    {
+        "query": "string",
+        "chat_id": "string (optional)",
+        "user_context": {
+            "latitude": float,
+            "longitude": float
+        },
+        "request_context": {
+            "max_results": integer
+        }
+    }
+    
+    If the user provides a location (e.g., "in San Francisco"), try to estimate the latitude and longitude and include them in `user_context`. 
+    If no location is provided, omit `user_context`.
+    Always include the `query` field with the user's original query or a refined version.
+    If `chat_id` is provided in the input, include it in the output.
+    
+    Output ONLY valid JSON.
+    """
+    
+    user_message = f"""
+    User Query: {request.query}
+    Chat ID: {request.chat_id}
+    """
+    
+    try:
+        completion = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message}
+            ],
+            model="llama-3.3-70b-versatile",
+            response_format={"type": "json_object"}
+        )
+        
+        yelp_request_body = json.loads(completion.choices[0].message.content)
+        
+        # Ensure chat_id is passed if it exists in the request and not in the generated body
+        if request.chat_id and "chat_id" not in yelp_request_body:
+            yelp_request_body["chat_id"] = request.chat_id
+            
+    except Exception as e:
+        print(f"Groq Error: {e}")
+        # Fallback: just pass the query directly
+        yelp_request_body = {
+            "query": request.query
+        }
+        if request.chat_id:
+            yelp_request_body["chat_id"] = request.chat_id
+
+    # Call Yelp API
+    yelp_url = "https://api.yelp.com/ai/chat/v2"
+    headers = {
+        "Authorization": f"Bearer {yelp_api_key}",
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(yelp_url, json=yelp_request_body, headers=headers)
+            response.raise_for_status()
+            return response.json()
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=e.response.status_code, detail=f"Yelp API Error: {e.response.text}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
