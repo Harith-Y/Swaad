@@ -58,6 +58,16 @@ app = FastAPI(title="Swaad Recipe Recommendation API")
 _embedding_model: Optional[SentenceTransformer] = None
 _pinecone_index = None
 
+@app.on_event("startup")
+def preload_models():
+    """Preload sentence-transformer model on startup to avoid first-request delay."""
+    global _embedding_model
+    if _embedding_model is None:
+        model_name = os.getenv("SENTENCE_TRANSFORMER_MODEL", "all-MiniLM-L6-v2")
+        print(f"Preloading sentence-transformer model: {model_name}")
+        _embedding_model = SentenceTransformer(model_name)
+        print("Sentence-transformer model loaded.")
+
 _ingredient_flavor_map = None
 _ingredient_upsert_done = False
 _taste_infer_cache: Dict[str, List[float]] = {}
@@ -321,6 +331,8 @@ async def _menu_url_to_dishes(menu_url: str) -> List[str]:
 
     if is_pdf:
         try:
+            if not os.getenv("GEMINI_API_KEY"):
+                return []  # Skip OCR if Gemini not configured
             text = extract_dish_names_from_image(raw, mime_type="application/pdf")
             dishes = [ln.strip() for ln in (text or "").split("\n") if ln.strip()]
             return _merge_unique_preserve_order(dishes)
@@ -330,6 +342,8 @@ async def _menu_url_to_dishes(menu_url: str) -> List[str]:
     if is_img:
         mime = content_type.split(";")[0].strip() if content_type.startswith("image/") else "image/jpeg"
         try:
+            if not os.getenv("GEMINI_API_KEY"):
+                return []  # Skip OCR if Gemini not configured
             text = extract_dish_names_from_image(raw, mime_type=mime)
             dishes = [ln.strip() for ln in (text or "").split("\n") if ln.strip()]
             return _merge_unique_preserve_order(dishes)
@@ -1954,6 +1968,11 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
     favorite_dishes = (dummy_user.get("favorite_dishes") or []) if isinstance(dummy_user, dict) else []
     diet_type = (dummy_user.get("diet_type") if isinstance(dummy_user, dict) else None) or "mix"
 
+    print(f"[DEBUG] Using dummy user: {user_key}")
+    print(f"[DEBUG] Allergies: {allergies}")
+    print(f"[DEBUG] Favorite dishes: {favorite_dishes}")
+    print(f"[DEBUG] Diet type: {diet_type}")
+
     if dummy_profile:
         allergies = dummy_profile.allergies or allergies
         favorite_dishes = [d.model_dump() for d in (dummy_profile.favorite_dishes or [])] or favorite_dishes
@@ -1993,16 +2012,18 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
     - If the user explicitly includes a location in their query, set business_search.location_explicit=true and set business_search.location.
     - If the user does NOT explicitly include a location, set business_search.location_explicit=false and DO NOT invent a location.
     - If fallback_location is provided and location_explicit=false, you may copy fallback_location into business_search.location.
+    - EXTRACT the number of results the user wants from their query (e.g., "5 best pizzas" -> max_results=5, "top 10 restaurants" -> max_results=10). If not specified, default to 10.
 
     business_search rules:
-    - Always include "limit": 50 and "offset": 50.
+    - Always include "limit": 50 and "offset": 0.
     - Extract a best-guess "term" (e.g., pizza, ramen, sushi).
     - Prefer an explicit location string if present; otherwise use the provided fallback_location if present.
 
     Output schema:
     {
-      "yelp_ai_body": {"query": "...", "chat_id": "...", "user_context": {"latitude": 0.0, "longitude": 0.0}, "request_context": {"max_results": 10}},
-      "business_search": {"term": "...", "location": "...", "location_explicit": true, "latitude": 0.0, "longitude": 0.0, "limit": 50, "offset": 50}
+      "yelp_ai_body": {"query": "...", "chat_id": "...", "user_context": {"latitude": 0.0, "longitude": 0.0}, "request_context": {"max_results": <extracted_number_or_10>}},
+      "business_search": {"term": "...", "location": "...", "location_explicit": true, "latitude": 0.0, "longitude": 0.0, "limit": 50, "offset": 0},
+      "extracted_max_results": <number_user_asked_for_or_10>
     }
     """
 
@@ -2042,17 +2063,21 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
         if isinstance(parsed, dict):
             yelp_ai_body = parsed.get("yelp_ai_body") or yelp_ai_body
             business_search = parsed.get("business_search") or business_search
+            # Use extracted_max_results from Groq if available
+            extracted_max = parsed.get("extracted_max_results")
+            if extracted_max and isinstance(extracted_max, int) and extracted_max > 0:
+                request.max_results = extracted_max
     except Exception:
         pass
 
     if request.chat_id and "chat_id" not in yelp_ai_body:
         yelp_ai_body["chat_id"] = request.chat_id
-    if request.max_results:
-        yelp_ai_body.setdefault("request_context", {})
-        yelp_ai_body["request_context"]["max_results"] = request.max_results
-    else:
-        yelp_ai_body.setdefault("request_context", {})
-        yelp_ai_body["request_context"].setdefault("max_results", 10)
+    
+    # Ensure max_results is set (from request or extracted)
+    final_max_results = request.max_results or 10
+    yelp_ai_body.setdefault("request_context", {})
+    yelp_ai_body["request_context"]["max_results"] = final_max_results
+    print(f"[DEBUG] max_results set to: {final_max_results}")
 
     search_term = business_search.get("term") if isinstance(business_search, dict) else None
     search_location = business_search.get("location") if isinstance(business_search, dict) else None
