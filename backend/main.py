@@ -119,6 +119,11 @@ class UserProfile(BaseModel):
     appetizer: FlavorProfile
     mains: FlavorProfile
     desserts: FlavorProfile
+    allergies: List[str] = []
+    favorite_dishes: List[DishInput] = []
+
+class PreferencePrompt(BaseModel):
+    prompt: str
 
 class RecommendationsRequest(BaseModel):
     user_profile: UserProfile
@@ -853,6 +858,69 @@ def create_user_profile(user_dishes: UserDishes):
         "desserts": desserts_profile
     }
 
+@app.post("/api/create-profile-ai", response_model=UserProfile)
+def create_profile_ai(data: PreferencePrompt):
+    """Create user flavor profile from natural language prompt using Groq"""
+    groq_api_key = os.getenv("GROQ_API_KEY")
+    if not groq_api_key:
+        raise HTTPException(status_code=500, detail="GROQ_API_KEY not configured")
+    
+    client = Groq(api_key=groq_api_key)
+    
+    system_prompt = """
+    You are a culinary expert AI. Analyze the user's taste preferences to create a flavor profile.
+    
+    Output JSON format:
+    {
+        "dishes": [{"name": "Dish Name", "category": "appetizer/mains/desserts"}],
+        "allergies": ["list", "of", "allergies"],
+        "flavor_profile": {
+            "appetizer": {"spicy": 0.0-1.0, "sweet": 0.0-1.0, "umami": 0.0-1.0, "sour": 0.0-1.0, "salty": 0.0-1.0},
+            "mains": {"spicy": 0.0-1.0, "sweet": 0.0-1.0, "umami": 0.0-1.0, "sour": 0.0-1.0, "salty": 0.0-1.0},
+            "desserts": {"spicy": 0.0-1.0, "sweet": 0.0-1.0, "umami": 0.0-1.0, "sour": 0.0-1.0, "salty": 0.0-1.0}
+        }
+    }
+    
+    Instructions:
+    1. Extract any dishes mentioned and categorize them.
+    2. Extract any allergies mentioned.
+    3. Estimate the flavor profile (0.0 to 1.0) for each category based on the user's description and mentioned dishes.
+    4. If a category is not mentioned, provide a balanced profile or infer from general preferences.
+    5. "spicy", "sweet", "umami", "sour", "salty" are the 5 dimensions.
+    """
+    
+    try:
+        completion = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": data.prompt}
+            ],
+            model="llama-3.3-70b-versatile",
+            response_format={"type": "json_object"}
+        )
+        
+        result = json.loads(completion.choices[0].message.content)
+        
+        dishes = []
+        for d in result.get("dishes", []):
+            dishes.append({
+                "name": d.get("name", "Unknown"),
+                "category": d.get("category", "mains")
+            })
+        
+        # Validate and structure the response
+        return {
+            "appetizer": result.get("flavor_profile", {}).get("appetizer", {"spicy": 0.5, "sweet": 0.5, "umami": 0.5, "sour": 0.5, "salty": 0.5}),
+            "mains": result.get("flavor_profile", {}).get("mains", {"spicy": 0.5, "sweet": 0.5, "umami": 0.5, "sour": 0.5, "salty": 0.5}),
+            "desserts": result.get("flavor_profile", {}).get("desserts", {"spicy": 0.5, "sweet": 0.5, "umami": 0.5, "sour": 0.5, "salty": 0.5}),
+            "allergies": result.get("allergies", []),
+            "favorite_dishes": dishes
+        }
+        
+    except Exception as e:
+        print(f"Groq Error: {e}")
+        raise HTTPException(status_code=500, detail=f"Error processing preferences: {str(e)}")
+
 def get_gemini_client():
     """Get or initialize Gemini client"""
     if not GEMINI_AVAILABLE:
@@ -1122,6 +1190,29 @@ def get_recommendations(request: RecommendationsRequest):
         for dish_name in dishes:
             recipe = find_recipe_by_name(dish_name, df)
             if recipe:
+                # Check for allergies
+                if hasattr(user_profile, 'allergies') and user_profile.allergies:
+                    ingredients = recipe.get('ingredients', [])
+                    if isinstance(ingredients, str):
+                        try:
+                            ingredients = ast.literal_eval(ingredients)
+                        except:
+                            ingredients = []
+                    
+                    # Simple keyword check for allergies
+                    has_allergy = False
+                    for allergy in user_profile.allergies:
+                        allergy_lower = allergy.lower()
+                        for ingredient in ingredients:
+                            if allergy_lower in ingredient.lower():
+                                has_allergy = True
+                                break
+                        if has_allergy:
+                            break
+                    
+                    if has_allergy:
+                        continue # Skip this recipe
+
                 # Store the mapping: (original menu dish name, matched recipe)
                 categorized_menu_dish_mappings[category].append((dish_name, recipe))
     

@@ -183,3 +183,99 @@
   cursor: not-allowed;
 }
 
+
+.preference-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.preference-input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.3s;
+  min-height: 150px;
+}
+
+.preference-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.create-profile-button {
+  width: 100%;
+  padding: 15px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.create-profile-button:hover:not(:disabled) {
+  background: #5a67d8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.create-profile-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+
+.preference-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.preference-input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.3s;
+  min-height: 150px;
+}
+
+.preference-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.create-profile-button {
+  width: 100%;
+  padding: 15px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.create-profile-button:hover:not(:disabled) {
+  background: #5a67d8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.create-profile-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
