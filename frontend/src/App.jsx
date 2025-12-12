@@ -9,12 +9,21 @@ import './App.css'
 import { API_URL } from './config'
 
 function App() {
+  const isChatRoute = window.location.pathname === '/chat' || window.location.pathname === '/chat/'
   const [currentView, setCurrentView] = useState('main') // 'main' or 'profile'
   const [step, setStep] = useState(1)
   const [userProfile, setUserProfile] = useState(null)
   const [menuDishes, setMenuDishes] = useState([])
   const [recommendations, setRecommendations] = useState(null)
   const [favoriteDishes, setFavoriteDishes] = useState([])
+
+  if (isChatRoute) {
+    return (
+      <div className="app">
+        <ChatInterface fullScreen />
+      </div>
+    )
+  }
 
   // Load saved profile from localStorage
   useEffect(() => {
