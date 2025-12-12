@@ -2,14 +2,21 @@ import React, { useState, useRef, useEffect } from 'react';
 import './ChatInterface.css';
 import { API_URL } from '../config';
 
-const ChatInterface = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const ChatInterface = ({ fullScreen = false }) => {
+  const [isOpen, setIsOpen] = useState(!!fullScreen);
   const [messages, setMessages] = useState([
     { text: "Hi! I can help you find restaurants using Yelp. What are you looking for?", sender: 'bot' }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [chatId, setChatId] = useState(null);
+  const [userKey, setUserKey] = useState(() => {
+    try {
+      return localStorage.getItem('swaad_user_key') || 'default';
+    } catch (e) {
+      return 'default';
+    }
+  });
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -20,7 +27,39 @@ const ChatInterface = () => {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    if (fullScreen) setIsOpen(true);
+  }, [fullScreen]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('swaad_user_key', userKey);
+    } catch (e) {
+      // ignore
+    }
+
+    // Sync dummy-user metadata (diet_type/location) so chat calls stay consistent.
+    const sync = async () => {
+      try {
+        const resp = await fetch(`${API_URL}/api/dummy-user?user_key=${encodeURIComponent(userKey)}`);
+        if (!resp.ok) return;
+        const data = await resp.json();
+        if (data && data.diet_type) {
+          localStorage.setItem('swaad_diet_type', data.diet_type);
+        }
+        if (data && data.location) {
+          localStorage.setItem('swaad_location', data.location);
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    sync();
+  }, [userKey]);
+
   const toggleChat = () => {
+    if (fullScreen) return;
     setIsOpen(!isOpen);
   };
 
@@ -57,7 +96,8 @@ const ChatInterface = () => {
         body: JSON.stringify({
           query: userMessage,
           chat_id: chatId,
-          diet_type: storedDietType
+          diet_type: storedDietType,
+          user_key: userKey
         }),
       });
 
@@ -99,16 +139,32 @@ const ChatInterface = () => {
   };
 
   return (
-    <div className="chat-widget">
+    <div className={`chat-widget ${fullScreen ? 'fullscreen' : ''}`}>
       {isOpen && (
-        <div className="chat-window">
+        <div className={`chat-window ${fullScreen ? 'fullscreen' : ''}`}>
           <div className="chat-header">
             <h3>Swaad Assistant</h3>
             <div className="header-actions">
+              <select
+                className="user-select"
+                value={userKey}
+                onChange={(e) => {
+                  setChatId(null);
+                  setMessages([
+                    { text: "Hi! I can help you find restaurants using Yelp. What are you looking for?", sender: 'bot' }
+                  ]);
+                  setUserKey(e.target.value);
+                }}
+                title="Select dummy user"
+              >
+                <option value="default">default</option>
+                <option value="dummy2">dummy2</option>
+                <option value="dummy3">dummy3</option>
+              </select>
               <button className="new-chat-btn" onClick={handleNewChat} title="Start New Chat">
                 +
               </button>
-              <button className="close-btn" onClick={toggleChat}>×</button>
+              {!fullScreen && <button className="close-btn" onClick={toggleChat}>×</button>}
             </div>
           </div>
           <div className="chat-messages">
@@ -159,9 +215,11 @@ const ChatInterface = () => {
           </form>
         </div>
       )}
-      <button className="chat-toggle-btn" onClick={toggleChat}>
-        💬
-      </button>
+      {!fullScreen && (
+        <button className="chat-toggle-btn" onClick={toggleChat}>
+          💬
+        </button>
+      )}
     </div>
   );
 };

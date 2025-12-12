@@ -64,24 +64,106 @@ _taste_infer_cache: Dict[str, List[float]] = {}
 USER_METADATA_MAP = {
     "default": {
         "location": os.getenv("DEFAULT_USER_LOCATION", ""),
-        "allergies": [],
-        "favorite_dishes": [],
+        "allergies": ["Nuts", "Cabbage", "Cauliflower"],
+        "favorite_dishes": [
+            {"name": "Paneer butter masala", "category": "mains"},
+            {"name": "Veg Manchurian", "category": "appetizer"},
+            {"name": "Peppy Paneer Pizza", "category": "mains"},
+        ],
+        "diet_type": "veg",
+        "flavor_profile": {
+            "appetizer": {"spicy": 0.6, "sweet": 0.2, "umami": 0.7, "sour": 0.3, "salty": 0.6},
+            "mains": {"spicy": 0.7, "sweet": 0.2, "umami": 0.8, "sour": 0.3, "salty": 0.7},
+            "desserts": {"spicy": 0.1, "sweet": 0.8, "umami": 0.2, "sour": 0.2, "salty": 0.2},
+            "allergies": ["Nuts", "Cabbage", "Cauliflower"],
+            "favorite_dishes": [
+                {"name": "Paneer butter masala", "category": "mains"},
+                {"name": "Veg Manchurian", "category": "appetizer"},
+                {"name": "Peppy Paneer Pizza", "category": "mains"},
+            ],
+            "diet_type": "veg",
+        },
+    }
+    ,
+    "dummy2": {
+        "location": "New York, NY",
+        "allergies": ["shellfish"],
+        "favorite_dishes": [
+            {"name": "Pepperoni Pizza", "category": "mains"},
+            {"name": "Chicken Wings", "category": "appetizer"},
+            {"name": "Cheesecake", "category": "desserts"}
+        ],
+        "diet_type": "non-veg",
+        "flavor_profile": {
+            "appetizer": {"spicy": 0.8, "sweet": 0.1, "umami": 0.7, "sour": 0.2, "salty": 0.8},
+            "mains": {"spicy": 0.6, "sweet": 0.2, "umami": 0.8, "sour": 0.2, "salty": 0.8},
+            "desserts": {"spicy": 0.1, "sweet": 0.9, "umami": 0.2, "sour": 0.2, "salty": 0.2},
+            "allergies": ["shellfish"],
+            "favorite_dishes": [
+                {"name": "Pepperoni Pizza", "category": "mains"},
+                {"name": "Chicken Wings", "category": "appetizer"},
+                {"name": "Cheesecake", "category": "desserts"}
+            ],
+            "diet_type": "non-veg",
+        },
+    }
+    ,
+    "dummy3": {
+        "location": "San Francisco, CA",
+        "allergies": ["gluten"],
+        "favorite_dishes": [
+            {"name": "Spicy Tuna Roll", "category": "mains"},
+            {"name": "Tonkotsu Ramen", "category": "mains"},
+            {"name": "Mango Mochi", "category": "desserts"}
+        ],
         "diet_type": "mix",
-        "flavor_profile": None,
+        "flavor_profile": {
+            "appetizer": {"spicy": 0.5, "sweet": 0.2, "umami": 0.7, "sour": 0.4, "salty": 0.6},
+            "mains": {"spicy": 0.7, "sweet": 0.2, "umami": 0.9, "sour": 0.3, "salty": 0.7},
+            "desserts": {"spicy": 0.1, "sweet": 0.8, "umami": 0.3, "sour": 0.3, "salty": 0.2},
+            "allergies": ["gluten"],
+            "favorite_dishes": [
+                {"name": "Spicy Tuna Roll", "category": "mains"},
+                {"name": "Tonkotsu Ramen", "category": "mains"},
+                {"name": "Mango Mochi", "category": "desserts"}
+            ],
+            "diet_type": "mix",
+        },
     }
 }
 
-def _get_dummy_user() -> Dict[str, Any]:
-    u = USER_METADATA_MAP.get("default")
+def _normalize_favorite_dishes(favorite_dishes: Any) -> List[Dict[str, str]]:
+    out: List[Dict[str, str]] = []
+    if not favorite_dishes or not isinstance(favorite_dishes, list):
+        return out
+    for d in favorite_dishes:
+        if isinstance(d, dict):
+            name = (d.get("name") or d.get("dish") or "").strip()
+            if not name:
+                continue
+            category = (d.get("category") or "mains").strip() or "mains"
+            out.append({"name": name, "category": category})
+        else:
+            name = str(d).strip()
+            if not name:
+                continue
+            out.append({"name": name, "category": "mains"})
+    return out
+
+def _get_dummy_user(user_key: str = "default") -> Dict[str, Any]:
+    key = (user_key or "default").strip() or "default"
+    u = USER_METADATA_MAP.get(key)
     if not isinstance(u, dict):
-        USER_METADATA_MAP["default"] = {
+        USER_METADATA_MAP[key] = {
             "location": os.getenv("DEFAULT_USER_LOCATION", ""),
             "allergies": [],
             "favorite_dishes": [],
             "diet_type": "mix",
             "flavor_profile": None,
         }
-        u = USER_METADATA_MAP["default"]
+        u = USER_METADATA_MAP[key]
+    if "favorite_dishes" in u:
+        u["favorite_dishes"] = _normalize_favorite_dishes(u.get("favorite_dishes"))
     return u
 
 def _dummy_user_to_user_profile(u: Dict[str, Any]) -> Optional["UserProfile"]:
@@ -103,7 +185,8 @@ def _dummy_user_to_user_profile(u: Dict[str, Any]) -> Optional["UserProfile"]:
         return None
 
 def _sync_dummy_user_from_request(request: Any) -> None:
-    u = _get_dummy_user()
+    key = getattr(request, "user_key", None) or "default"
+    u = _get_dummy_user(key)
     try:
         if getattr(request, "location", None):
             u["location"] = getattr(request, "location")
@@ -118,7 +201,8 @@ def _sync_dummy_user_from_request(request: Any) -> None:
         if getattr(request, "favorite_dishes", None):
             fav = getattr(request, "favorite_dishes")
             if isinstance(fav, list):
-                u["favorite_dishes"] = [d.model_dump() if hasattr(d, "model_dump") else d for d in fav]
+                raw = [d.model_dump() if hasattr(d, "model_dump") else d for d in fav]
+                u["favorite_dishes"] = _normalize_favorite_dishes(raw)
     except Exception:
         pass
     try:
@@ -142,7 +226,7 @@ def _sync_dummy_user_from_request(request: Any) -> None:
                 if isinstance(up_dict.get("allergies"), list):
                     u["allergies"] = up_dict.get("allergies")
                 if isinstance(up_dict.get("favorite_dishes"), list):
-                    u["favorite_dishes"] = up_dict.get("favorite_dishes")
+                    u["favorite_dishes"] = _normalize_favorite_dishes(up_dict.get("favorite_dishes"))
                 if up_dict.get("diet_type"):
                     u["diet_type"] = up_dict.get("diet_type")
     except Exception:
@@ -615,18 +699,18 @@ class DummyUserUpdate(BaseModel):
     flavor_profile: Optional[UserProfile] = None
 
 @app.get("/api/dummy-user")
-def get_dummy_user():
-    return _get_dummy_user()
+def get_dummy_user(user_key: str = "default"):
+    return _get_dummy_user(user_key)
 
 @app.put("/api/dummy-user")
-def update_dummy_user(data: DummyUserUpdate):
-    u = _get_dummy_user()
+def update_dummy_user(data: DummyUserUpdate, user_key: str = "default"):
+    u = _get_dummy_user(user_key)
     if data.location is not None:
         u["location"] = data.location
     if data.allergies is not None:
         u["allergies"] = data.allergies
     if data.favorite_dishes is not None:
-        u["favorite_dishes"] = [d.model_dump() for d in data.favorite_dishes]
+        u["favorite_dishes"] = _normalize_favorite_dishes([d.model_dump() for d in data.favorite_dishes])
     if data.diet_type is not None:
         u["diet_type"] = data.diet_type
     if data.flavor_profile is not None:
@@ -1840,6 +1924,7 @@ class ChatRequest(BaseModel):
     location: Optional[str] = None
     max_results: Optional[int] = None
     diet_type: Optional[str] = None
+    user_key: Optional[str] = "default"
 
 @app.post("/api/chat")
 async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
