@@ -6,6 +6,7 @@ import Recommendations from './components/Recommendations'
 import Profile from './components/Profile'
 import ChatInterface from './components/ChatInterface'
 import './App.css'
+import { API_URL } from './config'
 
 function App() {
   const [currentView, setCurrentView] = useState('main') // 'main' or 'profile'
@@ -17,6 +18,31 @@ function App() {
 
   // Load saved profile from localStorage
   useEffect(() => {
+    const loadDummyUser = async () => {
+      try {
+        const resp = await fetch(`${API_URL}/api/dummy-user`)
+        if (!resp.ok) return
+        const data = await resp.json()
+        if (data && data.flavor_profile) {
+          setUserProfile(data.flavor_profile)
+          localStorage.setItem('swaad_flavor_profile', JSON.stringify(data.flavor_profile))
+        }
+        if (data && data.favorite_dishes) {
+          setFavoriteDishes(data.favorite_dishes)
+          localStorage.setItem('swaad_favorite_dishes', JSON.stringify(data.favorite_dishes))
+        }
+        if (data && data.diet_type) {
+          localStorage.setItem('swaad_diet_type', data.diet_type)
+        }
+        if (data && data.location) {
+          localStorage.setItem('swaad_location', data.location)
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    loadDummyUser()
+
     const savedProfile = localStorage.getItem('swaad_flavor_profile')
     const savedDishes = localStorage.getItem('swaad_favorite_dishes')
     if (savedProfile) {
@@ -41,6 +67,22 @@ function App() {
     // Save to localStorage
     localStorage.setItem('swaad_flavor_profile', JSON.stringify(profile))
     localStorage.setItem('swaad_favorite_dishes', JSON.stringify(dishes))
+
+    // Persist to backend dummy user map
+    try {
+      fetch(`${API_URL}/api/dummy-user`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          flavor_profile: profile,
+          favorite_dishes: dishes,
+          diet_type: localStorage.getItem('swaad_diet_type')
+        })
+      })
+    } catch (e) {
+      // ignore
+    }
+
     setStep(2)
   }
 

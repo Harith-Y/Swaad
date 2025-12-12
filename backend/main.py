@@ -9,7 +9,7 @@ except ImportError:
     EMAIL_VALIDATION_AVAILABLE = False
     # Use string instead if email-validator not available
     EmailStr = str
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 import pandas as pd
 import ast
 import json
@@ -63,9 +63,90 @@ _taste_infer_cache: Dict[str, List[float]] = {}
 
 USER_METADATA_MAP = {
     "default": {
-        "location": os.getenv("DEFAULT_USER_LOCATION", "")
+        "location": os.getenv("DEFAULT_USER_LOCATION", ""),
+        "allergies": [],
+        "favorite_dishes": [],
+        "diet_type": "mix",
+        "flavor_profile": None,
     }
 }
+
+def _get_dummy_user() -> Dict[str, Any]:
+    u = USER_METADATA_MAP.get("default")
+    if not isinstance(u, dict):
+        USER_METADATA_MAP["default"] = {
+            "location": os.getenv("DEFAULT_USER_LOCATION", ""),
+            "allergies": [],
+            "favorite_dishes": [],
+            "diet_type": "mix",
+            "flavor_profile": None,
+        }
+        u = USER_METADATA_MAP["default"]
+    return u
+
+def _dummy_user_to_user_profile(u: Dict[str, Any]) -> Optional["UserProfile"]:
+    if not u or not isinstance(u, dict):
+        return None
+    fp = u.get("flavor_profile")
+    if not fp or not isinstance(fp, dict):
+        return None
+    try:
+        merged = dict(fp)
+        if "allergies" not in merged:
+            merged["allergies"] = u.get("allergies") or []
+        if "favorite_dishes" not in merged:
+            merged["favorite_dishes"] = u.get("favorite_dishes") or []
+        if "diet_type" not in merged:
+            merged["diet_type"] = u.get("diet_type") or "mix"
+        return UserProfile(**merged)
+    except Exception:
+        return None
+
+def _sync_dummy_user_from_request(request: Any) -> None:
+    u = _get_dummy_user()
+    try:
+        if getattr(request, "location", None):
+            u["location"] = getattr(request, "location")
+    except Exception:
+        pass
+    try:
+        if getattr(request, "diet_type", None):
+            u["diet_type"] = getattr(request, "diet_type")
+    except Exception:
+        pass
+    try:
+        if getattr(request, "favorite_dishes", None):
+            fav = getattr(request, "favorite_dishes")
+            if isinstance(fav, list):
+                u["favorite_dishes"] = [d.model_dump() if hasattr(d, "model_dump") else d for d in fav]
+    except Exception:
+        pass
+    try:
+        if getattr(request, "user_profile", None):
+            up = getattr(request, "user_profile")
+            if hasattr(up, "model_dump"):
+                up_dict = up.model_dump()
+            elif isinstance(up, dict):
+                up_dict = up
+            else:
+                up_dict = None
+            if isinstance(up_dict, dict):
+                u["flavor_profile"] = {
+                    "appetizer": up_dict.get("appetizer"),
+                    "mains": up_dict.get("mains"),
+                    "desserts": up_dict.get("desserts"),
+                    "allergies": up_dict.get("allergies", u.get("allergies") or []),
+                    "favorite_dishes": up_dict.get("favorite_dishes", u.get("favorite_dishes") or []),
+                    "diet_type": up_dict.get("diet_type", u.get("diet_type") or "mix"),
+                }
+                if isinstance(up_dict.get("allergies"), list):
+                    u["allergies"] = up_dict.get("allergies")
+                if isinstance(up_dict.get("favorite_dishes"), list):
+                    u["favorite_dishes"] = up_dict.get("favorite_dishes")
+                if up_dict.get("diet_type"):
+                    u["diet_type"] = up_dict.get("diet_type")
+    except Exception:
+        pass
 
 _NONVEG_KEYWORDS = {
     "chicken", "beef", "pork", "bacon", "ham", "turkey", "lamb", "mutton", "duck",
@@ -525,6 +606,32 @@ class UserProfile(BaseModel):
 
 class PreferencePrompt(BaseModel):
     prompt: str
+
+class DummyUserUpdate(BaseModel):
+    location: Optional[str] = None
+    allergies: Optional[List[str]] = None
+    favorite_dishes: Optional[List[DishInput]] = None
+    diet_type: Optional[str] = None
+    flavor_profile: Optional[UserProfile] = None
+
+@app.get("/api/dummy-user")
+def get_dummy_user():
+    return _get_dummy_user()
+
+@app.put("/api/dummy-user")
+def update_dummy_user(data: DummyUserUpdate):
+    u = _get_dummy_user()
+    if data.location is not None:
+        u["location"] = data.location
+    if data.allergies is not None:
+        u["allergies"] = data.allergies
+    if data.favorite_dishes is not None:
+        u["favorite_dishes"] = [d.model_dump() for d in data.favorite_dishes]
+    if data.diet_type is not None:
+        u["diet_type"] = data.diet_type
+    if data.flavor_profile is not None:
+        u["flavor_profile"] = data.flavor_profile.model_dump()
+    return u
 
 class RecommendationsRequest(BaseModel):
     user_profile: UserProfile
@@ -1315,13 +1422,29 @@ def create_profile_ai(data: PreferencePrompt):
             })
         
         # Validate and structure the response
-        return {
+        response_obj = {
             "appetizer": result.get("flavor_profile", {}).get("appetizer", {"spicy": 0.5, "sweet": 0.5, "umami": 0.5, "sour": 0.5, "salty": 0.5}),
             "mains": result.get("flavor_profile", {}).get("mains", {"spicy": 0.5, "sweet": 0.5, "umami": 0.5, "sour": 0.5, "salty": 0.5}),
             "desserts": result.get("flavor_profile", {}).get("desserts", {"spicy": 0.5, "sweet": 0.5, "umami": 0.5, "sour": 0.5, "salty": 0.5}),
             "allergies": result.get("allergies", []),
-            "favorite_dishes": dishes
+            "favorite_dishes": dishes,
+            "diet_type": _get_dummy_user().get("diet_type") or "mix"
         }
+
+        # Persist into dummy user map
+        du = _get_dummy_user()
+        du["allergies"] = response_obj.get("allergies") or []
+        du["favorite_dishes"] = dishes
+        du["flavor_profile"] = {
+            "appetizer": response_obj.get("appetizer"),
+            "mains": response_obj.get("mains"),
+            "desserts": response_obj.get("desserts"),
+            "allergies": du.get("allergies") or [],
+            "favorite_dishes": du.get("favorite_dishes") or [],
+            "diet_type": du.get("diet_type") or "mix",
+        }
+
+        return response_obj
         
     except Exception as e:
         print(f"Groq Error: {e}")
@@ -1730,19 +1853,22 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
 
     _maybe_upsert_ingredients_to_pinecone()
 
-    allergies = []
-    favorite_dishes = []
-    if request.user_profile:
-        allergies = request.user_profile.allergies or []
-        favorite_dishes = request.user_profile.favorite_dishes or []
-    if request.favorite_dishes:
-        favorite_dishes = request.favorite_dishes
+    # Dummy user map is the source of truth.
+    # If the frontend sends metadata, we treat it as a sync into the dummy map.
+    _sync_dummy_user_from_request(request)
+    dummy_user = _get_dummy_user()
+    dummy_profile = _dummy_user_to_user_profile(dummy_user)
 
-    diet_type = request.diet_type
-    if not diet_type and request.user_profile and getattr(request.user_profile, "diet_type", None):
-        diet_type = request.user_profile.diet_type
+    allergies = (dummy_user.get("allergies") or []) if isinstance(dummy_user, dict) else []
+    favorite_dishes = (dummy_user.get("favorite_dishes") or []) if isinstance(dummy_user, dict) else []
+    diet_type = (dummy_user.get("diet_type") if isinstance(dummy_user, dict) else None) or "mix"
 
-    user_taste_vec = _user_profile_to_taste_vector(request.user_profile) if request.user_profile else [0.0] * 6
+    if dummy_profile:
+        allergies = dummy_profile.allergies or allergies
+        favorite_dishes = [d.model_dump() for d in (dummy_profile.favorite_dishes or [])] or favorite_dishes
+        diet_type = dummy_profile.diet_type or diet_type
+
+    user_taste_vec = _user_profile_to_taste_vector(dummy_profile) if dummy_profile else [0.0] * 6
     fav_text = ""
     if favorite_dishes:
         try:
@@ -1754,7 +1880,7 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
     user_taste_vec = _combine_taste_vectors(user_taste_vec, inferred_user, secondary_weight=0.35)
 
     is_first_turn = not request.chat_id
-    user_db_location = (USER_METADATA_MAP.get("default") or {}).get("location") or ""
+    user_db_location = (dummy_user.get("location") if isinstance(dummy_user, dict) else None) or ""
     fallback_location = request.location
     if not fallback_location and is_first_turn and user_db_location:
         fallback_location = user_db_location
