@@ -17,6 +17,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import re
 import html as html_lib
+import traceback
 from sqlalchemy.orm import Session
 from database import get_db, User, Base, engine, YelpRawResponse
 from auth import (
@@ -83,6 +84,7 @@ USER_METADATA_MAP = {
             ],
             "diet_type": "veg",
         },
+        "pending_query": None,
     }
     ,
     "dummy2": {
@@ -106,6 +108,7 @@ USER_METADATA_MAP = {
             ],
             "diet_type": "non-veg",
         },
+        "pending_query": None,
     }
     ,
     "dummy3": {
@@ -129,6 +132,7 @@ USER_METADATA_MAP = {
             ],
             "diet_type": "mix",
         },
+        "pending_query": None,
     }
 }
 
@@ -160,6 +164,7 @@ def _get_dummy_user(user_key: str = "default") -> Dict[str, Any]:
             "favorite_dishes": [],
             "diet_type": "mix",
             "flavor_profile": None,
+            "pending_query": None,
         }
         u = USER_METADATA_MAP[key]
     if "favorite_dishes" in u:
@@ -1941,7 +1946,8 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
     # Dummy user map is the source of truth.
     # If the frontend sends metadata, we treat it as a sync into the dummy map.
     _sync_dummy_user_from_request(request)
-    dummy_user = _get_dummy_user()
+    user_key = (request.user_key or "default").strip() or "default"
+    dummy_user = _get_dummy_user(user_key)
     dummy_profile = _dummy_user_to_user_profile(dummy_user)
 
     allergies = (dummy_user.get("allergies") or []) if isinstance(dummy_user, dict) else []
@@ -1965,6 +1971,13 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
     user_taste_vec = _combine_taste_vectors(user_taste_vec, inferred_user, secondary_weight=0.35)
 
     is_first_turn = not request.chat_id
+    pending_query = dummy_user.get("pending_query") if isinstance(dummy_user, dict) else None
+    if is_first_turn and pending_query and request.query and not request.location:
+        # User likely replied with location-only; reuse stored query.
+        request.location = request.query
+        request.query = pending_query
+        dummy_user["location"] = request.location
+        dummy_user["pending_query"] = None
     user_db_location = (dummy_user.get("location") if isinstance(dummy_user, dict) else None) or ""
     fallback_location = request.location
     if not fallback_location and is_first_turn and user_db_location:
@@ -2061,6 +2074,8 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
         search_lng = uc_lng
 
     if is_first_turn and not location_explicit and not fallback_location:
+        if isinstance(dummy_user, dict):
+            dummy_user["pending_query"] = request.query
         return {
             "response": {
                 "text": "Please share your location (city or ZIP/postal code) so I can find restaurants near you."
@@ -2079,15 +2094,25 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
     ai_headers = {"Authorization": f"Bearer {yelp_api_key}", "Content-Type": "application/json"}
     yelp_ai_url = "https://api.yelp.com/ai/chat/v2"
 
+    ai_json = None
     try:
-        async with httpx.AsyncClient() as http_client:
+        async with httpx.AsyncClient(timeout=20.0, follow_redirects=True) as http_client:
             ai_resp = await http_client.post(yelp_ai_url, json=yelp_ai_body, headers=ai_headers)
             ai_resp.raise_for_status()
             ai_json = ai_resp.json()
-    except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=e.response.status_code, detail=f"Yelp API Error: {e.response.text}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+        # Yelp AI access can be unavailable; do not fail the entire chat.
+        print("Yelp AI chat error:", repr(e))
+        print(traceback.format_exc())
+        ai_json = {
+            "response": {
+                "text": "I couldn't reach Yelp AI chat right now, but I can still search businesses."
+            },
+            "entities": []
+        }
+
+    if not isinstance(ai_json, dict):
+        ai_json = {"response": {"text": str(ai_json)}, "entities": []}
 
     try:
         db.add(YelpRawResponse(query=request.query, endpoint="ai/chat/v2", request_params=yelp_ai_body, response_json=ai_json))
@@ -2096,6 +2121,8 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
         db.rollback()
 
     v3_search_json = None
+    if not search_term:
+        search_term = request.query
     if search_term and (search_location or (search_lat is not None and search_lng is not None)):
         v3_url = "https://api.yelp.com/v3/businesses/search"
         params = {"term": search_term, "limit": yelp_search_limit, "offset": yelp_search_offset}

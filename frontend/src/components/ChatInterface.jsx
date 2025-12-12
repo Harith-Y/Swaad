@@ -102,7 +102,14 @@ const ChatInterface = ({ fullScreen = false }) => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to get response');
+        let errBody = '';
+        try {
+          errBody = await response.text();
+        } catch (e) {
+          errBody = '';
+        }
+        console.error('Chat API error:', response.status, errBody);
+        throw new Error(errBody || 'Failed to get response');
       }
 
       const data = await response.json();
