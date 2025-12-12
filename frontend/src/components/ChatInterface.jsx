@@ -36,6 +36,21 @@ const ChatInterface = () => {
     if (!inputValue.trim()) return;
 
     const userMessage = inputValue.trim();
+    let storedProfile = null;
+    let storedDishes = null;
+    try {
+      const rawProfile = localStorage.getItem('swaad_flavor_profile');
+      if (rawProfile) storedProfile = JSON.parse(rawProfile);
+    } catch (err) {
+      storedProfile = null;
+    }
+    try {
+      const rawDishes = localStorage.getItem('swaad_favorite_dishes');
+      if (rawDishes) storedDishes = JSON.parse(rawDishes);
+    } catch (err) {
+      storedDishes = null;
+    }
+
     setMessages(prev => [...prev, { text: userMessage, sender: 'user' }]);
     setInputValue('');
     setIsLoading(true);
@@ -48,7 +63,9 @@ const ChatInterface = () => {
         },
         body: JSON.stringify({
           query: userMessage,
-          chat_id: chatId
+          chat_id: chatId,
+          user_profile: storedProfile,
+          favorite_dishes: storedDishes
         }),
       });
 
@@ -68,7 +85,15 @@ const ChatInterface = () => {
       
       // Extract businesses if available
       let businesses = [];
-      if (data.entities && data.entities.length > 0 && data.entities[0].businesses) {
+      if (data.menu_buddy && data.menu_buddy.recommendations && data.menu_buddy.recommendations.length > 0) {
+        businesses = data.menu_buddy.recommendations.map((r) => ({
+          id: r.id,
+          name: r.name,
+          url: r.url,
+          rating: r.avg_rating,
+          location: r.location
+        }));
+      } else if (data.entities && data.entities.length > 0 && data.entities[0].businesses) {
         businesses = data.entities[0].businesses;
       }
 
