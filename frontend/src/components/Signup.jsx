@@ -8,6 +8,7 @@ function Signup({ onSwitchToLogin }) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [dietType, setDietType] = useState('mix')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
@@ -66,7 +67,7 @@ function Signup({ onSwitchToLogin }) {
     setLoading(true)
 
     try {
-      await signup(email, username, password)
+      await signup(email, username, password, dietType)
       // Navigation will be handled by parent component
     } catch (err) {
       console.error('Signup error details:', err)
@@ -113,6 +114,14 @@ function Signup({ onSwitchToLogin }) {
             required
             placeholder="Choose a username"
           />
+        </div>
+        <div className="form-group">
+          <label>Diet Preference</label>
+          <select value={dietType} onChange={(e) => setDietType(e.target.value)}>
+            <option value="mix">Mix (Veg + Non-Veg)</option>
+            <option value="veg">Veg</option>
+            <option value="non-veg">Non-Veg</option>
+          </select>
         </div>
         <div className="form-group">
           <label>Password</label>

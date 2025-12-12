@@ -58,16 +58,18 @@ export const AuthProvider = ({ children }) => {
     return response.data
   }
 
-  const signup = async (email, username, password) => {
+  const signup = async (email, username, password, dietType = 'mix') => {
     try {
       const response = await axios.post(`${API_URL}/api/auth/signup`, {
         email,
         username,
-        password
+        password,
+        diet_type: dietType
       })
       
       const { access_token } = response.data
       localStorage.setItem('token', access_token)
+      localStorage.setItem('swaad_diet_type', dietType)
       setToken(access_token)
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
       

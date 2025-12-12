@@ -16,6 +16,7 @@ import json
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import re
+import html as html_lib
 from sqlalchemy.orm import Session
 from database import get_db, User, Base, engine, YelpRawResponse
 from auth import (
@@ -28,6 +29,8 @@ from groq import Groq
 import httpx
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone
+import csv
+from pathlib import Path
 
 # Load environment variables
 load_dotenv()
@@ -54,6 +57,142 @@ app = FastAPI(title="Swaad Recipe Recommendation API")
 _embedding_model: Optional[SentenceTransformer] = None
 _pinecone_index = None
 
+_ingredient_flavor_map = None
+_ingredient_upsert_done = False
+_taste_infer_cache: Dict[str, List[float]] = {}
+
+USER_METADATA_MAP = {
+    "default": {
+        "location": os.getenv("DEFAULT_USER_LOCATION", "")
+    }
+}
+
+_NONVEG_KEYWORDS = {
+    "chicken", "beef", "pork", "bacon", "ham", "turkey", "lamb", "mutton", "duck",
+    "fish", "salmon", "tuna", "shrimp", "prawn", "crab", "lobster", "anchovy", "anchovies",
+    "pepperoni", "sausage", "prosciutto", "salami"
+}
+
+def _merge_unique_preserve_order(items: List[str]) -> List[str]:
+    seen = set()
+    out = []
+    for x in items or []:
+        if not x or not isinstance(x, str):
+            continue
+        v = x.strip()
+        if not v:
+            continue
+        k = v.lower()
+        if k in seen:
+            continue
+        seen.add(k)
+        out.append(v)
+    return out
+
+def _is_nonveg_text(text: str) -> bool:
+    if not text:
+        return False
+    t = text.lower()
+    return any(k in t for k in _NONVEG_KEYWORDS)
+
+def _filter_dishes_by_diet(dishes: List[str], diet_type: Optional[str]) -> List[str]:
+    d = (diet_type or "mix").strip().lower()
+    if d not in {"veg", "vegetarian", "non-veg", "nonveg", "mix"}:
+        d = "mix"
+    if d == "mix":
+        return dishes or []
+    if d in {"veg", "vegetarian"}:
+        return [x for x in (dishes or []) if not _is_nonveg_text(x)]
+    return [x for x in (dishes or []) if _is_nonveg_text(x)]
+
+def _extract_text_from_html_bytes(raw: bytes) -> str:
+    if not raw:
+        return ""
+    try:
+        s = raw.decode("utf-8", errors="ignore")
+    except Exception:
+        return ""
+    s = re.sub(r"(?is)<(script|style|noscript).*?>.*?</\\1>", " ", s)
+    s = re.sub(r"(?i)<br\\s*/?>", "\n", s)
+    s = re.sub(r"(?i)</(p|li|div|tr|h1|h2|h3|h4|h5|h6)>", "\n", s)
+    s = re.sub(r"(?s)<.*?>", " ", s)
+    s = html_lib.unescape(s)
+    s = re.sub(r"[ \t\r\f\v]+", " ", s)
+    s = re.sub(r"\n\s*\n+", "\n", s)
+    return s.strip()
+
+async def _fetch_menu_url(menu_url: str) -> Optional[httpx.Response]:
+    if not menu_url:
+        return None
+    try:
+        async with httpx.AsyncClient(follow_redirects=True, timeout=20.0) as http_client:
+            resp = await http_client.get(menu_url, headers={"User-Agent": "Mozilla/5.0"})
+            if resp.status_code >= 400:
+                return None
+            return resp
+    except Exception:
+        return None
+
+async def _menu_url_to_dishes(menu_url: str) -> List[str]:
+    resp = await _fetch_menu_url(menu_url)
+    if resp is None:
+        return []
+
+    content_type = (resp.headers.get("content-type") or "").lower()
+    url_lc = (menu_url or "").lower()
+
+    is_pdf = "application/pdf" in content_type or url_lc.endswith(".pdf")
+    is_img = content_type.startswith("image/") or any(url_lc.endswith(ext) for ext in [".png", ".jpg", ".jpeg", ".webp"]) 
+    is_html = "text/html" in content_type or "application/xhtml" in content_type or url_lc.endswith(".html") or url_lc.endswith(".htm")
+
+    raw = resp.content
+    if not raw:
+        return []
+
+    if is_pdf:
+        try:
+            text = extract_dish_names_from_image(raw, mime_type="application/pdf")
+            dishes = [ln.strip() for ln in (text or "").split("\n") if ln.strip()]
+            return _merge_unique_preserve_order(dishes)
+        except Exception:
+            return []
+
+    if is_img:
+        mime = content_type.split(";")[0].strip() if content_type.startswith("image/") else "image/jpeg"
+        try:
+            text = extract_dish_names_from_image(raw, mime_type=mime)
+            dishes = [ln.strip() for ln in (text or "").split("\n") if ln.strip()]
+            return _merge_unique_preserve_order(dishes)
+        except Exception:
+            return []
+
+    if is_html or ("text/" in content_type):
+        page_text = _extract_text_from_html_bytes(raw)
+        if not page_text:
+            return []
+        try:
+            categorized = extract_dishes_from_menu(page_text)
+            flat = []
+            for cat in ["appetizer", "mains", "desserts"]:
+                flat.extend(categorized.get(cat, []) if isinstance(categorized, dict) else [])
+            return _merge_unique_preserve_order(flat)
+        except Exception:
+            return []
+
+    return []
+
+def _dish_recommendations_for_restaurant(menu_items: List[str], user_taste_vec: List[float], diet_type: Optional[str], top_n: int = 5) -> List[Dict]:
+    items = _filter_dishes_by_diet(menu_items or [], diet_type)
+    items = _merge_unique_preserve_order(items)
+    scored = []
+    semantic = os.getenv("USE_SEMANTIC_DISH_TASTE", "false").lower() in {"1", "true", "yes", "y"}
+    for dish in items[:40]:
+        tv = _infer_taste_from_text_hybrid(dish, semantic=semantic)
+        sim = _taste_similarity(user_taste_vec, tv)
+        scored.append({"name": dish, "similarity": float(sim)})
+    scored.sort(key=lambda x: x.get("similarity", 0.0), reverse=True)
+    return scored[: max(1, int(top_n))]
+
 def _get_embedding_model() -> SentenceTransformer:
     global _embedding_model
     if _embedding_model is None:
@@ -70,12 +209,178 @@ def _get_pinecone_index():
     global _pinecone_index
     if _pinecone_index is None:
         api_key = os.getenv("PINECONE_API_KEY")
-        index_name = os.getenv("PINECONE_INDEX")
+        index_name = os.getenv("PINECONE_INDEX") or "menu-buddy"
         if not api_key or not index_name:
             raise HTTPException(status_code=500, detail="Missing Pinecone configuration")
         pc = Pinecone(api_key=api_key)
         _pinecone_index = pc.Index(index_name)
     return _pinecone_index
+
+def _load_ingredient_flavor_map() -> Dict[str, Dict]:
+    global _ingredient_flavor_map
+    if _ingredient_flavor_map is not None:
+        return _ingredient_flavor_map
+
+    root = Path(__file__).resolve().parent.parent
+    csv_path = root / "ingredient-flavor.csv"
+    mapping: Dict[str, Dict] = {}
+    if not csv_path.exists():
+        _ingredient_flavor_map = mapping
+        return _ingredient_flavor_map
+
+    with csv_path.open("r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            ing = (row.get("ingredient") or "").strip()
+            if not ing:
+                continue
+            spicy = float(row.get("spicy") or 0)
+            sweet = float(row.get("sweet") or 0)
+            umami = float(row.get("umami") or 0)
+            sour = float(row.get("sour") or 0)
+            salty = float(row.get("salty") or 0)
+            bitter = 0.0
+            taste_vector = [sweet, salty, sour, bitter, umami, spicy]
+            mapping[ing.lower()] = {
+                "ingredient": ing,
+                "flavor_profile": {
+                    "spicy": spicy,
+                    "sweet": sweet,
+                    "umami": umami,
+                    "sour": sour,
+                    "salty": salty
+                },
+                "taste_vector": taste_vector
+            }
+
+    _ingredient_flavor_map = mapping
+    return _ingredient_flavor_map
+
+def _infer_taste_from_text(text: str) -> List[float]:
+    m = _load_ingredient_flavor_map()
+    if not text:
+        return [0.0] * 6
+    t = text.lower()
+
+    hits = 0
+    acc = np.zeros(6, dtype=float)
+    for ing_lc, info in m.items():
+        if ing_lc and re.search(r"\b" + re.escape(ing_lc) + r"\b", t):
+            vec = info.get("taste_vector") or [0.0] * 6
+            if len(vec) == 6:
+                acc += np.array(vec, dtype=float)
+                hits += 1
+
+    if hits == 0:
+        return [0.0] * 6
+    out = (acc / float(hits)).tolist()
+    return [float(x) for x in out]
+
+def _infer_taste_from_text_semantic(text: str) -> List[float]:
+    if not text:
+        return [0.0] * 6
+
+    cache_key = text.strip().lower()
+    if cache_key in _taste_infer_cache:
+        return _taste_infer_cache[cache_key]
+
+    try:
+        idx = _get_pinecone_index()
+    except Exception:
+        _taste_infer_cache[cache_key] = [0.0] * 6
+        return _taste_infer_cache[cache_key]
+
+    try:
+        qvec = _embed_text(text)
+        res = idx.query(vector=qvec, top_k=5, include_metadata=True, namespace="ingredients")
+        matches = res.get("matches", []) if isinstance(res, dict) else getattr(res, "matches", [])
+    except Exception:
+        _taste_infer_cache[cache_key] = [0.0] * 6
+        return _taste_infer_cache[cache_key]
+
+    num = np.zeros(6, dtype=float)
+    den = 0.0
+    for m in matches or []:
+        meta = m.get("metadata") if isinstance(m, dict) else getattr(m, "metadata", {})
+        score = float(m.get("score", 0.0)) if isinstance(m, dict) else float(getattr(m, "score", 0.0))
+        tv = meta.get("taste_vector") if isinstance(meta, dict) else None
+        if not isinstance(tv, list) or len(tv) != 6:
+            continue
+        w = max(0.0, score)
+        num += w * np.array(tv, dtype=float)
+        den += w
+
+    if den <= 0.0:
+        out = [0.0] * 6
+    else:
+        out = (num / den).tolist()
+
+    _taste_infer_cache[cache_key] = [float(x) for x in out]
+    return _taste_infer_cache[cache_key]
+
+def _infer_taste_from_text_hybrid(text: str, semantic: bool = False) -> List[float]:
+    lexical = _infer_taste_from_text(text)
+    if not semantic:
+        return lexical
+    semantic_vec = _infer_taste_from_text_semantic(text)
+    return _combine_taste_vectors(lexical, semantic_vec, secondary_weight=0.6)
+
+def _combine_taste_vectors(primary: List[float], secondary: List[float], secondary_weight: float = 0.35) -> List[float]:
+    if not primary or len(primary) != 6:
+        primary = [0.0] * 6
+    if not secondary or len(secondary) != 6:
+        return [float(x) for x in primary]
+    w = float(secondary_weight)
+    w = max(0.0, min(1.0, w))
+    p = np.array(primary, dtype=float)
+    s = np.array(secondary, dtype=float)
+    out = ((1.0 - w) * p + w * s).tolist()
+    return [float(x) for x in out]
+
+def _maybe_upsert_ingredients_to_pinecone() -> None:
+    global _ingredient_upsert_done
+    if _ingredient_upsert_done:
+        return
+    m = _load_ingredient_flavor_map()
+    if not m:
+        _ingredient_upsert_done = True
+        return
+    try:
+        idx = _get_pinecone_index()
+    except Exception:
+        return
+
+    vectors = []
+    for ing_lc, info in m.items():
+        ing = info.get("ingredient")
+        if not ing:
+            continue
+        vec = _embed_text(ing)
+        vectors.append({
+            "id": f"ingredient:{ing_lc}",
+            "values": vec,
+            "metadata": {
+                "type": "ingredient",
+                "ingredient": ing,
+                "flavor_profile": info.get("flavor_profile"),
+                "taste_vector": info.get("taste_vector"),
+            }
+        })
+
+        if len(vectors) >= 100:
+            try:
+                idx.upsert(vectors=vectors, namespace="ingredients")
+            except Exception:
+                pass
+            vectors = []
+
+    if vectors:
+        try:
+            idx.upsert(vectors=vectors, namespace="ingredients")
+        except Exception:
+            pass
+
+    _ingredient_upsert_done = True
 
 def _price_to_range(price: Optional[str]) -> Optional[int]:
     if not price:
@@ -115,12 +420,23 @@ def _favorites_boost(menu_items: List[str], favorite_dishes: List[Dict]) -> floa
     return min(0.15, 0.03 * hits)
 
 def _user_profile_to_taste_vector(user_profile: "UserProfile") -> List[float]:
-    p = user_profile.mains.model_dump() if user_profile and user_profile.mains else {}
-    spicy = float(p.get("spicy", 0.0))
-    sweet = float(p.get("sweet", 0.0))
-    umami = float(p.get("umami", 0.0))
-    sour = float(p.get("sour", 0.0))
-    salty = float(p.get("salty", 0.0))
+    if not user_profile:
+        return [0.0] * 6
+
+    parts = []
+    for cat in ["appetizer", "mains", "desserts"]:
+        prof = getattr(user_profile, cat, None)
+        if prof:
+            parts.append(prof.model_dump())
+
+    if not parts:
+        return [0.0] * 6
+
+    spicy = float(np.mean([p.get("spicy", 0.0) for p in parts]))
+    sweet = float(np.mean([p.get("sweet", 0.0) for p in parts]))
+    umami = float(np.mean([p.get("umami", 0.0) for p in parts]))
+    sour = float(np.mean([p.get("sour", 0.0) for p in parts]))
+    salty = float(np.mean([p.get("salty", 0.0) for p in parts]))
     bitter = 0.0
     return [sweet, salty, sour, bitter, umami, spicy]
 
@@ -205,6 +521,7 @@ class UserProfile(BaseModel):
     desserts: FlavorProfile
     allergies: List[str] = []
     favorite_dishes: List[DishInput] = []
+    diet_type: Optional[str] = "mix"
 
 class PreferencePrompt(BaseModel):
     prompt: str
@@ -219,6 +536,7 @@ class UserSignup(BaseModel):
     email: EmailStr
     username: str
     password: str
+    diet_type: Optional[str] = "mix"
     
     class Config:
         json_schema_extra = {
@@ -251,6 +569,7 @@ class UserResponse(BaseModel):
     username: str
     flavor_profile: Optional[UserProfile] = None
     favorite_dishes: List[DishInput] = []
+    diet_type: Optional[str] = "mix"
 
 class RecipeRecommendation(BaseModel):
     id: int
@@ -617,7 +936,8 @@ def signup(user_data: UserSignup, db: Session = Depends(get_db)):
             email=user_data.email,
             username=user_data.username,
             hashed_password=hashed_password,
-            favorite_dishes=[]
+            favorite_dishes=[],
+            diet_type=(user_data.diet_type or "mix")
         )
         db.add(db_user)
         db.commit()
@@ -711,7 +1031,8 @@ def google_login(google_data: GoogleLoginRequest, db: Session = Depends(get_db))
             email=email,
             username=username,
             hashed_password="",  # Empty for Google-authenticated users
-            favorite_dishes=[]
+            favorite_dishes=[],
+            diet_type="mix"
         )
         db.add(db_user)
         db.commit()
@@ -754,7 +1075,8 @@ def get_current_user_info(current_user: User = Depends(get_current_user)):
         "email": current_user.email,
         "username": current_user.username,
         "flavor_profile": flavor_profile,
-        "favorite_dishes": favorite_dishes
+        "favorite_dishes": favorite_dishes,
+        "diet_type": getattr(current_user, "diet_type", None) or "mix"
     }
 
 # User profile management endpoints
@@ -1394,6 +1716,7 @@ class ChatRequest(BaseModel):
     favorite_dishes: Optional[List[DishInput]] = None
     location: Optional[str] = None
     max_results: Optional[int] = None
+    diet_type: Optional[str] = None
 
 @app.post("/api/chat")
 async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
@@ -1405,11 +1728,47 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
 
     groq_client = Groq(api_key=groq_api_key)
 
+    _maybe_upsert_ingredients_to_pinecone()
+
+    allergies = []
+    favorite_dishes = []
+    if request.user_profile:
+        allergies = request.user_profile.allergies or []
+        favorite_dishes = request.user_profile.favorite_dishes or []
+    if request.favorite_dishes:
+        favorite_dishes = request.favorite_dishes
+
+    diet_type = request.diet_type
+    if not diet_type and request.user_profile and getattr(request.user_profile, "diet_type", None):
+        diet_type = request.user_profile.diet_type
+
+    user_taste_vec = _user_profile_to_taste_vector(request.user_profile) if request.user_profile else [0.0] * 6
+    fav_text = ""
+    if favorite_dishes:
+        try:
+            fav_text = " ".join([(d.name if hasattr(d, "name") else (d.get("name") if isinstance(d, dict) else str(d))) for d in favorite_dishes])
+        except Exception:
+            fav_text = ""
+    semantic_user = os.getenv("USE_SEMANTIC_INGREDIENT_TASTE", "true").lower() in {"1", "true", "yes", "y"}
+    inferred_user = _infer_taste_from_text_hybrid(fav_text, semantic=semantic_user)
+    user_taste_vec = _combine_taste_vectors(user_taste_vec, inferred_user, secondary_weight=0.35)
+
+    is_first_turn = not request.chat_id
+    user_db_location = (USER_METADATA_MAP.get("default") or {}).get("location") or ""
+    fallback_location = request.location
+    if not fallback_location and is_first_turn and user_db_location:
+        fallback_location = user_db_location
+
     system_prompt = """
     You output JSON only.
     Create two things:
     1) yelp_ai_body: the JSON body to send to https://api.yelp.com/ai/chat/v2
     2) business_search: params for https://api.yelp.com/v3/businesses/search
+
+    IMPORTANT:
+    - If the user explicitly includes a location in their query, set business_search.location_explicit=true and set business_search.location.
+    - If the user does NOT explicitly include a location, set business_search.location_explicit=false and DO NOT invent a location.
+    - If fallback_location is provided and location_explicit=false, you may copy fallback_location into business_search.location.
 
     business_search rules:
     - Always include "limit": 50 and "offset": 50.
@@ -1419,21 +1778,32 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
     Output schema:
     {
       "yelp_ai_body": {"query": "...", "chat_id": "...", "user_context": {"latitude": 0.0, "longitude": 0.0}, "request_context": {"max_results": 10}},
-      "business_search": {"term": "...", "location": "...", "latitude": 0.0, "longitude": 0.0, "limit": 50, "offset": 50}
+      "business_search": {"term": "...", "location": "...", "location_explicit": true, "latitude": 0.0, "longitude": 0.0, "limit": 50, "offset": 50}
     }
     """
 
     user_message = {
         "query": request.query,
         "chat_id": request.chat_id,
-        "fallback_location": request.location,
+        "fallback_location": fallback_location,
         "fallback_max_results": request.max_results
     }
 
     yelp_ai_body = {"query": request.query}
     if request.chat_id:
         yelp_ai_body["chat_id"] = request.chat_id
-    business_search = {"term": None, "location": request.location, "limit": 50, "offset": 50}
+    try:
+        yelp_search_limit = int(os.getenv("YELP_SEARCH_LIMIT", "50"))
+    except Exception:
+        yelp_search_limit = 50
+    try:
+        yelp_search_offset = int(os.getenv("YELP_SEARCH_OFFSET", "50"))
+    except Exception:
+        yelp_search_offset = 50
+    yelp_search_limit = max(1, min(50, yelp_search_limit))
+    yelp_search_offset = max(0, yelp_search_offset)
+
+    business_search = {"term": None, "location": fallback_location, "limit": yelp_search_limit, "offset": yelp_search_offset}
 
     try:
         completion = groq_client.chat.completions.create(
@@ -1462,10 +1832,14 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
 
     search_term = business_search.get("term") if isinstance(business_search, dict) else None
     search_location = business_search.get("location") if isinstance(business_search, dict) else None
+    location_explicit = bool(business_search.get("location_explicit")) if isinstance(business_search, dict) else False
     search_lat = business_search.get("latitude") if isinstance(business_search, dict) else None
     search_lng = business_search.get("longitude") if isinstance(business_search, dict) else None
+
+    if not location_explicit:
+        search_location = fallback_location
     if not search_location:
-        search_location = request.location
+        search_location = fallback_location
 
     user_context = yelp_ai_body.get("user_context") if isinstance(yelp_ai_body, dict) else None
     uc_lat = user_context.get("latitude") if isinstance(user_context, dict) else None
@@ -1474,6 +1848,14 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
         search_lat = uc_lat
     if search_lng is None:
         search_lng = uc_lng
+
+    if is_first_turn and not location_explicit and not fallback_location:
+        return {
+            "response": {
+                "text": "Please share your location (city or ZIP/postal code) so I can find restaurants near you."
+            },
+            "chat_id": request.chat_id
+        }
 
     if not search_location and (search_lat is None or search_lng is None):
         return {
@@ -1505,7 +1887,7 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
     v3_search_json = None
     if search_term and (search_location or (search_lat is not None and search_lng is not None)):
         v3_url = "https://api.yelp.com/v3/businesses/search"
-        params = {"term": search_term, "limit": 50, "offset": 50}
+        params = {"term": search_term, "limit": yelp_search_limit, "offset": yelp_search_offset}
         if search_location:
             params["location"] = search_location
         else:
@@ -1556,7 +1938,9 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
                 if isinstance(c, dict) and c.get("title"):
                     cuisine_types.append(c.get("title"))
             attrs = b.get("attributes") if isinstance(b.get("attributes"), dict) else {}
-            menu_url = attrs.get("MenuUrl") if attrs else None
+            menu_url = None
+            if attrs:
+                menu_url = attrs.get("MenuUrl") or attrs.get("menu_url") or attrs.get("menuUrl")
             summaries = b.get("summaries") if isinstance(b.get("summaries"), dict) else {}
             contextual = b.get("contextual_info") if isinstance(b.get("contextual_info"), dict) else {}
             review_snip = contextual.get("review_snippet")
@@ -1577,6 +1961,32 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
                 "review_snippet": review_snip,
                 "photo_urls": photo_urls
             })
+
+        menu_url_dishes_map: Dict[str, List[str]] = {}
+        try:
+            import asyncio
+
+            async def _menu_task(rid: str, url: str, sem: asyncio.Semaphore):
+                async with sem:
+                    dishes = await _menu_url_to_dishes(url)
+                    return rid, dishes
+
+            sem = asyncio.Semaphore(int(os.getenv("MENU_URL_CONCURRENCY", "3")))
+            tasks = []
+            for bp in biz_payload:
+                rid = str(bp.get("id") or "")
+                url = bp.get("menu_url")
+                if rid and url:
+                    tasks.append(_menu_task(rid, url, sem))
+
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            for r in results:
+                if isinstance(r, tuple) and len(r) == 2:
+                    rid, dishes = r
+                    if rid and isinstance(dishes, list) and dishes:
+                        menu_url_dishes_map[str(rid)] = dishes
+        except Exception:
+            menu_url_dishes_map = {}
 
         taste_prompt = """
         You are a food recommender.
@@ -1622,6 +2032,19 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
             popular_dishes = extra.get("popular_dishes") if isinstance(extra.get("popular_dishes"), list) else []
             taste_vector = extra.get("taste_vector") if isinstance(extra.get("taste_vector"), list) else [0.0] * 6
 
+            menu_url_dishes = menu_url_dishes_map.get(rid, [])
+            if menu_url_dishes:
+                menu_items = _merge_unique_preserve_order((menu_items or []) + (menu_url_dishes[:60]))
+
+            menu_items = _filter_dishes_by_diet(menu_items or [], diet_type)
+            inferred = _infer_taste_from_text("\n".join([
+                str(b.get("name") or ""),
+                " ".join([str(x) for x in (b.get("cuisine_types") or [])]),
+                "\n".join([str(x) for x in menu_items[:30]]),
+                "\n".join([str(x) for x in popular_dishes[:20]])
+            ]))
+            taste_vector = _combine_taste_vectors(taste_vector, inferred, secondary_weight=0.35)
+
             embed_text = "\n".join([
                 str(b.get("name") or ""),
                 " ".join([str(x) for x in (b.get("cuisine_types") or [])]),
@@ -1643,6 +2066,7 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
                 "menu_items": menu_items,
                 "popular_dishes": popular_dishes,
                 "taste_vector": taste_vector,
+                "recommended_dishes": _dish_recommendations_for_restaurant(menu_items, user_taste_vec, diet_type, top_n=5),
                 "photos": b.get("photo_urls") or [],
                 "menu_url": b.get("menu_url")
             }
@@ -1660,6 +2084,7 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
                     "menu_items": restaurant_obj["menu_items"],
                     "popular_dishes": restaurant_obj["popular_dishes"],
                     "taste_vector": restaurant_obj["taste_vector"],
+                    "recommended_dishes": restaurant_obj["recommended_dishes"],
                     "photos": restaurant_obj["photos"],
                     "menu_url": restaurant_obj["menu_url"],
                 }
@@ -1672,24 +2097,17 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
     try:
         pc_index = _get_pinecone_index()
         qvec = _embed_text(request.query)
-        top_k = 20
+        top_k = 10
         query_res = pc_index.query(vector=qvec, top_k=top_k, include_metadata=True)
         matches = query_res.get("matches", []) if isinstance(query_res, dict) else getattr(query_res, "matches", [])
-
-        allergies = []
-        favorite_dishes = []
-        if request.user_profile:
-            allergies = request.user_profile.allergies or []
-            favorite_dishes = request.user_profile.favorite_dishes or []
-        if request.favorite_dishes:
-            favorite_dishes = request.favorite_dishes
-
-        user_taste_vec = _user_profile_to_taste_vector(request.user_profile) if request.user_profile else [0.0] * 6
 
         for m in matches:
             meta = m.get("metadata") if isinstance(m, dict) else getattr(m, "metadata", {})
             score = float(m.get("score", 0.0)) if isinstance(m, dict) else float(getattr(m, "score", 0.0))
             menu_items = meta.get("menu_items") or []
+            menu_items = _filter_dishes_by_diet(menu_items, diet_type)
+            if not menu_items:
+                continue
             if not _allergy_filter(menu_items, allergies):
                 continue
             taste_vec = meta.get("taste_vector") or [0.0] * 6
@@ -1708,6 +2126,7 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
                 "menu_items": menu_items,
                 "popular_dishes": meta.get("popular_dishes"),
                 "taste_vector": taste_vec,
+                "recommended_dishes": _dish_recommendations_for_restaurant(menu_items, user_taste_vec, diet_type, top_n=5),
                 "photos": meta.get("photos"),
                 "menu_url": meta.get("menu_url"),
                 "score": combined

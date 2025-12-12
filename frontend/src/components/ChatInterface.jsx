@@ -38,6 +38,7 @@ const ChatInterface = () => {
     const userMessage = inputValue.trim();
     let storedProfile = null;
     let storedDishes = null;
+    let storedDietType = null;
     try {
       const rawProfile = localStorage.getItem('swaad_flavor_profile');
       if (rawProfile) storedProfile = JSON.parse(rawProfile);
@@ -49,6 +50,12 @@ const ChatInterface = () => {
       if (rawDishes) storedDishes = JSON.parse(rawDishes);
     } catch (err) {
       storedDishes = null;
+    }
+
+    try {
+      storedDietType = localStorage.getItem('swaad_diet_type');
+    } catch (err) {
+      storedDietType = null;
     }
 
     setMessages(prev => [...prev, { text: userMessage, sender: 'user' }]);
@@ -65,7 +72,8 @@ const ChatInterface = () => {
           query: userMessage,
           chat_id: chatId,
           user_profile: storedProfile,
-          favorite_dishes: storedDishes
+          favorite_dishes: storedDishes,
+          diet_type: storedDietType
         }),
       });
 
