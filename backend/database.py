@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, JSON, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, JSON, DateTime, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
@@ -23,6 +23,7 @@ class User(Base):
     hashed_password = Column(String)
     flavor_profile = Column(JSON, default=None)  # Stores UserProfile as JSON
     favorite_dishes = Column(JSON, default=[])  # List of DishInput objects
+    diet_type = Column(String, default="mix")
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -38,6 +39,12 @@ class YelpRawResponse(Base):
 
 # Create tables
 Base.metadata.create_all(bind=engine)
+
+try:
+    with engine.begin() as conn:
+        conn.execute(text("ALTER TABLE users ADD COLUMN diet_type VARCHAR DEFAULT 'mix'"))
+except Exception:
+    pass
 
 def get_db():
     db = SessionLocal()

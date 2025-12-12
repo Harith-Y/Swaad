@@ -1,6 +1,9 @@
-# 🍽️ Swaad - Flavor Profile Recipe Recommendation System
+# 🍽️ Swaad / MenuBuddy
 
-A full-stack application that creates personalized flavor profiles based on your favorite dishes and recommends menu items that match your taste preferences.
+A full-stack application for taste-based food discovery.
+
+- **MenuBuddy (recommended):** Yelp-powered chat that finds restaurants and recommends dishes from their menus using vector search + OCR/scraping.
+- **Legacy mode:** Dataset-based recipe/profile endpoints that use `recipes_with_flavour_profiles.csv`.
 
 ---
 
@@ -21,8 +24,8 @@ Before you begin, ensure you have the following installed on your system:
 
 ### Required Files
 
-Make sure the following file exists in the project root directory:
-- `recipes_with_flavour_profiles.csv` - Recipe database with flavor profiles
+- `ingredient-flavor.csv` (project root) - Used to enrich taste profiling and to upsert ingredient vectors into Pinecone.
+- `recipes_with_flavour_profiles.csv` (project root, **legacy only**) - Used by some profile endpoints that still reference the local recipe dataset.
 
 ---
 
@@ -35,14 +38,41 @@ git clone <repository-url>
 cd swaad
 ```
 
-### Step 2: Set Up Your API Key
+### Step 2: Configure Environment Variables
 
-1. Open the `sample_env_file.env` file in the project root folder
-2. Replace `your_api_key_here` with your actual Gemini API key:
-   ```
-   GEMINI_API_KEY=your_api_key_here
-   ```
-3. Rename the file from `sample_env_file.env` to `.env`
+Create a `.env` file in the **project root** (same level as `README.md`).
+
+You can use:
+
+- `backend/.env.example` as a reference for Yelp/Pinecone/Groq settings
+- `sample_env_file.env` as a reference for Gemini OCR settings
+
+Minimum required for **MenuBuddy**:
+
+```env
+GROQ_API_KEY=...
+YELP_API_KEY=...
+PINECONE_API_KEY=...
+PINECONE_INDEX=menu-buddy
+SENTENCE_TRANSFORMER_MODEL=all-MiniLM-L6-v2
+
+# OCR/scraping for menu_url (PDF/image/HTML)
+GEMINI_API_KEY=...
+
+# Location fallback (used when user does not provide location in the first chat prompt)
+DEFAULT_USER_LOCATION=
+
+# Yelp Fusion search pagination
+YELP_SEARCH_LIMIT=50
+YELP_SEARCH_OFFSET=50
+
+# Menu URL ingestion concurrency
+MENU_URL_CONCURRENCY=3
+
+# Ingredient taste inference controls
+USE_SEMANTIC_INGREDIENT_TASTE=true
+USE_SEMANTIC_DISH_TASTE=false
+```
 
 **How to get a Gemini API Key:**
 1. Go to [Google AI Studio](https://aistudio.google.com)
@@ -110,6 +140,44 @@ If the script doesn't work or you prefer manual setup, run these commands from t
 
 ## 📖 Usage Guide
 
+## MenuBuddy (Yelp-powered Chat)
+
+1. **Sign up**
+   - Set your diet preference:
+     - `veg`
+     - `non-veg`
+     - `mix`
+
+2. **Create/Store your flavor profile (optional but recommended)**
+   - Favorite dishes (soft filter)
+   - Allergies (hard filter)
+
+3. **Chat**
+   - Ask for food (example: "I want a spicy mushroom pizza")
+   - **Location rules:**
+     - If your first chat prompt includes a location, that is used.
+     - Else, the backend uses `DEFAULT_USER_LOCATION` if configured.
+     - Else, the API asks you to provide a location.
+
+4. **How dish recommendations are generated**
+   - Yelp AI returns businesses and (sometimes) `menu_url`.
+   - If `menu_url` exists:
+     - PDF/image: we run OCR via Gemini.
+     - HTML: we scrape text and extract dish-like lines.
+   - Extracted dish names are compared to your taste profile using ingredient-flavor enrichment.
+   - `diet_type` is a **hard filter**:
+     - `mix`: veg + non-veg
+     - `veg`: filters out non-veg dishes
+     - `non-veg`: keeps only non-veg dishes
+
+5. **API response shape**
+   - `/api/chat` returns the Yelp AI response plus `menu_buddy`:
+     - `menu_buddy.seed_restaurants`: ingested restaurants (+ menu extraction)
+     - `menu_buddy.recommendations`: top ranked restaurants (10)
+     - each restaurant includes `recommended_dishes` (top dishes from its menu)
+
+## Legacy mode (Dataset-based)
+
 ### Creating Your Flavor Profile
 
 1. **Enter Favorite Dishes:**
@@ -154,13 +222,11 @@ If the script doesn't work or you prefer manual setup, run these commands from t
 
 ---
 
-## 📊 Dataset
+## 📊 Dataset (Legacy)
 
-This project uses the Food.com Recipes and User Interactions dataset from Kaggle:
+Some endpoints still reference the local recipe dataset (`recipes_with_flavour_profiles.csv`).
 
-**[Food.com Recipes and User Interactions Dataset](https://www.kaggle.com/datasets/shuyangli94/food-com-recipes-and-user-interactions?select=RAW_recipes.csv)**
-
-The dataset contains comprehensive recipe information including ingredients, cooking instructions, and nutritional data, which forms the foundation for the flavor profile matching system.
+MenuBuddy chat recommendations do **not** require the legacy dataset and instead rely on Yelp APIs + Pinecone + ingredient-flavor enrichment.
 
 ---
 
