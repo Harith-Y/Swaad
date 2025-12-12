@@ -130,10 +130,18 @@ const ChatInterface = ({ fullScreen = false }) => {
           name: r.name,
           url: r.url,
           rating: r.avg_rating,
-          location: r.location
+          location: r.location,
+          recommended_dishes: r.recommended_dishes || []
         }));
       } else if (data.entities && data.entities.length > 0 && data.entities[0].businesses) {
-        businesses = data.entities[0].businesses;
+        businesses = data.entities[0].businesses.map((b) => ({
+          id: b.id,
+          name: b.name,
+          url: b.url,
+          rating: b.rating,
+          location: b.location,
+          recommended_dishes: []
+        }));
       }
 
       setMessages(prev => [...prev, { text: botResponse, sender: 'bot', businesses }]);
@@ -198,6 +206,11 @@ const ChatInterface = ({ fullScreen = false }) => {
                           <p className="business-address">
                             {business.location.address1}, {business.location.city}
                           </p>
+                        )}
+                        {business.recommended_dishes && business.recommended_dishes.length > 0 && (
+                          <div className="recommended-dishes">
+                            <strong>Try:</strong> {business.recommended_dishes.slice(0, 3).map(d => typeof d === 'string' ? d : d.name).join(', ')}
+                          </div>
                         )}
                       </a>
                     ))}

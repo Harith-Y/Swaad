@@ -250,7 +250,7 @@ def _sync_dummy_user_from_request(request: Any) -> None:
 _NONVEG_KEYWORDS = {
     "chicken", "beef", "pork", "bacon", "ham", "turkey", "lamb", "mutton", "duck",
     "fish", "salmon", "tuna", "shrimp", "prawn", "crab", "lobster", "anchovy", "anchovies",
-    "pepperoni", "sausage", "prosciutto", "salami"
+    "pepperoni", "sausage", "prosciutto", "salami", "egg", "eggs"
 }
 
 def _merge_unique_preserve_order(items: List[str]) -> List[str]:
@@ -397,6 +397,23 @@ def _get_pinecone_index():
         if not api_key or not index_name:
             raise HTTPException(status_code=500, detail="Missing Pinecone configuration")
         pc = Pinecone(api_key=api_key)
+        
+        # Create index if it doesn't exist
+        try:
+            existing_indexes = [idx.name for idx in pc.list_indexes()]
+            if index_name not in existing_indexes:
+                print(f"[INFO] Creating Pinecone index: {index_name}")
+                from pinecone import ServerlessSpec
+                pc.create_index(
+                    name=index_name,
+                    dimension=384,  # all-MiniLM-L6-v2 embedding dimension
+                    metric="cosine",
+                    spec=ServerlessSpec(cloud="aws", region="us-east-1")
+                )
+                print(f"[INFO] Pinecone index '{index_name}' created successfully")
+        except Exception as e:
+            print(f"[WARNING] Could not check/create Pinecone index: {e}")
+        
         _pinecone_index = pc.Index(index_name)
     return _pinecone_index
 
@@ -1999,8 +2016,13 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
         dummy_user["pending_query"] = None
     user_db_location = (dummy_user.get("location") if isinstance(dummy_user, dict) else None) or ""
     fallback_location = request.location
-    if not fallback_location and is_first_turn and user_db_location:
+    if not fallback_location and user_db_location:
         fallback_location = user_db_location
+    
+    print(f"[DEBUG] user_key: {user_key}")
+    print(f"[DEBUG] user_db_location: {user_db_location}")
+    print(f"[DEBUG] request.location: {request.location}")
+    print(f"[DEBUG] fallback_location: {fallback_location}")
 
     system_prompt = """
     You output JSON only.
@@ -2010,19 +2032,26 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
 
     IMPORTANT:
     - If the user explicitly includes a location in their query, set business_search.location_explicit=true and set business_search.location.
-    - If the user does NOT explicitly include a location, set business_search.location_explicit=false and DO NOT invent a location.
-    - If fallback_location is provided and location_explicit=false, you may copy fallback_location into business_search.location.
+    - If the user does NOT explicitly include a location, set business_search.location_explicit=false.
+    - If fallback_location is provided, you MUST convert it to latitude/longitude coordinates for yelp_ai_body.user_context.
     - EXTRACT the number of results the user wants from their query (e.g., "5 best pizzas" -> max_results=5, "top 10 restaurants" -> max_results=10). If not specified, default to 10.
+
+    Location conversion rules:
+    - Convert location strings to approximate lat/lng coordinates.
+    - Examples: "New York, NY" -> lat: 40.7128, lng: -74.0060; "San Francisco, CA" -> lat: 37.7749, lng: -122.4194
+    - For yelp_ai_body, put coordinates in user_context: {"latitude": <lat>, "longitude": <lng>}
+    - For business_search, use the location string.
 
     business_search rules:
     - Always include "limit": 50 and "offset": 0.
     - Extract a best-guess "term" (e.g., pizza, ramen, sushi).
-    - Prefer an explicit location string if present; otherwise use the provided fallback_location if present.
+    - If fallback_location is provided, set location to fallback_location.
+    - If the user explicitly mentions a location in their query, use that instead.
 
     Output schema:
     {
-      "yelp_ai_body": {"query": "...", "chat_id": "...", "user_context": {"latitude": 0.0, "longitude": 0.0}, "request_context": {"max_results": <extracted_number_or_10>}},
-      "business_search": {"term": "...", "location": "...", "location_explicit": true, "latitude": 0.0, "longitude": 0.0, "limit": 50, "offset": 0},
+      "yelp_ai_body": {"query": "...", "chat_id": "...", "user_context": {"latitude": <lat>, "longitude": <lng>}, "request_context": {"max_results": <extracted_number_or_10>}},
+      "business_search": {"term": "...", "location": "...", "location_explicit": true_or_false, "limit": 50, "offset": 0},
       "extracted_max_results": <number_user_asked_for_or_10>
     }
     """
@@ -2037,14 +2066,21 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
     yelp_ai_body = {"query": request.query}
     if request.chat_id:
         yelp_ai_body["chat_id"] = request.chat_id
+    
+    # Set final_max_results early (may be updated by Groq)
+    final_max_results = request.max_results or 10
+    
     try:
         yelp_search_limit = int(os.getenv("YELP_SEARCH_LIMIT", "50"))
     except Exception:
         yelp_search_limit = 50
     try:
-        yelp_search_offset = int(os.getenv("YELP_SEARCH_OFFSET", "50"))
+        yelp_search_offset = int(os.getenv("YELP_SEARCH_OFFSET", "0"))
     except Exception:
-        yelp_search_offset = 50
+        yelp_search_offset = 0
+    # Use final_max_results if available, otherwise use env setting
+    if final_max_results:
+        yelp_search_limit = max(final_max_results, 10)  # At least 10 for better variety
     yelp_search_limit = max(1, min(50, yelp_search_limit))
     yelp_search_offset = max(0, yelp_search_offset)
 
@@ -2067,14 +2103,14 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
             extracted_max = parsed.get("extracted_max_results")
             if extracted_max and isinstance(extracted_max, int) and extracted_max > 0:
                 request.max_results = extracted_max
+                final_max_results = extracted_max  # Update if Groq extracted a better value
     except Exception:
         pass
 
     if request.chat_id and "chat_id" not in yelp_ai_body:
         yelp_ai_body["chat_id"] = request.chat_id
     
-    # Ensure max_results is set (from request or extracted)
-    final_max_results = request.max_results or 10
+    # Set max_results in Yelp AI request
     yelp_ai_body.setdefault("request_context", {})
     yelp_ai_body["request_context"]["max_results"] = final_max_results
     print(f"[DEBUG] max_results set to: {final_max_results}")
@@ -2085,10 +2121,13 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
     search_lat = business_search.get("latitude") if isinstance(business_search, dict) else None
     search_lng = business_search.get("longitude") if isinstance(business_search, dict) else None
 
-    if not location_explicit:
+    if not location_explicit and fallback_location:
         search_location = fallback_location
-    if not search_location:
+    if not search_location and fallback_location:
         search_location = fallback_location
+    
+    print(f"[DEBUG] search_location after business_search: {search_location}")
+    print(f"[DEBUG] location_explicit: {location_explicit}")
 
     user_context = yelp_ai_body.get("user_context") if isinstance(yelp_ai_body, dict) else None
     uc_lat = user_context.get("latitude") if isinstance(user_context, dict) else None
@@ -2119,12 +2158,15 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
     ai_headers = {"Authorization": f"Bearer {yelp_api_key}", "Content-Type": "application/json"}
     yelp_ai_url = "https://api.yelp.com/ai/chat/v2"
 
+    print(f"[DEBUG] Sending to Yelp AI: {json.dumps(yelp_ai_body)}")
+
     ai_json = None
     try:
         async with httpx.AsyncClient(timeout=20.0, follow_redirects=True) as http_client:
             ai_resp = await http_client.post(yelp_ai_url, json=yelp_ai_body, headers=ai_headers)
             ai_resp.raise_for_status()
             ai_json = ai_resp.json()
+            print(f"[DEBUG] Yelp AI response: {json.dumps(ai_json)}")
     except Exception as e:
         # Yelp AI access can be unavailable; do not fail the entire chat.
         print("Yelp AI chat error:", repr(e))
@@ -2156,12 +2198,16 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
         else:
             params["latitude"] = search_lat
             params["longitude"] = search_lng
+        print(f"[DEBUG] Calling Yelp v3 API with params: {params}")
         try:
             async with httpx.AsyncClient() as http_client:
                 v3_resp = await http_client.get(v3_url, headers={"Authorization": f"Bearer {yelp_api_key}"}, params=params)
                 v3_resp.raise_for_status()
                 v3_search_json = v3_resp.json()
-        except Exception:
+                v3_businesses = v3_search_json.get("businesses", []) if v3_search_json else []
+                print(f"[DEBUG] Yelp v3 API returned {len(v3_businesses)} businesses")
+        except Exception as e:
+            print(f"[DEBUG] Yelp v3 API error: {e}")
             v3_search_json = None
 
         if v3_search_json is not None:
@@ -2180,8 +2226,15 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
     except Exception:
         businesses = []
 
-    if not businesses and v3_search_json and isinstance(v3_search_json, dict):
-        businesses = v3_search_json.get("businesses") or []
+    # Merge v3 results with AI results to get more restaurants
+    if v3_search_json and isinstance(v3_search_json, dict):
+        v3_businesses = v3_search_json.get("businesses") or []
+        # Add v3 businesses that aren't already in the AI response
+        existing_ids = {b.get("id") for b in businesses if isinstance(b, dict) and b.get("id")}
+        for v3_biz in v3_businesses:
+            if isinstance(v3_biz, dict) and v3_biz.get("id") not in existing_ids:
+                businesses.append(v3_biz)
+        print(f"[DEBUG] Total businesses after merging v3: {len(businesses)}")
 
     try:
         ingest_count = int((yelp_ai_body.get("request_context") or {}).get("max_results") or 10)
@@ -2190,6 +2243,7 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
     ingest_count = max(1, min(50, ingest_count))
     businesses = businesses[:ingest_count]
 
+    print(f"[DEBUG] Processing {len(businesses)} businesses from Yelp")
     if businesses:
         biz_payload = []
         for b in businesses:
@@ -2334,35 +2388,39 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
                 "menu_url": b.get("menu_url")
             }
             restaurants.append(restaurant_obj)
+        
+        print(f"[DEBUG] Total restaurants processed: {len(restaurants)}")
 
-            if pc_index is not None:
-                metadata = {
-                    "name": restaurant_obj["name"],
-                    "url": restaurant_obj["url"],
-                    "avg_rating": restaurant_obj["avg_rating"],
-                    "price_range": restaurant_obj["price_range"],
-                    "cuisine_types": restaurant_obj["cuisine_types"],
-                    "location": restaurant_obj["location"],
-                    "coordinates": restaurant_obj["coordinates"],
-                    "menu_items": restaurant_obj["menu_items"],
-                    "popular_dishes": restaurant_obj["popular_dishes"],
-                    "taste_vector": restaurant_obj["taste_vector"],
-                    "recommended_dishes": restaurant_obj["recommended_dishes"],
-                    "photos": restaurant_obj["photos"],
-                    "menu_url": restaurant_obj["menu_url"],
-                }
-                try:
-                    pc_index.upsert(vectors=[{"id": rid, "values": vec, "metadata": metadata}])
-                except Exception:
-                    pass
+        if pc_index is not None:
+            metadata = {
+                "name": restaurant_obj["name"],
+                "url": restaurant_obj["url"],
+                "avg_rating": restaurant_obj["avg_rating"],
+                "price_range": restaurant_obj["price_range"],
+                "cuisine_types": restaurant_obj["cuisine_types"],
+                "location": restaurant_obj["location"],
+                "coordinates": restaurant_obj["coordinates"],
+                "menu_items": restaurant_obj["menu_items"],
+                "popular_dishes": restaurant_obj["popular_dishes"],
+                "taste_vector": restaurant_obj["taste_vector"],
+                "recommended_dishes": restaurant_obj["recommended_dishes"],
+                "photos": restaurant_obj["photos"],
+                "menu_url": restaurant_obj["menu_url"],
+            }
+            try:
+                pc_index.upsert(vectors=[{"id": rid, "values": vec, "metadata": metadata}])
+            except Exception:
+                pass
 
     ranked = []
     try:
         pc_index = _get_pinecone_index()
         qvec = _embed_text(request.query)
-        top_k = 10
+        top_k = max(final_max_results, 10)
+        print(f"[DEBUG] Querying Pinecone with top_k={top_k}")
         query_res = pc_index.query(vector=qvec, top_k=top_k, include_metadata=True)
         matches = query_res.get("matches", []) if isinstance(query_res, dict) else getattr(query_res, "matches", [])
+        print(f"[DEBUG] Pinecone returned {len(matches)} matches")
 
         for m in matches:
             meta = m.get("metadata") if isinstance(m, dict) else getattr(m, "metadata", {})
@@ -2396,8 +2454,25 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
             })
 
         ranked.sort(key=lambda x: x.get("score", 0.0), reverse=True)
-    except Exception:
+        print(f"[DEBUG] Total ranked restaurants: {len(ranked)}")
+        # Limit to requested max_results
+        ranked = ranked[:final_max_results]
+        print(f"[DEBUG] Returning top {len(ranked)} recommendations")
+    except Exception as e:
+        print(f"[DEBUG] Error in ranking: {e}")
+        import traceback
+        traceback.print_exc()
         ranked = []
+    
+    # Fallback: If Pinecone is empty or ranking failed, use seed_restaurants
+    if not ranked and restaurants:
+        print(f"[DEBUG] Pinecone empty, using seed_restaurants as fallback")
+        for r in restaurants:
+            taste_vec = r.get("taste_vector") or [0.0] * 6
+            tscore = _taste_similarity(user_taste_vec, taste_vec)
+            r["score"] = (r.get("avg_rating") or 0.0) * 0.5 + tscore * 0.5
+        ranked = sorted(restaurants, key=lambda x: x.get("score", 0.0), reverse=True)[:final_max_results]
+        print(f"[DEBUG] Fallback ranking returned {len(ranked)} restaurants")
 
     ai_json["menu_buddy"] = {
         "seed_restaurants": restaurants,
