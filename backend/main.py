@@ -17,7 +17,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import re
 from sqlalchemy.orm import Session
-from database import get_db, User, Base, engine
+from database import get_db, User, Base, engine, YelpRawResponse
 from auth import (
     verify_password, get_password_hash, create_access_token,
     get_user_by_email, get_user_by_username, get_current_user
@@ -26,6 +26,8 @@ from dotenv import load_dotenv
 import os
 from groq import Groq
 import httpx
+from sentence_transformers import SentenceTransformer
+from pinecone import Pinecone
 
 # Load environment variables
 load_dotenv()
@@ -48,6 +50,88 @@ except ImportError:
     GEMINI_AVAILABLE = False
 
 app = FastAPI(title="Swaad Recipe Recommendation API")
+
+_embedding_model: Optional[SentenceTransformer] = None
+_pinecone_index = None
+
+def _get_embedding_model() -> SentenceTransformer:
+    global _embedding_model
+    if _embedding_model is None:
+        model_name = os.getenv("SENTENCE_TRANSFORMER_MODEL", "all-MiniLM-L6-v2")
+        _embedding_model = SentenceTransformer(model_name)
+    return _embedding_model
+
+def _embed_text(text: str) -> List[float]:
+    model = _get_embedding_model()
+    vec = model.encode([text], normalize_embeddings=True)[0]
+    return vec.tolist()
+
+def _get_pinecone_index():
+    global _pinecone_index
+    if _pinecone_index is None:
+        api_key = os.getenv("PINECONE_API_KEY")
+        index_name = os.getenv("PINECONE_INDEX")
+        if not api_key or not index_name:
+            raise HTTPException(status_code=500, detail="Missing Pinecone configuration")
+        pc = Pinecone(api_key=api_key)
+        _pinecone_index = pc.Index(index_name)
+    return _pinecone_index
+
+def _price_to_range(price: Optional[str]) -> Optional[int]:
+    if not price:
+        return None
+    if isinstance(price, str):
+        return len(price.strip()) if price.strip() else None
+    return None
+
+def _safe_lower_list(values: Optional[List[str]]) -> List[str]:
+    if not values:
+        return []
+    out = []
+    for v in values:
+        if v and isinstance(v, str):
+            out.append(v.lower())
+    return out
+
+def _allergy_filter(menu_items: List[str], allergies: List[str]) -> bool:
+    if not allergies:
+        return True
+    menu_text = "\n".join(menu_items).lower()
+    for allergy in allergies:
+        a = (allergy or "").strip().lower()
+        if a and a in menu_text:
+            return False
+    return True
+
+def _favorites_boost(menu_items: List[str], favorite_dishes: List[Dict]) -> float:
+    if not favorite_dishes:
+        return 0.0
+    fav_names = [d.get("name", "") for d in favorite_dishes if isinstance(d, dict)]
+    fav_names = _safe_lower_list(fav_names)
+    if not fav_names:
+        return 0.0
+    menu_text = "\n".join(menu_items).lower()
+    hits = sum(1 for f in fav_names if f and f in menu_text)
+    return min(0.15, 0.03 * hits)
+
+def _user_profile_to_taste_vector(user_profile: "UserProfile") -> List[float]:
+    p = user_profile.mains.model_dump() if user_profile and user_profile.mains else {}
+    spicy = float(p.get("spicy", 0.0))
+    sweet = float(p.get("sweet", 0.0))
+    umami = float(p.get("umami", 0.0))
+    sour = float(p.get("sour", 0.0))
+    salty = float(p.get("salty", 0.0))
+    bitter = 0.0
+    return [sweet, salty, sour, bitter, umami, spicy]
+
+def _taste_similarity(user_vec: List[float], item_vec: List[float]) -> float:
+    if not user_vec or not item_vec or len(user_vec) != len(item_vec):
+        return 0.0
+    a = np.array(user_vec, dtype=float)
+    b = np.array(item_vec, dtype=float)
+    if np.linalg.norm(a) == 0 or np.linalg.norm(b) == 0:
+        return 0.0
+    return float(cosine_similarity([a], [b])[0][0])
 
 # CORS middleware
 # Allow localhost for development and any frontend URL from environment
@@ -1148,17 +1232,19 @@ async def upload_menu_image(file: UploadFile = File(...)):
 @app.post("/api/recommendations", response_model=RecommendationsResponse)
 def get_recommendations(request: RecommendationsRequest):
     """Get recommendations based on user profile and menu dishes"""
-    df = load_recipes()
-    
+    groq_api_key = os.getenv("GROQ_API_KEY")
+    if not groq_api_key:
+        raise HTTPException(status_code=500, detail="GROQ_API_KEY not configured")
+
+    client = Groq(api_key=groq_api_key)
+
     user_profile = request.user_profile
     menu_dishes = request.menu_dishes
     categorized_dishes = request.categorized_dishes
-    
-    # Use categorized dishes if provided, otherwise categorize from flat list
+
     if categorized_dishes:
         dish_categories = categorized_dishes
     else:
-        # Fallback: categorize dishes ourselves
         dish_categories = {
             "appetizer": [],
             "mains": [],
@@ -1166,104 +1252,110 @@ def get_recommendations(request: RecommendationsRequest):
         }
         for dish in menu_dishes:
             dish_lower = dish.lower()
-            dessert_keywords = ['cake', 'pie', 'ice cream', 'pudding', 'chocolate', 'cookie', 
+            dessert_keywords = ['cake', 'pie', 'ice cream', 'pudding', 'chocolate', 'cookie',
                               'brownie', 'tart', 'mousse', 'custard', 'flan', 'sorbet']
             appetizer_keywords = ['salad', 'soup', 'dip', 'bruschetta', 'samosa', 'spring roll',
                                 'wings', 'nachos', 'quesadilla', 'hummus', 'guacamole']
-            
+
             if any(kw in dish_lower for kw in dessert_keywords):
                 dish_categories["desserts"].append(dish)
             elif any(kw in dish_lower for kw in appetizer_keywords):
                 dish_categories["appetizer"].append(dish)
             else:
                 dish_categories["mains"].append(dish)
-    
-    # Find recipes matching menu dishes, keeping track of menu dish name -> recipe mapping
-    # This preserves the original menu dish names for display
-    categorized_menu_dish_mappings = {
-        "appetizer": [],  # List of tuples: (menu_dish_name, recipe_dict)
-        "mains": [],
-        "desserts": []
-    }
-    
+
+    dish_entries = []
+    seen = set()
     for category, dishes in dish_categories.items():
         for dish_name in dishes:
-            recipe = find_recipe_by_name(dish_name, df)
-            if recipe:
-                # Check for allergies
-                if hasattr(user_profile, 'allergies') and user_profile.allergies:
-                    ingredients = recipe.get('ingredients', [])
-                    if isinstance(ingredients, str):
-                        try:
-                            ingredients = ast.literal_eval(ingredients)
-                        except:
-                            ingredients = []
-                    
-                    # Simple keyword check for allergies
-                    has_allergy = False
-                    for allergy in user_profile.allergies:
-                        allergy_lower = allergy.lower()
-                        for ingredient in ingredients:
-                            if allergy_lower in ingredient.lower():
-                                has_allergy = True
-                                break
-                        if has_allergy:
-                            break
-                    
-                    if has_allergy:
-                        continue # Skip this recipe
+            key = (category, (dish_name or "").strip().lower())
+            if key in seen:
+                continue
+            seen.add(key)
+            dish_entries.append({"name": dish_name, "category": category})
 
-                # Store the mapping: (original menu dish name, matched recipe)
-                categorized_menu_dish_mappings[category].append((dish_name, recipe))
+    system_prompt = """
+    You are a culinary expert.
+    For each dish name provided, return a flavor profile (0.0 to 1.0) and a short ingredient list.
     
-    # Get recommendations for each category
+    Output JSON format:
+    {
+      "dishes": [
+        {
+          "name": "string",
+          "category": "appetizer/mains/desserts",
+          "ingredients": ["string"],
+          "flavor_profile": {"spicy": 0.0-1.0, "sweet": 0.0-1.0, "umami": 0.0-1.0, "sour": 0.0-1.0, "salty": 0.0-1.0}
+        }
+      ]
+    }
+    """
+
+    try:
+        completion = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": json.dumps({"dishes": dish_entries})}
+            ],
+            model="llama-3.3-70b-versatile",
+            response_format={"type": "json_object"}
+        )
+        parsed = json.loads(completion.choices[0].message.content)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating dish profiles: {str(e)}")
+
+    dish_profiles = {}
+    for d in parsed.get("dishes", []) if isinstance(parsed, dict) else []:
+        name = (d.get("name") or "").strip()
+        category = (d.get("category") or "mains").strip()
+        prof = d.get("flavor_profile") or {}
+        ingredients = d.get("ingredients") or []
+        dish_profiles[(category, name.lower())] = {
+            "flavor_profile": {
+                "spicy": float(prof.get("spicy", 0.5)),
+                "sweet": float(prof.get("sweet", 0.5)),
+                "umami": float(prof.get("umami", 0.5)),
+                "sour": float(prof.get("sour", 0.5)),
+                "salty": float(prof.get("salty", 0.5)),
+            },
+            "ingredients": [str(x) for x in ingredients if x][:10]
+        }
+
     recommendations = {
         "appetizer": [],
         "mains": [],
         "desserts": []
     }
-    
+
+    next_id = 1
     for category in ["appetizer", "mains", "desserts"]:
-        # Fix Pydantic deprecation: use model_dump() instead of dict()
-        user_profile_dict = user_profile.model_dump()[category]
-        menu_dish_mappings = categorized_menu_dish_mappings[category]
-        
-        # Calculate similarity scores, keeping track of menu dish names
+        user_profile_dict = user_profile.model_dump().get(category, {})
         scored_items = []
-        for menu_dish_name, recipe in menu_dish_mappings:
-            if isinstance(recipe['flavor_profile'], str):
-                recipe_profile = ast.literal_eval(recipe['flavor_profile'])
-            else:
-                recipe_profile = recipe['flavor_profile']
-            
-            similarity = calculate_similarity(user_profile_dict, recipe_profile)
-            # Store: (menu_dish_name, recipe, similarity_score)
-            scored_items.append((menu_dish_name, recipe, similarity))
-        
-        # Sort by similarity and get top 5
+        for dish_name in dish_categories.get(category, []):
+            key = (category, (dish_name or "").strip().lower())
+            info = dish_profiles.get(key)
+            if not info:
+                continue
+
+            if hasattr(user_profile, "allergies") and user_profile.allergies:
+                if not _allergy_filter(info.get("ingredients", []), user_profile.allergies):
+                    continue
+
+            similarity = calculate_similarity(user_profile_dict, info["flavor_profile"])
+            scored_items.append((dish_name, info, similarity))
+
         scored_items.sort(key=lambda x: x[2], reverse=True)
-        
-        for menu_dish_name, recipe, score in scored_items[:5]:
-            if isinstance(recipe['ingredients'], str):
-                ingredients = ast.literal_eval(recipe['ingredients'])
-            else:
-                ingredients = recipe['ingredients']
-            
-            if isinstance(recipe['flavor_profile'], str):
-                flavor_profile = ast.literal_eval(recipe['flavor_profile'])
-            else:
-                flavor_profile = recipe['flavor_profile']
-            
-            # Use the original menu dish name instead of recipe name
+        for dish_name, info, score in scored_items[:5]:
             recommendations[category].append({
-                "id": int(recipe['id']),
-                "name": menu_dish_name,  # Use menu dish name, not recipe name
-                "ingredients": ingredients,
-                "flavor_profile": flavor_profile,
-                "similarity_score": round(score, 3),
+                "id": next_id,
+                "name": dish_name,
+                "ingredients": info.get("ingredients", []),
+                "flavor_profile": info.get("flavor_profile", {}),
+                "similarity_score": round(float(score), 3),
                 "category": category
             })
-    
+            next_id += 1
+
     return {"recommendations": recommendations}
 
 @app.get("/api/search-recipes")
@@ -1298,88 +1390,339 @@ def search_recipes(query: str, limit: int = 10):
 class ChatRequest(BaseModel):
     query: str
     chat_id: Optional[str] = None
+    user_profile: Optional[UserProfile] = None
+    favorite_dishes: Optional[List[DishInput]] = None
+    location: Optional[str] = None
+    max_results: Optional[int] = None
 
 @app.post("/api/chat")
-async def chat_with_yelp(request: ChatRequest):
+async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
     groq_api_key = os.getenv("GROQ_API_KEY")
     yelp_api_key = os.getenv("YELP_API_KEY")
     
     if not groq_api_key or not yelp_api_key:
         raise HTTPException(status_code=500, detail="Missing API keys")
 
-    client = Groq(api_key=groq_api_key)
-    
-    # Prompt for Groq to convert query to Yelp API format
+    groq_client = Groq(api_key=groq_api_key)
+
     system_prompt = """
-    You are an assistant that converts natural language queries into a JSON body for the Yelp AI Chat API.
-    
-    The Yelp AI Chat API expects a POST body like this:
+    You output JSON only.
+    Create two things:
+    1) yelp_ai_body: the JSON body to send to https://api.yelp.com/ai/chat/v2
+    2) business_search: params for https://api.yelp.com/v3/businesses/search
+
+    business_search rules:
+    - Always include "limit": 50 and "offset": 50.
+    - Extract a best-guess "term" (e.g., pizza, ramen, sushi).
+    - Prefer an explicit location string if present; otherwise use the provided fallback_location if present.
+
+    Output schema:
     {
-        "query": "string",
-        "chat_id": "string (optional)",
-        "user_context": {
-            "latitude": float,
-            "longitude": float
-        },
-        "request_context": {
-            "max_results": integer
-        }
+      "yelp_ai_body": {"query": "...", "chat_id": "...", "user_context": {"latitude": 0.0, "longitude": 0.0}, "request_context": {"max_results": 10}},
+      "business_search": {"term": "...", "location": "...", "latitude": 0.0, "longitude": 0.0, "limit": 50, "offset": 50}
     }
-    
-    If the user provides a location (e.g., "in San Francisco"), try to estimate the latitude and longitude and include them in `user_context`. 
-    If no location is provided, omit `user_context`.
-    Always include the `query` field with the user's original query or a refined version.
-    If `chat_id` is provided in the input, include it in the output.
-    
-    Output ONLY valid JSON.
     """
-    
-    user_message = f"""
-    User Query: {request.query}
-    Chat ID: {request.chat_id}
-    """
-    
+
+    user_message = {
+        "query": request.query,
+        "chat_id": request.chat_id,
+        "fallback_location": request.location,
+        "fallback_max_results": request.max_results
+    }
+
+    yelp_ai_body = {"query": request.query}
+    if request.chat_id:
+        yelp_ai_body["chat_id"] = request.chat_id
+    business_search = {"term": None, "location": request.location, "limit": 50, "offset": 50}
+
     try:
-        completion = client.chat.completions.create(
+        completion = groq_client.chat.completions.create(
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_message}
+                {"role": "user", "content": json.dumps(user_message)}
             ],
             model="llama-3.3-70b-versatile",
             response_format={"type": "json_object"}
         )
-        
-        yelp_request_body = json.loads(completion.choices[0].message.content)
-        
-        # Ensure chat_id is passed if it exists in the request and not in the generated body
-        if request.chat_id and "chat_id" not in yelp_request_body:
-            yelp_request_body["chat_id"] = request.chat_id
-            
-    except Exception as e:
-        print(f"Groq Error: {e}")
-        # Fallback: just pass the query directly
-        yelp_request_body = {
-            "query": request.query
-        }
-        if request.chat_id:
-            yelp_request_body["chat_id"] = request.chat_id
+        parsed = json.loads(completion.choices[0].message.content)
+        if isinstance(parsed, dict):
+            yelp_ai_body = parsed.get("yelp_ai_body") or yelp_ai_body
+            business_search = parsed.get("business_search") or business_search
+    except Exception:
+        pass
 
-    # Call Yelp API
-    yelp_url = "https://api.yelp.com/ai/chat/v2"
-    headers = {
-        "Authorization": f"Bearer {yelp_api_key}",
-        "Content-Type": "application/json"
-    }
-    
+    if request.chat_id and "chat_id" not in yelp_ai_body:
+        yelp_ai_body["chat_id"] = request.chat_id
+    if request.max_results:
+        yelp_ai_body.setdefault("request_context", {})
+        yelp_ai_body["request_context"]["max_results"] = request.max_results
+    else:
+        yelp_ai_body.setdefault("request_context", {})
+        yelp_ai_body["request_context"].setdefault("max_results", 10)
+
+    search_term = business_search.get("term") if isinstance(business_search, dict) else None
+    search_location = business_search.get("location") if isinstance(business_search, dict) else None
+    search_lat = business_search.get("latitude") if isinstance(business_search, dict) else None
+    search_lng = business_search.get("longitude") if isinstance(business_search, dict) else None
+    if not search_location:
+        search_location = request.location
+
+    user_context = yelp_ai_body.get("user_context") if isinstance(yelp_ai_body, dict) else None
+    uc_lat = user_context.get("latitude") if isinstance(user_context, dict) else None
+    uc_lng = user_context.get("longitude") if isinstance(user_context, dict) else None
+    if search_lat is None:
+        search_lat = uc_lat
+    if search_lng is None:
+        search_lng = uc_lng
+
+    if not search_location and (search_lat is None or search_lng is None):
+        return {
+            "response": {
+                "text": "Please share your location (city or ZIP/postal code) so I can find restaurants near you."
+            },
+            "chat_id": request.chat_id
+        }
+
+    ai_headers = {"Authorization": f"Bearer {yelp_api_key}", "Content-Type": "application/json"}
+    yelp_ai_url = "https://api.yelp.com/ai/chat/v2"
+
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(yelp_url, json=yelp_request_body, headers=headers)
-            response.raise_for_status()
-            return response.json()
+        async with httpx.AsyncClient() as http_client:
+            ai_resp = await http_client.post(yelp_ai_url, json=yelp_ai_body, headers=ai_headers)
+            ai_resp.raise_for_status()
+            ai_json = ai_resp.json()
     except httpx.HTTPStatusError as e:
         raise HTTPException(status_code=e.response.status_code, detail=f"Yelp API Error: {e.response.text}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+    try:
+        db.add(YelpRawResponse(query=request.query, endpoint="ai/chat/v2", request_params=yelp_ai_body, response_json=ai_json))
+        db.commit()
+    except Exception:
+        db.rollback()
+
+    v3_search_json = None
+    if search_term and (search_location or (search_lat is not None and search_lng is not None)):
+        v3_url = "https://api.yelp.com/v3/businesses/search"
+        params = {"term": search_term, "limit": 50, "offset": 50}
+        if search_location:
+            params["location"] = search_location
+        else:
+            params["latitude"] = search_lat
+            params["longitude"] = search_lng
+        try:
+            async with httpx.AsyncClient() as http_client:
+                v3_resp = await http_client.get(v3_url, headers={"Authorization": f"Bearer {yelp_api_key}"}, params=params)
+                v3_resp.raise_for_status()
+                v3_search_json = v3_resp.json()
+        except Exception:
+            v3_search_json = None
+
+        if v3_search_json is not None:
+            try:
+                db.add(YelpRawResponse(query=request.query, endpoint="v3/businesses/search", request_params=params, response_json=v3_search_json))
+                db.commit()
+            except Exception:
+                db.rollback()
+
+    restaurants = []
+    businesses = []
+    try:
+        entities = ai_json.get("entities") or []
+        if entities and isinstance(entities, list) and isinstance(entities[0], dict):
+            businesses = entities[0].get("businesses") or []
+    except Exception:
+        businesses = []
+
+    if not businesses and v3_search_json and isinstance(v3_search_json, dict):
+        businesses = v3_search_json.get("businesses") or []
+
+    try:
+        ingest_count = int((yelp_ai_body.get("request_context") or {}).get("max_results") or 10)
+    except Exception:
+        ingest_count = 10
+    ingest_count = max(1, min(50, ingest_count))
+    businesses = businesses[:ingest_count]
+
+    if businesses:
+        biz_payload = []
+        for b in businesses:
+            if not isinstance(b, dict):
+                continue
+            categories = b.get("categories") or []
+            cuisine_types = []
+            for c in categories:
+                if isinstance(c, dict) and c.get("title"):
+                    cuisine_types.append(c.get("title"))
+            attrs = b.get("attributes") if isinstance(b.get("attributes"), dict) else {}
+            menu_url = attrs.get("MenuUrl") if attrs else None
+            summaries = b.get("summaries") if isinstance(b.get("summaries"), dict) else {}
+            contextual = b.get("contextual_info") if isinstance(b.get("contextual_info"), dict) else {}
+            review_snip = contextual.get("review_snippet")
+            photos = contextual.get("photos") if isinstance(contextual.get("photos"), list) else []
+            photo_urls = [p.get("original_url") for p in photos if isinstance(p, dict) and p.get("original_url")]
+
+            biz_payload.append({
+                "id": b.get("id"),
+                "name": b.get("name"),
+                "cuisine_types": cuisine_types,
+                "price": b.get("price"),
+                "rating": b.get("rating"),
+                "url": b.get("url"),
+                "location": b.get("location"),
+                "coordinates": b.get("coordinates"),
+                "menu_url": menu_url,
+                "summaries": summaries,
+                "review_snippet": review_snip,
+                "photo_urls": photo_urls
+            })
+
+        taste_prompt = """
+        You are a food recommender.
+        For each restaurant, infer:
+        - menu_items: 10-20 plausible menu items for that restaurant
+        - popular_dishes: 5-10 popular dishes
+        - taste_vector: 6 floats in [0,1] ordered as [sweet, salty, sour, bitter, umami, spicy]
+
+        Output JSON:
+        {"restaurants": [{"id": "...", "menu_items": ["..."], "popular_dishes": ["..."], "taste_vector": [0,0,0,0,0,0]}]}
+        """
+
+        enrich_map = {}
+        try:
+            completion = groq_client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": taste_prompt},
+                    {"role": "user", "content": json.dumps({"restaurants": biz_payload})}
+                ],
+                model="llama-3.3-70b-versatile",
+                response_format={"type": "json_object"}
+            )
+            enriched = json.loads(completion.choices[0].message.content)
+            for r in enriched.get("restaurants", []) if isinstance(enriched, dict) else []:
+                rid = r.get("id")
+                if rid:
+                    enrich_map[str(rid)] = r
+        except Exception:
+            enrich_map = {}
+
+        try:
+            pc_index = _get_pinecone_index()
+        except Exception:
+            pc_index = None
+
+        for b in biz_payload:
+            rid = str(b.get("id") or "")
+            if not rid:
+                continue
+
+            extra = enrich_map.get(rid, {})
+            menu_items = extra.get("menu_items") if isinstance(extra.get("menu_items"), list) else []
+            popular_dishes = extra.get("popular_dishes") if isinstance(extra.get("popular_dishes"), list) else []
+            taste_vector = extra.get("taste_vector") if isinstance(extra.get("taste_vector"), list) else [0.0] * 6
+
+            embed_text = "\n".join([
+                str(b.get("name") or ""),
+                " ".join([str(x) for x in (b.get("cuisine_types") or [])]),
+                str((b.get("summaries") or {}).get("long") or ""),
+                "\n".join([str(x) for x in menu_items[:30]]),
+                "\n".join([str(x) for x in popular_dishes[:20]]),
+            ])
+            vec = _embed_text(embed_text)
+
+            restaurant_obj = {
+                "id": rid,
+                "name": b.get("name"),
+                "location": b.get("location"),
+                "coordinates": b.get("coordinates"),
+                "cuisine_types": b.get("cuisine_types") or [],
+                "price_range": _price_to_range(b.get("price")),
+                "avg_rating": b.get("rating"),
+                "url": b.get("url"),
+                "menu_items": menu_items,
+                "popular_dishes": popular_dishes,
+                "taste_vector": taste_vector,
+                "photos": b.get("photo_urls") or [],
+                "menu_url": b.get("menu_url")
+            }
+            restaurants.append(restaurant_obj)
+
+            if pc_index is not None:
+                metadata = {
+                    "name": restaurant_obj["name"],
+                    "url": restaurant_obj["url"],
+                    "avg_rating": restaurant_obj["avg_rating"],
+                    "price_range": restaurant_obj["price_range"],
+                    "cuisine_types": restaurant_obj["cuisine_types"],
+                    "location": restaurant_obj["location"],
+                    "coordinates": restaurant_obj["coordinates"],
+                    "menu_items": restaurant_obj["menu_items"],
+                    "popular_dishes": restaurant_obj["popular_dishes"],
+                    "taste_vector": restaurant_obj["taste_vector"],
+                    "photos": restaurant_obj["photos"],
+                    "menu_url": restaurant_obj["menu_url"],
+                }
+                try:
+                    pc_index.upsert(vectors=[{"id": rid, "values": vec, "metadata": metadata}])
+                except Exception:
+                    pass
+
+    ranked = []
+    try:
+        pc_index = _get_pinecone_index()
+        qvec = _embed_text(request.query)
+        top_k = 20
+        query_res = pc_index.query(vector=qvec, top_k=top_k, include_metadata=True)
+        matches = query_res.get("matches", []) if isinstance(query_res, dict) else getattr(query_res, "matches", [])
+
+        allergies = []
+        favorite_dishes = []
+        if request.user_profile:
+            allergies = request.user_profile.allergies or []
+            favorite_dishes = request.user_profile.favorite_dishes or []
+        if request.favorite_dishes:
+            favorite_dishes = request.favorite_dishes
+
+        user_taste_vec = _user_profile_to_taste_vector(request.user_profile) if request.user_profile else [0.0] * 6
+
+        for m in matches:
+            meta = m.get("metadata") if isinstance(m, dict) else getattr(m, "metadata", {})
+            score = float(m.get("score", 0.0)) if isinstance(m, dict) else float(getattr(m, "score", 0.0))
+            menu_items = meta.get("menu_items") or []
+            if not _allergy_filter(menu_items, allergies):
+                continue
+            taste_vec = meta.get("taste_vector") or [0.0] * 6
+            tscore = _taste_similarity(user_taste_vec, taste_vec)
+            boost = _favorites_boost(menu_items, [d.model_dump() if hasattr(d, "model_dump") else d for d in favorite_dishes] if favorite_dishes else [])
+            combined = score + 0.35 * tscore + boost
+            ranked.append({
+                "id": m.get("id") if isinstance(m, dict) else getattr(m, "id", None),
+                "name": meta.get("name"),
+                "url": meta.get("url"),
+                "avg_rating": meta.get("avg_rating"),
+                "price_range": meta.get("price_range"),
+                "cuisine_types": meta.get("cuisine_types"),
+                "location": meta.get("location"),
+                "coordinates": meta.get("coordinates"),
+                "menu_items": menu_items,
+                "popular_dishes": meta.get("popular_dishes"),
+                "taste_vector": taste_vec,
+                "photos": meta.get("photos"),
+                "menu_url": meta.get("menu_url"),
+                "score": combined
+            })
+
+        ranked.sort(key=lambda x: x.get("score", 0.0), reverse=True)
+    except Exception:
+        ranked = []
+
+    ai_json["menu_buddy"] = {
+        "seed_restaurants": restaurants,
+        "recommendations": ranked
+    }
+
+    return ai_json
 
 if __name__ == "__main__":
     import uvicorn
