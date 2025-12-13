@@ -1,0 +1,145 @@
+[
+    {
+        "id": 1,
+        "name": "Spice Garden Indian Restaurant",
+        "location": {
+            "address": "123 Main St",
+            "city": "San Francisco",
+            "lat": 37.7749,
+            "lng": -122.4194
+        },
+        "cuisine_types": ["Indian", "North Indian"],
+        "price": "$$",
+        "menu_items": [
+            "Paneer Butter Masala",
+            "Chicken Tikka Masala",
+            "Garlic Naan",
+            "Samosa",
+            "Biryani",
+            "Dal Makhani",
+            "Tandoori Chicken",
+            "Palak Paneer",
+            "Aloo Gobi"
+        ],
+        "popular_dishes": [
+            "Paneer Butter Masala",
+            "Chicken Tikka Masala",
+            "Garlic Naan"
+        ],
+        "avg_rating": 4.5
+    },
+    {
+        "id": 2,
+        "name": "Sushi Palace",
+        "location": {
+            "address": "456 Ocean Ave",
+            "city": "San Francisco",
+            "lat": 37.7849,
+            "lng": -122.4094
+        },
+        "cuisine_types": ["Japanese", "Sushi"],
+        "price": "$$$",
+        "menu_items": [
+            "California Roll",
+            "Salmon Sashimi",
+            "Tuna Nigiri",
+            "Miso Soup",
+            "Tempura",
+            "Edamame",
+            "Spicy Tuna Roll",
+            "Dragon Roll",
+            "Seaweed Salad"
+        ],
+        "popular_dishes": [
+            "Salmon Sashimi",
+            "California Roll",
+            "Dragon Roll"
+        ],
+        "avg_rating": 4.7
+    },
+    {
+        "id": 3,
+        "name": "Mama's Italian Kitchen",
+        "location": {
+            "address": "789 Pasta Lane",
+            "city": "San Francisco",
+            "lat": 37.7649,
+            "lng": -122.4294
+        },
+        "cuisine_types": ["Italian", "Pizza"],
+        "price": "$$",
+        "menu_items": [
+            "Margherita Pizza",
+            "Spaghetti Carbonara",
+            "Fettuccine Alfredo",
+            "Lasagna",
+            "Tiramisu",
+            "Caesar Salad",
+            "Bruschetta",
+            "Penne Arrabbiata"
+        ],
+        "popular_dishes": [
+            "Margherita Pizza",
+            "Spaghetti Carbonara",
+            "Tiramisu"
+        ],
+        "avg_rating": 4.6
+    },
+    {
+        "id": 4,
+        "name": "Thai Basil Express",
+        "location": {
+            "address": "321 Spice Road",
+            "city": "San Francisco",
+            "lat": 37.7549,
+            "lng": -122.4394
+        },
+        "cuisine_types": ["Thai", "Asian"],
+        "price": "$",
+        "menu_items": [
+            "Pad Thai",
+            "Green Curry",
+            "Tom Yum Soup",
+            "Mango Sticky Rice",
+            "Spring Rolls",
+            "Massaman Curry",
+            "Papaya Salad",
+            "Basil Fried Rice"
+        ],
+        "popular_dishes": [
+            "Pad Thai",
+            "Green Curry",
+            "Mango Sticky Rice"
+        ],
+        "avg_rating": 4.4
+    },
+    {
+        "id": 5,
+        "name": "The Burger Joint",
+        "location": {
+            "address": "555 Grill Street",
+            "city": "San Francisco",
+            "lat": 37.7449,
+            "lng": -122.4494
+        },
+        "cuisine_types": ["American", "Burgers"],
+        "price": "$$",
+        "menu_items": [
+            "Classic Cheeseburger",
+            "Bacon Burger",
+            "Veggie Burger",
+            "French Fries",
+            "Onion Rings",
+            "Milkshake",
+            "Chicken Wings",
+            "BBQ Burger"
+        ],
+        "popular_dishes": [
+            "Classic Cheeseburger",
+            "Bacon Burger",
+            "French Fries"
+        ],
+        "avg_rating": 4.3
+    }
+]
+
