@@ -1,7 +1,6 @@
 {
   "name": "swaad-frontend",
-  "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,11 +8,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@react-oauth/google": "^0.12.2",
-    "axios": "^1.6.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "recharts": "^2.10.3"
+    "axios": "^1.6.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
@@ -22,3 +19,4 @@
     "vite": "^5.0.8"
   }
 }
+

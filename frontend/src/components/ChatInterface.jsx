@@ -1,247 +1,127 @@
-import React, { useState, useRef, useEffect } from 'react';
-import './ChatInterface.css';
-import { API_URL } from '../config';
+import { useState, useRef, useEffect } from 'react'
+import axios from 'axios'
+import RestaurantCard from './RestaurantCard'
+import './ChatInterface.css'
 
-const ChatInterface = ({ fullScreen = false }) => {
-  const [isOpen, setIsOpen] = useState(!!fullScreen);
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+function ChatInterface() {
   const [messages, setMessages] = useState([
-    { text: "Hi! I can help you find restaurants using Yelp. What are you looking for?", sender: 'bot' }
-  ]);
-  const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [chatId, setChatId] = useState(null);
-  const [userKey, setUserKey] = useState(() => {
-    try {
-      return localStorage.getItem('swaad_user_key') || 'default';
-    } catch (e) {
-      return 'default';
+    {
+      role: 'assistant',
+      content: 'Hi! I\'m your food recommendation assistant. Tell me what you\'re craving, and I\'ll suggest the perfect restaurants and dishes for you! 🍽️',
+      type: 'text'
     }
-  });
-  const messagesEndRef = useRef(null);
+  ])
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+  const messagesEndRef = useRef(null)
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    scrollToBottom()
+  }, [messages])
 
-  useEffect(() => {
-    if (fullScreen) setIsOpen(true);
-  }, [fullScreen]);
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!input.trim() || loading) return
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('swaad_user_key', userKey);
-    } catch (e) {
-      // ignore
-    }
+    const userMessage = input.trim()
+    setInput('')
 
-    // Sync dummy-user metadata (diet_type/location) so chat calls stay consistent.
-    const sync = async () => {
-      try {
-        const resp = await fetch(`${API_URL}/api/dummy-user?user_key=${encodeURIComponent(userKey)}`);
-        if (!resp.ok) return;
-        const data = await resp.json();
-        if (data && data.diet_type) {
-          localStorage.setItem('swaad_diet_type', data.diet_type);
-        }
-        if (data && data.location) {
-          localStorage.setItem('swaad_location', data.location);
-        }
-      } catch (e) {
-        // ignore
-      }
-    };
-
-    sync();
-  }, [userKey]);
-
-  const toggleChat = () => {
-    if (fullScreen) return;
-    setIsOpen(!isOpen);
-  };
-
-  const handleNewChat = () => {
-    setChatId(null);
-    setMessages([
-      { text: "Hi! I can help you find restaurants using Yelp. What are you looking for?", sender: 'bot' }
-    ]);
-  };
-
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!inputValue.trim()) return;
-
-    const userMessage = inputValue.trim();
-    let storedDietType = null;
+    // Add user message
+    setMessages(prev => [...prev, { role: 'user', content: userMessage, type: 'text' }])
+    setLoading(true)
 
     try {
-      storedDietType = localStorage.getItem('swaad_diet_type');
-    } catch (err) {
-      storedDietType = null;
-    }
+      const response = await axios.post(`${API_URL}/api/chat`, {
+        query: userMessage
+      })
 
-    setMessages(prev => [...prev, { text: userMessage, sender: 'user' }]);
-    setInputValue('');
-    setIsLoading(true);
+      const data = response.data
 
-    try {
-      const response = await fetch(`${API_URL}/api/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: userMessage,
-          chat_id: chatId,
-          diet_type: storedDietType,
-          user_key: userKey
-        }),
-      });
+      // Add text response
+      const textResponse = data.response?.text || 'Sorry, I couldn\'t process that request.'
+      setMessages(prev => [...prev, { role: 'assistant', content: textResponse, type: 'text' }])
 
-      if (!response.ok) {
-        let errBody = '';
-        try {
-          errBody = await response.text();
-        } catch (e) {
-          errBody = '';
-        }
-        console.error('Chat API error:', response.status, errBody);
-        throw new Error(errBody || 'Failed to get response');
+      // Add restaurant cards if available
+      if (data.menu_buddy?.recommendations && data.menu_buddy.recommendations.length > 0) {
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: data.menu_buddy.recommendations,
+          type: 'restaurants'
+        }])
       }
 
-      const data = await response.json();
-      
-      // Update chat ID for next request
-      if (data.chat_id) {
-        setChatId(data.chat_id);
-      }
-
-      // Extract text from Yelp response
-      const botResponse = data.response?.text || "Sorry, I couldn't understand that.";
-      
-      // Extract businesses if available
-      let businesses = [];
-      if (data.menu_buddy && data.menu_buddy.recommendations && data.menu_buddy.recommendations.length > 0) {
-        businesses = data.menu_buddy.recommendations.map((r) => ({
-          id: r.id,
-          name: r.name,
-          url: r.url,
-          rating: r.avg_rating,
-          location: r.location,
-          recommended_dishes: r.recommended_dishes || []
-        }));
-      } else if (data.entities && data.entities.length > 0 && data.entities[0].businesses) {
-        businesses = data.entities[0].businesses.map((b) => ({
-          id: b.id,
-          name: b.name,
-          url: b.url,
-          rating: b.rating,
-          location: b.location,
-          recommended_dishes: []
-        }));
-      }
-
-      setMessages(prev => [...prev, { text: botResponse, sender: 'bot', businesses }]);
     } catch (error) {
-      console.error('Chat error:', error);
-      setMessages(prev => [...prev, { text: "Sorry, something went wrong. Please try again.", sender: 'bot' }]);
+      console.error('Error:', error)
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: '❌ Sorry, there was an error processing your request. Please make sure the backend server is running on port 8000.',
+        type: 'text'
+      }])
     } finally {
-      setIsLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <div className={`chat-widget ${fullScreen ? 'fullscreen' : ''}`}>
-      {isOpen && (
-        <div className={`chat-window ${fullScreen ? 'fullscreen' : ''}`}>
-          <div className="chat-header">
-            <h3>Swaad Assistant</h3>
-            <div className="header-actions">
-              <select
-                className="user-select"
-                value={userKey}
-                onChange={(e) => {
-                  setChatId(null);
-                  setMessages([
-                    { text: "Hi! I can help you find restaurants using Yelp. What are you looking for?", sender: 'bot' }
-                  ]);
-                  setUserKey(e.target.value);
-                }}
-                title="Select dummy user"
-              >
-                <option value="default">default</option>
-                <option value="dummy2">dummy2</option>
-                <option value="dummy3">dummy3</option>
-              </select>
-              <button className="new-chat-btn" onClick={handleNewChat} title="Start New Chat">
-                +
-              </button>
-              {!fullScreen && <button className="close-btn" onClick={toggleChat}>×</button>}
+    <div className="chat-container">
+      <div className="messages-container">
+        {messages.map((message, index) => (
+          <div key={index} className={`message ${message.role}`}>
+            <div className="message-avatar">
+              {message.role === 'user' ? '👤' : '🤖'}
+            </div>
+            <div className="message-content">
+              {message.type === 'text' ? (
+                message.content.split('\n').map((line, i) => (
+                  <p key={i}>{line}</p>
+                ))
+              ) : message.type === 'restaurants' ? (
+                <div className="restaurants-grid">
+                  {message.content.map((restaurant, idx) => (
+                    <RestaurantCard key={idx} restaurant={restaurant} />
+                  ))}
+                </div>
+              ) : null}
             </div>
           </div>
-          <div className="chat-messages">
-            {messages.map((msg, index) => (
-              <div key={index} className={`message-container ${msg.sender}`}>
-                <div className={`message ${msg.sender}`}>
-                  {msg.text}
-                </div>
-                {msg.businesses && msg.businesses.length > 0 && (
-                  <div className="business-cards">
-                    {msg.businesses.map((business) => (
-                      <a 
-                        key={business.id} 
-                        href={business.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="business-card"
-                      >
-                        <div className="business-info">
-                          <h4>{business.name}</h4>
-                          {business.rating && <span className="rating">★ {business.rating}</span>}
-                        </div>
-                        {business.location && (
-                          <p className="business-address">
-                            {business.location.address1}, {business.location.city}
-                          </p>
-                        )}
-                        {business.recommended_dishes && business.recommended_dishes.length > 0 && (
-                          <div className="recommended-dishes">
-                            <strong>Try:</strong> {business.recommended_dishes.slice(0, 3).map(d => typeof d === 'string' ? d : d.name).join(', ')}
-                          </div>
-                        )}
-                      </a>
-                    ))}
-                  </div>
-                )}
+        ))}
+        {loading && (
+          <div className="message assistant">
+            <div className="message-avatar">🤖</div>
+            <div className="message-content">
+              <div className="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
               </div>
-            ))}
-            {isLoading && <div className="typing-indicator">Typing...</div>}
-            <div ref={messagesEndRef} />
+            </div>
           </div>
-          <form className="chat-input-area" onSubmit={handleSendMessage}>
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Ask about restaurants..."
-              disabled={isLoading}
-            />
-            <button type="submit" className="send-btn" disabled={isLoading || !inputValue.trim()}>
-              ➤
-            </button>
-          </form>
-        </div>
-      )}
-      {!fullScreen && (
-        <button className="chat-toggle-btn" onClick={toggleChat}>
-          💬
-        </button>
-      )}
-    </div>
-  );
-};
+        )}
+        <div ref={messagesEndRef} />
+      </div>
 
-export default ChatInterface;
+      <form className="input-container" onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="What are you craving? (e.g., 'I want spicy Thai food')"
+          disabled={loading}
+          className="chat-input"
+        />
+        <button type="submit" disabled={loading || !input.trim()} className="send-button">
+          {loading ? '⏳' : '🚀'}
+        </button>
+      </form>
+    </div>
+  )
+}
+
+export default ChatInterface
+

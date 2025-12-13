@@ -16,6 +16,69 @@ from dish_processing import get_groq_client
 from config import GROQ_API_KEY, USE_SEMANTIC_INGREDIENT_TASTE
 
 
+def is_greeting(query: str) -> bool:
+    """
+    Check if the query is a greeting.
+
+    Returns:
+        True if query is a greeting, False otherwise
+    """
+    query_lower = query.lower().strip()
+    greetings = [
+        "hi", "hello", "hey", "hola", "greetings", "good morning",
+        "good afternoon", "good evening", "howdy", "what's up",
+        "whats up", "sup", "yo", "hiya", "heya"
+    ]
+
+    # Check if query is exactly a greeting or starts with greeting
+    for greeting in greetings:
+        if query_lower == greeting or query_lower.startswith(greeting + " "):
+            return True
+
+    return False
+
+
+def is_dish_query(query: str) -> Optional[str]:
+    """
+    Check if the query is asking for a specific dish (not at a specific restaurant).
+
+    Returns:
+        Dish name if detected, None otherwise
+    """
+    query_lower = query.lower().strip()
+
+    # Patterns for dish queries - more specific patterns
+    patterns = [
+        # "is there a place where X is available"
+        r"is\s+there\s+(?:a\s+)?(?:place|restaurant)\s+(?:where|that\s+has)\s+(.+?)\s+(?:is\s+)?available",
+        # "where can I find X" or "where can I get X"
+        r"where\s+can\s+i\s+(?:find|get)\s+(.+?)(?:\s+near|\s+in|\s+at|\s*$)",
+        # "do you have X" or "is there X"
+        r"^(?:do\s+you\s+have|is\s+there)\s+(?:any\s+)?(.+?)(?:\s+available|\s+near|\s+in|\s+at|\s*$)",
+        # "I want X" or "show me X"
+        r"^(?:i\s+want|i'd\s+like|i\s+need|give\s+me|show\s+me|find|get\s+me|looking\s+for)\s+(.+?)(?:\s+near|\s+in|\s+at|\s*$)",
+        # "can I get X"
+        r"^can\s+i\s+get\s+(.+?)(?:\s+near|\s+in|\s+at|\s*$)",
+    ]
+
+    # Don't treat greetings or very short queries as dish queries
+    if len(query_lower.split()) <= 1:
+        return None
+
+    for pattern in patterns:
+        match = re.search(pattern, query_lower)
+        if match:
+            dish_name = match.group(1).strip()
+            # Clean up the dish name
+            dish_name = re.sub(r'\s+(?:near|in|at|from)\s+.*$', '', dish_name).strip()
+            # Filter out generic food type queries
+            generic_terms = ["food", "something", "anything", "restaurant", "place", "restaurants", "places"]
+            if dish_name not in generic_terms and len(dish_name) > 2:
+                return dish_name
+
+    return None
+
+
 def parse_specific_query(query: str) -> Optional[Tuple[str, str]]:
     """
     Parse query to detect if user is asking about a specific dish at a specific restaurant.
@@ -111,6 +174,109 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
     final_max_results = request.max_results or 10
     print(f"[DEBUG] max_results set to: {final_max_results}")
 
+    # Initialize flags
+    dish_not_found = False
+    dish_not_found_name = None
+
+    # Check if this is a greeting
+    if is_greeting(request.query):
+        print(f"[DEBUG] Greeting detected")
+        greeting_responses = [
+            "Hello! 👋 I'm Swaad, your AI food companion. I can help you discover amazing restaurants and dishes based on your taste preferences. What are you craving today?",
+            "Hey there! 🍽️ Welcome to Swaad! Tell me what kind of food you're in the mood for, and I'll find the perfect restaurants for you.",
+            "Hi! 😊 I'm here to help you find delicious food. Whether you're craving something spicy, sweet, or savory, just let me know and I'll recommend the best spots!",
+        ]
+        import random
+        return {
+            "response": {
+                "text": random.choice(greeting_responses)
+            },
+            "chat_id": request.chat_id,
+            "menu_buddy": {"recommendations": []}
+        }
+
+    # Check if this is a dish-specific query (not at a specific restaurant)
+    dish_query = is_dish_query(request.query)
+    if dish_query and "where restaurant is" not in request.query.lower():
+        print(f"[DEBUG] Dish-specific query detected: '{dish_query}'")
+
+        try:
+            pc_index = get_pinecone_index()
+            # Search all restaurants for this dish
+            all_restaurants = pc_index.query(
+                vector=[0.0] * 384,  # Dummy vector to get all restaurants
+                top_k=100,
+                include_metadata=True,
+                namespace="restaurants"
+            )
+            matches = all_restaurants.get("matches", []) if isinstance(all_restaurants, dict) else getattr(all_restaurants, "matches", [])
+
+            # Search for restaurants that have this dish
+            restaurants_with_dish = []
+            for m in matches:
+                meta = m.get("metadata") if isinstance(m, dict) else getattr(m, "metadata", {})
+                menu_items = meta.get("menu_items", [])
+
+                # Check if dish exists in menu
+                for menu_item in menu_items:
+                    if dish_query.lower() in menu_item.lower() or menu_item.lower() in dish_query.lower():
+                        restaurants_with_dish.append({
+                            "name": meta.get("name"),
+                            "rating": meta.get("avg_rating"),
+                            "price_range": meta.get("price_range"),
+                            "cuisine_types": meta.get("cuisine_types", []),
+                            "dish": menu_item,
+                            "metadata": meta
+                        })
+                        break  # Only add restaurant once
+
+            if not restaurants_with_dish:
+                # Dish not found - continue to general recommendations below
+                print(f"[DEBUG] Dish '{dish_query}' not found in any restaurant, will provide general recommendations")
+                # Set a flag to modify the response text later
+                dish_not_found = True
+                dish_not_found_name = dish_query
+            else:
+                # Dish found - return restaurants that have it
+                print(f"[DEBUG] Found '{dish_query}' at {len(restaurants_with_dish)} restaurants")
+
+                # Rank by rating and taste similarity
+                from recommendations import dish_recommendations_for_restaurant
+                ranked_restaurants = []
+                for rest in restaurants_with_dish[:10]:  # Limit to top 10
+                    # Get recommended dishes for this restaurant
+                    menu_items = rest["metadata"].get("menu_items", [])
+                    recommended_dishes = dish_recommendations_for_restaurant(
+                        menu_items=menu_items,
+                        user_taste_vec=user_taste_vec,
+                        diet_type=diet_type,
+                        top_n=5
+                    )
+
+                    ranked_restaurants.append({
+                        "name": rest["name"],
+                        "rating": rest["rating"],
+                        "price_range": rest["price_range"],
+                        "cuisine_types": rest["cuisine_types"],
+                        "recommended_dishes": recommended_dishes
+                    })
+
+                # Sort by rating
+                ranked_restaurants.sort(key=lambda x: x.get("rating", 0), reverse=True)
+
+                return {
+                    "response": {
+                        "text": f"Great choice! I found '{dish_query}' at {len(restaurants_with_dish)} restaurants. Here are the top-rated ones:"
+                    },
+                    "chat_id": request.chat_id,
+                    "menu_buddy": {"recommendations": ranked_restaurants[:final_max_results]}
+                }
+
+        except Exception as e:
+            print(f"[DEBUG] Error in dish query: {e}")
+            import traceback
+            traceback.print_exc()
+
     # Check if this is a specific query (dish at specific restaurant)
     specific_query = parse_specific_query(request.query)
     if specific_query:
@@ -198,9 +364,14 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
     print(f"[DEBUG] Querying Pinecone for restaurant recommendations")
 
     # Initialize response structure
+    if dish_not_found:
+        initial_text = f"Sorry, I couldn't find '{dish_not_found_name}' in our restaurant database. But don't worry! Based on your taste preferences, here are some similar recommendations you might enjoy in {fallback_location}:"
+    else:
+        initial_text = f"Here are some great restaurant recommendations for you in {fallback_location}!"
+
     ai_json = {
         "response": {
-            "text": f"Here are some great restaurant recommendations for you in {fallback_location}!"
+            "text": initial_text
         },
         "chat_id": request.chat_id
     }
@@ -262,8 +433,22 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
         if original_text and ranked:
             restaurant_names = [r.get("name") for r in ranked if r.get("name")]
             diet_label = "vegetarian" if diet_type in {"veg", "vegetarian"} else diet_type or "any diet"
-            
-            rewrite_prompt = f"""Rewrite this restaurant recommendation text to:
+
+            if dish_not_found:
+                rewrite_prompt = f"""The user asked for '{dish_not_found_name}' but it's not available in our database.
+Rewrite this text to:
+1. Apologize that '{dish_not_found_name}' is not available
+2. Mention these {len(ranked)} alternative restaurants: {', '.join(restaurant_names[:5])}
+3. Say these are similar recommendations based on their taste preferences
+4. Only mention dishes suitable for {diet_label} diet
+5. Keep the tone friendly and helpful
+6. Be concise (2-3 sentences max)
+
+Original text: {original_text}
+
+Rewritten text:"""
+            else:
+                rewrite_prompt = f"""Rewrite this restaurant recommendation text to:
 1. Match the actual {len(ranked)} restaurants shown: {', '.join(restaurant_names[:5])}
 2. Only mention dishes suitable for {diet_label} diet (NO meat, fish, eggs, or animal products if vegetarian)
 3. Keep the tone friendly and helpful
@@ -272,14 +457,14 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
 Original text: {original_text}
 
 Rewritten text:"""
-            
+
             completion = groq_client.chat.completions.create(
                 messages=[{"role": "user", "content": rewrite_prompt}],
                 model="llama-3.3-70b-versatile",
                 temperature=0.7,
                 max_tokens=200
             )
-            
+
             rewritten_text = completion.choices[0].message.content.strip()
             ai_json["response"]["text"] = rewritten_text
             print(f"[DEBUG] Rewrote response text for {diet_label} diet")
