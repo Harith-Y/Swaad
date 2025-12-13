@@ -10,6 +10,7 @@ except ImportError:
     # Use string instead if email-validator not available
     EmailStr = str
 from typing import List, Dict, Optional, Any
+import asyncio
 import pandas as pd
 import ast
 import json
@@ -17,6 +18,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import re
 import html as html_lib
+from html.parser import HTMLParser
 import traceback
 from sqlalchemy.orm import Session
 from database import get_db, User, Base, engine, YelpRawResponse
@@ -73,6 +75,17 @@ def preload_models():
         if groq_api_key:
             _groq_client = Groq(api_key=groq_api_key)
             print("Groq client initialized.")
+
+    try:
+        _load_ingredient_flavor_map()
+    except Exception:
+        pass
+
+    if os.getenv("PRELOAD_INGREDIENTS_TO_PINECONE", "false").lower() in {"1", "true", "yes", "y"}:
+        try:
+            _maybe_upsert_ingredients_to_pinecone()
+        except Exception:
+            pass
 
 _ingredient_flavor_map = None
 _ingredient_upsert_done = False
@@ -316,7 +329,14 @@ Respond with ONLY the word 'veg' or 'non-veg', nothing else."""
         t = dish_name.lower()
         nonveg_keywords = {"chicken", "beef", "pork", "bacon", "ham", "turkey", "lamb", 
                           "mutton", "duck", "fish", "salmon", "tuna", "shrimp", "prawn", 
-                          "crab", "lobster", "egg", "meat", "seafood"}
+                          "crab", "lobster", "egg", "meat", "seafood", "sausage", "pepperoni",
+                          "steak", "burger", "filet", "ribs", "wings", "sushi", "sashimi", "calamari",
+                          "oyster", "mussel", "clam", "scallop", "anchovy", "caviar", "roe", "squid",
+                          "octopus", "snail", "escargot", "veal", "venison", "bison", "rabbit", "quail",
+                          "goose", "pheasant", "boar", "elk", "buffalo", "kangaroo", "alligator", "frog",
+                          "turtle", "snake", "insect", "worm", "grub", "cricket", "grasshopper", "ant",
+                          "bee", "wasp", "hornet", "fly", "mosquito", "spider", "scorpion", "centipede",
+                          "millipede", "slug", "snail", "leech", "louse", "flea", "tick", "mite", "bedbug"}
         classification = "non-veg" if any(k in t for k in nonveg_keywords) else "veg"
         _dish_classification_cache[cache_key] = classification
         return classification
@@ -344,46 +364,85 @@ def _filter_dishes_by_diet(dishes: List[str], diet_type: Optional[str]) -> List[
             if classification == "veg":
                 filtered.append(dish)
         else:
-            # For non-veg users, only include non-veg dishes
-            if classification == "non-veg":
-                filtered.append(dish)
+            # For non-veg users, include everything (they can eat veg too)
+            filtered.append(dish)
     
     return filtered
+
+class HTMLTextExtractor(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.result = []
+        self.ignore_tags = {'script', 'style', 'noscript'}
+        self.ignore_content = False
+        
+    def handle_starttag(self, tag, attrs):
+        if tag in self.ignore_tags:
+            self.ignore_content = True
+        elif tag in {'br', 'p', 'div', 'li', 'tr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'}:
+            self.result.append('\n')
+            
+    def handle_endtag(self, tag):
+        if tag in self.ignore_tags:
+            self.ignore_content = False
+        elif tag in {'p', 'div', 'li', 'tr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'}:
+            self.result.append('\n')
+
+    def handle_data(self, data):
+        if not self.ignore_content:
+            self.result.append(data)
+            
+    def get_text(self):
+        return "".join(self.result)
 
 def _extract_text_from_html_bytes(raw: bytes) -> str:
     if not raw:
         return ""
     try:
+        print(f"[DEBUG] Decoding HTML bytes (len={len(raw)})...")
         s = raw.decode("utf-8", errors="ignore")
     except Exception:
         return ""
-    s = re.sub(r"(?is)<(script|style|noscript).*?>.*?</\\1>", " ", s)
-    s = re.sub(r"(?i)<br\\s*/?>", "\n", s)
-    s = re.sub(r"(?i)</(p|li|div|tr|h1|h2|h3|h4|h5|h6)>", "\n", s)
-    s = re.sub(r"(?s)<.*?>", " ", s)
+    
+    print("[DEBUG] Cleaning HTML with HTMLParser...")
+    try:
+        parser = HTMLTextExtractor()
+        parser.feed(s)
+        s = parser.get_text()
+    except Exception as e:
+        print(f"[DEBUG] HTMLParser error: {e}, falling back to simple regex")
+        s = re.sub(r"<[^>]+>", " ", s)
+
     s = html_lib.unescape(s)
     s = re.sub(r"[ \t\r\f\v]+", " ", s)
     s = re.sub(r"\n\s*\n+", "\n", s)
+    print(f"[DEBUG] HTML cleaning done. Result len={len(s)}")
     return s.strip()
 
 async def _fetch_menu_url(menu_url: str) -> Optional[httpx.Response]:
     if not menu_url:
         return None
     try:
+        print(f"[DEBUG] Fetching URL: {menu_url}")
         async with httpx.AsyncClient(follow_redirects=True, timeout=20.0) as http_client:
             resp = await http_client.get(menu_url, headers={"User-Agent": "Mozilla/5.0"})
+            print(f"[DEBUG] Status code: {resp.status_code}")
             if resp.status_code >= 400:
                 return None
             return resp
-    except Exception:
+    except Exception as e:
+        print(f"[DEBUG] Fetch error: {e}")
         return None
 
 async def _menu_url_to_dishes(menu_url: str) -> List[str]:
+    print(f"[DEBUG] _menu_url_to_dishes called for {menu_url}")
     resp = await _fetch_menu_url(menu_url)
     if resp is None:
+        print("[DEBUG] Failed to fetch menu URL")
         return []
 
     content_type = (resp.headers.get("content-type") or "").lower()
+    print(f"[DEBUG] Content-Type: {content_type}")
     url_lc = (menu_url or "").lower()
 
     is_pdf = "application/pdf" in content_type or url_lc.endswith(".pdf")
@@ -392,53 +451,90 @@ async def _menu_url_to_dishes(menu_url: str) -> List[str]:
 
     raw = resp.content
     if not raw:
+        print("[DEBUG] Empty response content")
         return []
 
     if is_pdf:
+        print("[DEBUG] Processing as PDF")
         try:
             if not os.getenv("GEMINI_API_KEY"):
+                print("[DEBUG] Skipping PDF OCR: No GEMINI_API_KEY")
                 return []  # Skip OCR if Gemini not configured
             text = extract_dish_names_from_image(raw, mime_type="application/pdf")
             dishes = [ln.strip() for ln in (text or "").split("\n") if ln.strip()]
             return _merge_unique_preserve_order(dishes)
-        except Exception:
+        except Exception as e:
+            print(f"[DEBUG] PDF processing error: {e}")
             return []
 
     if is_img:
+        print("[DEBUG] Processing as Image")
         mime = content_type.split(";")[0].strip() if content_type.startswith("image/") else "image/jpeg"
         try:
             if not os.getenv("GEMINI_API_KEY"):
+                print("[DEBUG] Skipping Image OCR: No GEMINI_API_KEY")
                 return []  # Skip OCR if Gemini not configured
             text = extract_dish_names_from_image(raw, mime_type=mime)
             dishes = [ln.strip() for ln in (text or "").split("\n") if ln.strip()]
             return _merge_unique_preserve_order(dishes)
-        except Exception:
+        except Exception as e:
+            print(f"[DEBUG] Image processing error: {e}")
             return []
 
     if is_html or ("text/" in content_type):
+        print("[DEBUG] Processing as HTML")
         page_text = _extract_text_from_html_bytes(raw)
         if not page_text:
+            print("[DEBUG] Extracted text is empty")
             return []
         try:
-            categorized = extract_dishes_from_menu(page_text)
+            print("[DEBUG] Extracting dishes from text...")
+            categorized = await extract_dishes_from_menu(page_text)
             flat = []
             for cat in ["appetizer", "mains", "desserts"]:
                 flat.extend(categorized.get(cat, []) if isinstance(categorized, dict) else [])
+            print(f"[DEBUG] Found {len(flat)} dishes in HTML")
             return _merge_unique_preserve_order(flat)
-        except Exception:
+        except Exception as e:
+            print(f"[DEBUG] HTML processing error: {e}")
             return []
 
     return []
 
-def _dish_recommendations_for_restaurant(menu_items: List[str], user_taste_vec: List[float], diet_type: Optional[str], top_n: int = 5) -> List[Dict]:
+def _dish_recommendations_for_restaurant(menu_items: List[str], user_taste_vec: List[float], diet_type: Optional[str], query_text: Optional[str] = None, top_n: int = 5) -> List[Dict]:
     items = _filter_dishes_by_diet(menu_items or [], diet_type)
     items = _merge_unique_preserve_order(items)
     scored = []
     semantic = os.getenv("USE_SEMANTIC_DISH_TASTE", "false").lower() in {"1", "true", "yes", "y"}
+    
+    # Pre-process query for keyword matching
+    query_tokens = set()
+    if query_text:
+        # Simple tokenization: remove punctuation, lowercase
+        q_clean = re.sub(r"[^\w\s]", "", query_text.lower())
+        query_tokens = set(q_clean.split())
+        # Remove common stop words
+        stop_words = {"i", "want", "to", "eat", "some", "a", "the", "in", "at", "near", "me", "place", "restaurant", "find", "show", "give"}
+        query_tokens = query_tokens - stop_words
+
     for dish in items[:40]:
         tv = _infer_taste_from_text_hybrid(dish, semantic=semantic)
         sim = _taste_similarity(user_taste_vec, tv)
-        scored.append({"name": dish, "similarity": float(sim)})
+        
+        # Boost score if dish matches query
+        query_boost = 0.0
+        if query_tokens:
+            d_clean = re.sub(r"[^\w\s]", "", dish.lower())
+            d_tokens = set(d_clean.split())
+            # Check for overlap
+            overlap = len(query_tokens.intersection(d_tokens))
+            if overlap > 0:
+                # Massive boost for matching query terms to ensure they appear first
+                query_boost = 2.0 + (0.5 * overlap)
+        
+        final_score = float(sim) + query_boost
+        scored.append({"name": dish, "similarity": final_score, "base_sim": float(sim)})
+        
     scored.sort(key=lambda x: x.get("similarity", 0.0), reverse=True)
     return scored[: max(1, int(top_n))]
 
@@ -578,8 +674,19 @@ def _infer_taste_from_text_semantic(text: str) -> List[float]:
     for m in matches or []:
         meta = m.get("metadata") if isinstance(m, dict) else getattr(m, "metadata", {})
         score = float(m.get("score", 0.0)) if isinstance(m, dict) else float(getattr(m, "score", 0.0))
-        tv = meta.get("taste_vector") if isinstance(meta, dict) else None
-        if not isinstance(tv, list) or len(tv) != 6:
+        tv = None
+        try:
+            t0 = meta.get("taste_0")
+            t1 = meta.get("taste_1")
+            t2 = meta.get("taste_2")
+            t3 = meta.get("taste_3")
+            t4 = meta.get("taste_4")
+            t5 = meta.get("taste_5")
+            if all(isinstance(x, (int, float)) for x in [t0, t1, t2, t3, t4, t5]):
+                tv = [float(t0), float(t1), float(t2), float(t3), float(t4), float(t5)]
+        except Exception:
+            tv = None
+        if not tv or len(tv) != 6:
             continue
         w = max(0.0, score)
         num += w * np.array(tv, dtype=float)
@@ -630,6 +737,10 @@ def _maybe_upsert_ingredients_to_pinecone() -> None:
         ing = info.get("ingredient")
         if not ing:
             continue
+        fp = info.get("flavor_profile") or {}
+        taste_vec = info.get("taste_vector") or [0.0] * 6
+        if not isinstance(taste_vec, list) or len(taste_vec) != 6:
+            taste_vec = [0.0] * 6
         vec = _embed_text(ing)
         vectors.append({
             "id": f"ingredient:{ing_lc}",
@@ -637,8 +748,17 @@ def _maybe_upsert_ingredients_to_pinecone() -> None:
             "metadata": {
                 "type": "ingredient",
                 "ingredient": ing,
-                "flavor_profile": info.get("flavor_profile"),
-                "taste_vector": info.get("taste_vector"),
+                "spicy": float(fp.get("spicy", 0.0)),
+                "sweet": float(fp.get("sweet", 0.0)),
+                "umami": float(fp.get("umami", 0.0)),
+                "sour": float(fp.get("sour", 0.0)),
+                "salty": float(fp.get("salty", 0.0)),
+                "taste_0": float(taste_vec[0]),
+                "taste_1": float(taste_vec[1]),
+                "taste_2": float(taste_vec[2]),
+                "taste_3": float(taste_vec[3]),
+                "taste_4": float(taste_vec[4]),
+                "taste_5": float(taste_vec[5]),
             }
         })
 
@@ -663,6 +783,32 @@ def _price_to_range(price: Optional[str]) -> Optional[int]:
     if isinstance(price, str):
         return len(price.strip()) if price.strip() else None
     return None
+
+def _normalize_key(value: Optional[str]) -> str:
+    v = (value or "").strip().lower()
+    v = re.sub(r"\s+", " ", v)
+    return v
+
+def _extract_max_results_from_query(query: Optional[str], default: int = 10) -> int:
+    q = (query or "").lower()
+    m = re.search(r"\b(\d{1,2})\b", q)
+    if not m:
+        return int(default)
+    try:
+        n = int(m.group(1))
+        return max(1, min(50, n))
+    except Exception:
+        return int(default)
+
+def _extract_location_from_query(query: Optional[str]) -> Optional[str]:
+    q = (query or "").strip()
+    if not q:
+        return None
+    m = re.search(r"\b(?:from|in|near)\s+([A-Za-z].{2,80})\s*$", q, flags=re.IGNORECASE)
+    if not m:
+        return None
+    loc = (m.group(1) or "").strip()
+    return loc or None
 
 def _safe_lower_list(values: Optional[List[str]]) -> List[str]:
     if not values:
@@ -1112,139 +1258,65 @@ def is_dish_name(line: str) -> bool:
     
     return True
 
-def extract_dishes_from_menu(menu_text: str) -> Dict[str, List[str]]:
-    """Extract dish names from menu text and categorize them with Groq-powered filtering"""
-    lines = menu_text.split('\n')
+async def extract_dishes_from_menu(menu_text: str) -> Dict[str, List[str]]:
+    """Extract dish names from menu text and categorize them using Groq LLM."""
+    if not menu_text:
+        return {"appetizer": [], "mains": [], "desserts": []}
+
+    # Limit text length to avoid token limits (approx 15k chars ~ 3-4k tokens)
+    # We'll take the first chunk which usually contains the menu
+    truncated_text = menu_text[:15000] 
+
+    groq_client = _get_groq_client()
+    if not groq_client:
+        print("[DEBUG] Groq client not available for menu extraction")
+        return {"appetizer": [], "mains": [], "desserts": []}
+
+    prompt = f"""
+    You are an AI menu parser. Extract food dishes from the provided menu text and categorize them into 'appetizer', 'mains', and 'desserts'.
     
-    # Category synonyms mapping
-    appetizer_synonyms = ['appetizer', 'appetiser', 'appetizers', 'appetisers', 
-                         'starter', 'starters', 'small plates', 'small plate',
-                         'tapas', 'hors d\'oeuvres', 'hors d\'oeuvre', 'hors d oeuvres',
-                         'beginning', 'beginnings', 'first course', 'first courses']
-    mains_synonyms = ['main', 'mains', 'main course', 'main courses', 
-                     'entree', 'entrees', 'big plates', 'big plate',
-                     'large plates', 'large plate', 'mains course', 'main dish',
-                     'main dishes', 'second course', 'second courses']
-    dessert_synonyms = ['dessert', 'desserts', 'sweet', 'sweets', 
-                       'pudding', 'puddings', 'finale', 'finales',
-                       'sweet course', 'sweet courses', 'after dinner']
+    Rules:
+    1. Return ONLY a valid JSON object.
+    2. Keys must be "appetizer", "mains", "desserts".
+    3. Values must be lists of strings (dish names).
+    4. Clean the dish names (remove prices, ingredients, descriptions).
+    5. Ignore beverages, sides, and non-food text.
+    6. If a dish fits multiple categories, pick the best one.
     
-    categorized_dishes = {
-        "appetizer": [],
-        "mains": [],
-        "desserts": []
-    }
-    
-    current_category = None
-    
-    for line in lines:
-        line_original = line.strip()
-        if not line_original:
-            continue
+    Menu Text:
+    {truncated_text}
+    """
+
+    try:
+        print("[DEBUG] Sending menu text to Groq for extraction...")
         
-        line_lower = line_original.lower()
+        def _call_groq():
+            return groq_client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant that outputs JSON."},
+                    {"role": "user", "content": prompt}
+                ],
+                model="llama-3.3-70b-versatile",
+                response_format={"type": "json_object"},
+                temperature=0.1
+            )
+
+        completion = await asyncio.to_thread(_call_groq)
         
-        # Check if this line is a category header
-        is_appetizer_header = any(syn in line_lower for syn in appetizer_synonyms)
-        is_mains_header = any(syn in line_lower for syn in mains_synonyms)
-        is_dessert_header = any(syn in line_lower for syn in dessert_synonyms)
+        response_content = completion.choices[0].message.content
+        data = json.loads(response_content)
         
-        if is_appetizer_header:
-            current_category = "appetizer"
-            continue
-        elif is_mains_header:
-            current_category = "mains"
-            continue
-        elif is_dessert_header:
-            current_category = "desserts"
-            continue
-        
-        # Skip if not a valid dish name
-        if not is_dish_name(line_original):
-            continue
-        
-        # Clean and extract dish name (remove prices, numbers, etc.)
-        # Remove numbering at start (1., 2), etc.)
-        line_clean = re.sub(r'^\d+[\.\)]\s*', '', line_original)
-        
-        # Remove prices - more comprehensive patterns
-        # Remove $XX.XX at end
-        line_clean = re.sub(r'\s*\$?\d+\.?\d*\s*$', '', line_clean)
-        # Remove - $XX.XX
-        line_clean = re.sub(r'\s*-\s*\$?\d+\.?\d*\s*$', '', line_clean)
-        # Remove (XX.XX) or [XX.XX]
-        line_clean = re.sub(r'\s*[\(\[].*?\d+\.?\d*.*?[\)\]]\s*$', '', line_clean)
-        # Remove standalone price patterns
-        line_clean = re.sub(r'\s+\$\d+\.?\d*\s*', ' ', line_clean)
-        
-        # Remove common suffixes that might be prices
-        line_clean = re.sub(r'\s+\d+\.?\d*\s*(usd|eur|gbp|rs|rupees?|each|per)\s*$', '', line_clean, flags=re.IGNORECASE)
-        
-        # Clean up
-        line_clean = line_clean.strip()
-        
-        # Skip if too short after cleaning
-        if len(line_clean) < 2:
-            continue
-        
-        # Collect for batch validation
-        normalized_name = normalize_dish_name(line_clean)
-        
-        if not normalized_name or len(normalized_name) < 2:
-            continue
-        
-        if is_price_line(normalized_name):
-            continue
-        
-        # Store with category info for later
-        if current_category:
-            if normalized_name not in categorized_dishes[current_category]:
-                categorized_dishes[current_category].append(normalized_name)
-        else:
-            # Try to infer category from dish name
-            dish_lower = normalized_name.lower()
-            dessert_keywords = ['cake', 'pie', 'ice cream', 'pudding', 'chocolate', 'cookie', 
-                              'brownie', 'tart', 'mousse', 'custard', 'flan', 'sorbet',
-                              'cheesecake', 'tiramisu', 'gelato', 'sundae', 'parfait',
-                              'creme brulee', 'creme brûlée', 'baklava', 'cannoli']
-            appetizer_keywords = ['salad', 'soup', 'dip', 'bruschetta', 'samosa', 'spring roll',
-                                'wings', 'nachos', 'quesadilla', 'hummus', 'guacamole',
-                                'appetizer', 'starter', 'tapas', 'antipasto', 'mezze',
-                                'crostini', 'canape', 'canapé']
-            
-            if any(keyword in dish_lower for keyword in dessert_keywords):
-                if dish_lower not in categorized_dishes["desserts"]:
-                    categorized_dishes["desserts"].append(normalized_name)
-            elif any(keyword in dish_lower for keyword in appetizer_keywords):
-                if dish_lower not in categorized_dishes["appetizer"]:
-                    categorized_dishes["appetizer"].append(normalized_name)
-            else:
-                if dish_lower not in categorized_dishes["mains"]:
-                    categorized_dishes["mains"].append(normalized_name)
-    
-    # Batch validate all collected dishes with Groq
-    all_dishes = categorized_dishes["appetizer"] + categorized_dishes["mains"] + categorized_dishes["desserts"]
-    valid_dishes = _validate_dishes_with_groq(all_dishes)
-    valid_set = set(valid_dishes)
-    
-    # Filter each category to only include validated dishes
-    categorized_dishes["appetizer"] = [d for d in categorized_dishes["appetizer"] if d in valid_set]
-    categorized_dishes["mains"] = [d for d in categorized_dishes["mains"] if d in valid_set]
-    categorized_dishes["desserts"] = [d for d in categorized_dishes["desserts"] if d in valid_set]
-    
-    # Limit each category to 20 dishes and remove duplicates
-    for category in categorized_dishes:
-        # Remove duplicates while preserving order
-        seen = set()
-        unique_dishes = []
-        for dish in categorized_dishes[category]:
-            dish_lower = dish.lower()
-            if dish_lower not in seen:
-                seen.add(dish_lower)
-                unique_dishes.append(dish)
-        categorized_dishes[category] = unique_dishes[:20]
-    
-    return categorized_dishes
+        # Ensure structure
+        result = {
+            "appetizer": data.get("appetizer", []),
+            "mains": data.get("mains", []),
+            "desserts": data.get("desserts", [])
+        }
+        print(f"[DEBUG] Groq extracted: {len(result['appetizer'])} apps, {len(result['mains'])} mains, {len(result['desserts'])} desserts")
+        return result
+    except Exception as e:
+        print(f"[DEBUG] Groq extraction failed: {e}")
+        return {"appetizer": [], "mains": [], "desserts": []}
 
 def calculate_similarity(profile1: Dict, profile2: Dict) -> float:
     """Calculate cosine similarity between two flavor profiles"""
@@ -1883,9 +1955,9 @@ Return ONLY valid JSON, no other text or explanation."""
         )
 
 @app.post("/api/process-menu")
-def process_menu_text(menu: MenuText):
+async def process_menu_text(menu: MenuText):
     """Extract dish names from menu text and categorize them"""
-    categorized_dishes = extract_dishes_from_menu(menu.text)
+    categorized_dishes = await extract_dishes_from_menu(menu.text)
     # Flatten for backward compatibility, but also return categorized
     all_dishes = categorized_dishes["appetizer"] + categorized_dishes["mains"] + categorized_dishes["desserts"]
     return {
@@ -1923,7 +1995,7 @@ async def upload_menu_image(file: UploadFile = File(...)):
             raise HTTPException(status_code=400, detail="Could not extract text from image. Please ensure the image is clear and contains readable text.")
         
         # Process the extracted text
-        categorized_dishes = extract_dishes_from_menu(extracted_text)
+        categorized_dishes = await extract_dishes_from_menu(extracted_text)
         all_dishes = categorized_dishes["appetizer"] + categorized_dishes["mains"] + categorized_dishes["desserts"]
         
         return {
@@ -2108,13 +2180,13 @@ class ChatRequest(BaseModel):
 async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
     groq_api_key = os.getenv("GROQ_API_KEY")
     yelp_api_key = os.getenv("YELP_API_KEY")
+
+    preindexed_mode = os.getenv("PREINDEXED_MODE", "false").lower() in {"1", "true", "yes", "y"}
     
-    if not groq_api_key or not yelp_api_key:
+    if not groq_api_key or (not preindexed_mode and not yelp_api_key):
         raise HTTPException(status_code=500, detail="Missing API keys")
 
     groq_client = _get_groq_client()
-
-    _maybe_upsert_ingredients_to_pinecone()
 
     # Dummy user map is the source of truth.
     # If the frontend sends metadata, we treat it as a sync into the dummy map.
@@ -2296,6 +2368,138 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
             },
             "chat_id": request.chat_id
         }
+
+    if preindexed_mode:
+        ranked = []
+        try:
+            pc_index = _get_pinecone_index()
+            qvec = _embed_text(request.query)
+            top_k = max(final_max_results, 10)
+            location_key = _normalize_key(search_location)
+            # Handle "City, State" format by taking only the city part
+            if "," in location_key:
+                location_key = location_key.split(",")[0].strip()
+            
+            flt = {"location_key": {"$eq": location_key}} if location_key else None
+            print(f"[DEBUG] Querying Pinecone with top_k={top_k}, filter={flt}, namespace='restaurants'")
+            if flt:
+                query_res = pc_index.query(vector=qvec, top_k=top_k, include_metadata=True, filter=flt, namespace="restaurants")
+            else:
+                query_res = pc_index.query(vector=qvec, top_k=top_k, include_metadata=True, namespace="restaurants")
+            matches = query_res.get("matches", []) if isinstance(query_res, dict) else getattr(query_res, "matches", [])
+            print(f"[DEBUG] Pinecone returned {len(matches)} matches")
+
+            for m in matches:
+                meta = m.get("metadata") if isinstance(m, dict) else getattr(m, "metadata", {})
+                score = float(m.get("score", 0.0)) if isinstance(m, dict) else float(getattr(m, "score", 0.0))
+                menu_items = meta.get("menu_items") or []
+                menu_items = _filter_dishes_by_diet(menu_items, diet_type)
+                if not menu_items:
+                    continue
+                if not _allergy_filter(menu_items, allergies):
+                    continue
+
+                location = meta.get("location")
+                if location is None:
+                    loc_json = meta.get("location_json")
+                    if isinstance(loc_json, str) and loc_json:
+                        try:
+                            location = json.loads(loc_json)
+                        except Exception:
+                            location = loc_json
+                coordinates = meta.get("coordinates")
+                if coordinates is None:
+                    coords_json = meta.get("coordinates_json")
+                    if isinstance(coords_json, str) and coords_json:
+                        try:
+                            coordinates = json.loads(coords_json)
+                        except Exception:
+                            coordinates = coords_json
+
+                taste_vec = None
+                try:
+                    t0 = meta.get("taste_0")
+                    t1 = meta.get("taste_1")
+                    t2 = meta.get("taste_2")
+                    t3 = meta.get("taste_3")
+                    t4 = meta.get("taste_4")
+                    t5 = meta.get("taste_5")
+                    if all(isinstance(x, (int, float)) for x in [t0, t1, t2, t3, t4, t5]):
+                        taste_vec = [float(t0), float(t1), float(t2), float(t3), float(t4), float(t5)]
+                except Exception:
+                    taste_vec = None
+                if not taste_vec:
+                    taste_vec = [0.0] * 6
+
+                tscore = _taste_similarity(user_taste_vec, taste_vec)
+                boost = _favorites_boost(menu_items, [d.model_dump() if hasattr(d, "model_dump") else d for d in favorite_dishes] if favorite_dishes else [])
+                combined = score + 0.35 * tscore + boost
+
+                ranked.append({
+                    "id": m.get("id") if isinstance(m, dict) else getattr(m, "id", None),
+                    "name": meta.get("name"),
+                    "url": meta.get("url"),
+                    "avg_rating": meta.get("avg_rating"),
+                    "price_range": meta.get("price_range"),
+                    "cuisine_types": meta.get("cuisine_types"),
+                    "location": location,
+                    "coordinates": coordinates,
+                    "menu_items": menu_items,
+                    "popular_dishes": meta.get("popular_dishes"),
+                    "taste_vector": taste_vec,
+                    "recommended_dishes": _dish_recommendations_for_restaurant(menu_items, user_taste_vec, diet_type, top_n=5),
+                    "photos": meta.get("photos"),
+                    "menu_url": meta.get("menu_url"),
+                    "score": combined
+                })
+
+            ranked.sort(key=lambda x: x.get("score", 0.0), reverse=True)
+            ranked = ranked[:final_max_results]
+        except Exception as e:
+            print(f"[DEBUG] Error in ranking: {e}")
+            ranked = []
+
+        ai_json = {
+            "response": {
+                "text": f"Here are {len(ranked)} options in {search_location}."
+            },
+            "entities": [],
+            "chat_id": request.chat_id
+        }
+        ai_json["menu_buddy"] = {
+            "seed_restaurants": [],
+            "recommendations": ranked
+        }
+
+        try:
+            original_text = ai_json.get("response", {}).get("text", "")
+            if original_text and ranked:
+                restaurant_names = [r.get("name") for r in ranked if r.get("name")]
+                diet_label = "vegetarian" if diet_type in {"veg", "vegetarian"} else diet_type or "any diet"
+
+                rewrite_prompt = f"""Rewrite this restaurant recommendation text to:
+1. Match the actual {len(ranked)} restaurants shown: {', '.join(restaurant_names[:5])}
+2. Only mention dishes suitable for {diet_label} diet (NO meat, fish, eggs, or animal products if vegetarian)
+3. Keep the tone friendly and helpful
+4. Be concise (2-3 sentences max)
+
+Original text: {original_text}
+
+Rewritten text:"""
+
+                completion = groq_client.chat.completions.create(
+                    messages=[{"role": "user", "content": rewrite_prompt}],
+                    model="llama-3.3-70b-versatile",
+                    temperature=0.7,
+                    max_tokens=200
+                )
+                rewritten_text = completion.choices[0].message.content.strip()
+                ai_json["response"]["text"] = rewritten_text
+                print(f"[DEBUG] Rewrote response text for {diet_label} diet")
+        except Exception as e:
+            print(f"[DEBUG] Failed to rewrite response text: {e}")
+
+        return ai_json
 
     ai_headers = {"Authorization": f"Bearer {yelp_api_key}", "Content-Type": "application/json"}
     yelp_ai_url = "https://api.yelp.com/ai/chat/v2"
@@ -2527,7 +2731,7 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
                 "menu_items": menu_items,
                 "popular_dishes": popular_dishes,
                 "taste_vector": taste_vector,
-                "recommended_dishes": _dish_recommendations_for_restaurant(menu_items, user_taste_vec, diet_type, top_n=5),
+                "recommended_dishes": _dish_recommendations_for_restaurant(menu_items, user_taste_vec, diet_type, query_text=request.query, top_n=5),
                 "photos": b.get("photo_urls") or [],
                 "menu_url": b.get("menu_url")
             }
@@ -2590,10 +2794,18 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
         pc_index = _get_pinecone_index()
         qvec = _embed_text(request.query)
         top_k = max(final_max_results, 10)
-        print(f"[DEBUG] Querying Pinecone with top_k={top_k}")
-        query_res = pc_index.query(vector=qvec, top_k=top_k, include_metadata=True)
+        print(f"[DEBUG] Querying Pinecone with top_k={top_k}, namespace='restaurants'")
+        query_res = pc_index.query(vector=qvec, top_k=top_k, include_metadata=True, namespace="restaurants")
         matches = query_res.get("matches", []) if isinstance(query_res, dict) else getattr(query_res, "matches", [])
         print(f"[DEBUG] Pinecone returned {len(matches)} matches")
+
+        # Pre-process query for keyword matching
+        query_tokens = set()
+        if request.query:
+            q_clean = re.sub(r"[^\w\s]", "", request.query.lower())
+            query_tokens = set(q_clean.split())
+            stop_words = {"i", "want", "to", "eat", "some", "a", "the", "in", "at", "near", "me", "place", "restaurant", "find", "show", "give"}
+            query_tokens = query_tokens - stop_words
 
         for m in matches:
             meta = m.get("metadata") if isinstance(m, dict) else getattr(m, "metadata", {})
@@ -2636,7 +2848,28 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
                 taste_vec = [0.0] * 6
             tscore = _taste_similarity(user_taste_vec, taste_vec)
             boost = _favorites_boost(menu_items, [d.model_dump() if hasattr(d, "model_dump") else d for d in favorite_dishes] if favorite_dishes else [])
-            combined = score + 0.35 * tscore + boost
+            
+            # Calculate query relevance boost
+            query_boost = 0.0
+            if query_tokens:
+                # Check menu items
+                menu_text = " ".join(menu_items).lower()
+                # Check popular dishes
+                pop_dishes = meta.get("popular_dishes") or []
+                if isinstance(pop_dishes, list):
+                    pop_text = " ".join([str(p) for p in pop_dishes]).lower()
+                else:
+                    pop_text = ""
+                
+                full_text = menu_text + " " + pop_text
+                full_text_clean = re.sub(r"[^\w\s]", "", full_text)
+                restaurant_tokens = set(full_text_clean.split())
+                
+                overlap = len(query_tokens.intersection(restaurant_tokens))
+                if overlap > 0:
+                    query_boost = 0.5 + (0.2 * overlap)
+
+            combined = score + 0.35 * tscore + boost + query_boost
             ranked.append({
                 "id": m.get("id") if isinstance(m, dict) else getattr(m, "id", None),
                 "name": meta.get("name"),
@@ -2649,7 +2882,7 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
                 "menu_items": menu_items,
                 "popular_dishes": meta.get("popular_dishes"),
                 "taste_vector": taste_vec,
-                "recommended_dishes": _dish_recommendations_for_restaurant(menu_items, user_taste_vec, diet_type, top_n=5),
+                "recommended_dishes": _dish_recommendations_for_restaurant(menu_items, user_taste_vec, diet_type, query_text=request.query, top_n=5),
                 "photos": meta.get("photos"),
                 "menu_url": meta.get("menu_url"),
                 "score": combined
