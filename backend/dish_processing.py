@@ -1,7 +1,7 @@
 """
 Dish extraction, classification, and filtering utilities.
 """
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Tuple
 import re
 import json
 from groq import Groq
@@ -126,38 +126,119 @@ def is_nonveg_text(text: str) -> bool:
 
 
 def filter_dishes_by_diet(dishes: List[str], diet_type: Optional[str]) -> List[str]:
-    """Filter dishes based on dietary preferences."""
+    """Filter dishes based on dietary preferences using Groq."""
     if not dishes:
         return []
     
     if not diet_type or diet_type in {"mix", "any", "all"}:
         return dishes
+        
+    # Normalize diet type
+    target_diet = "veg" if diet_type in {"veg", "vegetarian", "vegan"} else "non-veg"
     
-    if diet_type in {"veg", "vegetarian"}:
-        return [d for d in dishes if not is_nonveg_text(d)]
-    
-    if diet_type in {"non-veg", "nonveg", "non_veg"}:
-        return [d for d in dishes if is_nonveg_text(d)]
-    
-    return dishes
+    try:
+        client = get_groq_client()
+        filtered_dishes = []
+        batch_size = 50
+        
+        for i in range(0, len(dishes), batch_size):
+            batch = dishes[i:i+batch_size]
+            
+            # Prepare prompt
+            dishes_text = "\n".join([f"{idx+1}. {d}" for idx, d in enumerate(batch)])
+            
+            prompt = f"""Identify which of these dishes are {target_diet.upper()}.
+            
+Rules:
+1. "Veg" means vegetarian (lacto-ovo).
+2. "Non-veg" means contains meat, fish, seafood.
+3. Return ONLY the numbers of the dishes that match {target_diet.upper()}.
+4. Return comma-separated numbers (e.g. "1,3,5").
+5. If none match, return "none".
+
+List:
+{dishes_text}
+
+Response:"""
+
+            completion = client.chat.completions.create(
+                messages=[{"role": "user", "content": prompt}],
+                model="llama-3.3-70b-versatile",
+                temperature=0,
+                max_tokens=100
+            )
+            
+            result = completion.choices[0].message.content.strip().lower()
+            
+            if result == "none":
+                continue
+                
+            # Parse indices
+            try:
+                indices = [int(x.strip()) - 1 for x in result.split(',') if x.strip().isdigit()]
+                for idx in indices:
+                    if 0 <= idx < len(batch):
+                        filtered_dishes.append(batch[idx])
+            except Exception as e:
+                print(f"[ERROR] Failed to parse Groq diet response: {e}")
+                # Fallback to keyword matching for this batch
+                for d in batch:
+                    if target_diet == "veg" and not is_nonveg_text(d):
+                        filtered_dishes.append(d)
+                    elif target_diet == "non-veg" and is_nonveg_text(d):
+                        filtered_dishes.append(d)
+                        
+        return filtered_dishes
+
+    except Exception as e:
+        print(f"[ERROR] Groq diet filter failed: {e}")
+        # Fallback to keyword matching
+        if target_diet == "veg":
+            return [d for d in dishes if not is_nonveg_text(d)]
+        else:
+            return [d for d in dishes if is_nonveg_text(d)]
 
 
 def detect_diet_from_query(query: str) -> Optional[str]:
     """
-    Detect diet preference from query string.
+    Detect diet preference from query string using Groq.
     Returns 'veg', 'non-veg', or None.
     """
+    # Fast path for obvious keywords
     query_lower = query.lower()
-    
-    # Check for explicit non-veg mentions first (longer match)
-    if any(x in query_lower for x in ["non-veg", "non veg", "nonvegetarian", "non vegetarian", "meat"]):
+    if any(x in query_lower for x in ["non-veg", "non veg", "nonvegetarian", "non vegetarian", "meat", "chicken", "beef", "pork"]):
         return "non-veg"
-        
-    # Check for explicit veg mentions
-    if any(x in query_lower for x in ["veg", "vegetarian", "pure veg"]):
+    if any(x in query_lower for x in ["veg", "vegetarian", "pure veg", "vegan"]):
         return "veg"
+
+    # Use Groq for complex queries
+    try:
+        client = get_groq_client()
+        prompt = f"""Analyze the dietary preference in this query.
+Query: "{query}"
+
+Rules:
+1. If the user explicitly asks for vegetarian/vegan food (e.g. "no meat", "plant based"), return "veg".
+2. If the user explicitly asks for meat/non-veg food (e.g. "meat lover", "carnivore"), return "non-veg".
+3. If no specific diet is mentioned, return "none".
+
+Response (only "veg", "non-veg", or "none"):"""
+
+        completion = client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.3-70b-versatile",
+            temperature=0,
+            max_tokens=10
+        )
         
-    return None
+        result = completion.choices[0].message.content.strip().lower()
+        if result in ["veg", "non-veg"]:
+            return result
+            
+        return None
+    except Exception as e:
+        print(f"[ERROR] Diet detection failed: {e}")
+        return None
 
 
 # Allergen mapping for smarter filtering
@@ -203,6 +284,70 @@ def allergy_filter(menu_items: List[str], allergies: List[str]) -> bool:
                     return False
     
     return True
+
+
+def filter_dishes_by_allergy(dishes: List[str], allergies: List[str]) -> List[str]:
+    """
+    Filter dishes that are safe for the given allergies using Groq.
+    """
+    if not dishes or not allergies:
+        return dishes
+        
+    try:
+        client = get_groq_client()
+        safe_dishes = []
+        batch_size = 50
+        
+        for i in range(0, len(dishes), batch_size):
+            batch = dishes[i:i+batch_size]
+            
+            dishes_text = "\n".join([f"{idx+1}. {d}" for idx, d in enumerate(batch)])
+            allergies_text = ", ".join(allergies)
+            
+            prompt = f"""Identify which of these dishes are SAFE for someone with these allergies: {allergies_text}.
+
+Rules:
+1. Analyze the likely ingredients of each dish.
+2. If a dish likely contains an allergen (e.g. "Pesto" contains nuts/dairy, "Carbonara" contains egg/dairy/pork), exclude it.
+3. Be strict. Safety first.
+4. Return ONLY the numbers of the SAFE dishes.
+5. Return comma-separated numbers (e.g. "1,3,5").
+6. If none are safe, return "none".
+
+List:
+{dishes_text}
+
+Response:"""
+
+            completion = client.chat.completions.create(
+                messages=[{"role": "user", "content": prompt}],
+                model="llama-3.3-70b-versatile",
+                temperature=0,
+                max_tokens=100
+            )
+            
+            result = completion.choices[0].message.content.strip().lower()
+            
+            if result == "none":
+                continue
+                
+            try:
+                indices = [int(x.strip()) - 1 for x in result.split(',') if x.strip().isdigit()]
+                for idx in indices:
+                    if 0 <= idx < len(batch):
+                        safe_dishes.append(batch[idx])
+            except Exception:
+                # Fallback
+                for d in batch:
+                    if allergy_filter(d, allergies):
+                        safe_dishes.append(d)
+                        
+        return safe_dishes
+
+    except Exception as e:
+        print(f"[ERROR] Groq allergy filter failed: {e}")
+        # Fallback
+        return [d for d in dishes if allergy_filter(d, allergies)]
 
 
 def extract_dish_from_query(query: str) -> Optional[str]:
@@ -339,6 +484,50 @@ Response:"""
         return None
 
 
+def classify_intent(query: str) -> str:
+    """
+    Classify user query intent using Groq.
+    Returns: 'greeting', 'food_query', 'irrelevant'
+    """
+    # Fast path for greetings
+    query_lower = query.lower().strip()
+    greetings = {"hi", "hello", "hey", "hola", "greetings", "yo", "sup", "thanks", "thank you", "bye", "goodbye"}
+    if query_lower in greetings or any(query_lower.startswith(g + " ") for g in greetings):
+        return "greeting"
+
+    try:
+        client = get_groq_client()
+        prompt = f"""Classify this user query for a food AI.
+Query: "{query}"
+
+Categories:
+1. "greeting": Hi, hello, thanks, bye, general pleasantries.
+2. "food_query": Asking for food, restaurants, recipes, diet, hunger, "I want pizza", "where to eat".
+3. "irrelevant": Politics, math, coding, weather, sports, or nonsense not related to food.
+
+Response (only one word):"""
+
+        completion = client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.3-70b-versatile",
+            temperature=0,
+            max_tokens=10
+        )
+        
+        result = completion.choices[0].message.content.strip().lower()
+        if "greeting" in result: return "greeting"
+        if "food" in result or "query" in result: return "food_query"
+        if "irrelevant" in result: return "irrelevant"
+        
+        # Default to food_query if unsure
+        return "food_query"
+
+    except Exception as e:
+        print(f"[ERROR] Intent classification failed: {e}")
+        # Fallback: assume food query unless it's obviously not
+        return "food_query"
+
+
 def is_relevant_query(query: str) -> bool:
     """
     Check if the query is relevant to the Swaad AI use case (food, restaurants, etc.).
@@ -406,6 +595,51 @@ def is_relevant_query(query: str) -> bool:
         print(f"[ERROR] Relevance check failed: {e}")
         # Fail open (assume relevant) if AI fails to avoid blocking legitimate queries
         return True
+
+
+def check_location_match(user_location: str, restaurant_location: str) -> bool:
+    """
+    Check if user location matches restaurant location using Groq.
+    """
+    if not user_location or not restaurant_location:
+        return False
+    
+    # Ensure inputs are strings
+    if not isinstance(user_location, str): user_location = str(user_location)
+    if not isinstance(restaurant_location, str): restaurant_location = str(restaurant_location)
+        
+    # Fast path: simple string containment
+    u_loc = user_location.lower().split(',')[0].strip()
+    r_loc = restaurant_location.lower()
+    if u_loc in r_loc or r_loc in u_loc:
+        return True
+        
+    try:
+        client = get_groq_client()
+        prompt = f"""Determine if these two locations refer to the same area or if one is inside the other.
+Location A: "{user_location}"
+Location B: "{restaurant_location}"
+
+Rules:
+1. Return "yes" if they match (e.g. "NYC" and "New York", "Manhattan" and "New York City").
+2. Return "yes" if one is inside the other (e.g. "Brooklyn" and "New York").
+3. Return "no" if they are different cities or far apart.
+
+Response (only "yes" or "no"):"""
+
+        completion = client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.3-70b-versatile",
+            temperature=0,
+            max_tokens=5
+        )
+        
+        result = completion.choices[0].message.content.strip().lower()
+        return "yes" in result
+    except Exception as e:
+        print(f"[ERROR] Location match failed: {e}")
+        # Fallback to simple check
+        return u_loc in r_loc or r_loc in u_loc
 
 
 def is_price_line(line: str) -> bool:
@@ -614,37 +848,7 @@ def normalize_dish_name(name: str) -> str:
     return name
 
 
-def is_price_line(line: str) -> bool:
-    """Check if line is likely a price indicator."""
-    price_patterns = [
-        r'\$\d+',
-        r'₹\d+',
-        r'\d+\.\d{2}',
-        r'price:',
-        r'cost:',
-    ]
-    return any(re.search(pattern, line.lower()) for pattern in price_patterns)
 
-
-def is_dish_name(line: str) -> bool:
-    """Check if line is likely a dish name."""
-    line = line.strip()
-    
-    if not line or len(line) < 3:
-        return False
-    
-    if is_price_line(line):
-        return False
-    
-    # Skip section headers
-    if line.lower() in {"appetizers", "mains", "desserts", "beverages", "drinks", "menu"}:
-        return False
-    
-    # Skip lines that are too long (likely descriptions)
-    if len(line) > 100:
-        return False
-    
-    return True
 
 
 def merge_unique_preserve_order(items: List[str]) -> List[str]:
@@ -658,3 +862,48 @@ def merge_unique_preserve_order(items: List[str]) -> List[str]:
             result.append(item)
     return result
 
+
+
+def extract_dish_and_restaurant(query: str) -> Optional[Tuple[str, str]]:
+    """
+    Extract dish and restaurant name from query using Groq.
+    Returns (dish, restaurant) or None.
+    """
+    # Fast check for 'from', 'at', 'in'
+    query_lower = query.lower()
+    if not any(x in query_lower for x in ['from', 'at', 'in', 'restaurant']):
+        return None
+
+    try:
+        client = get_groq_client()
+        prompt = f"""Extract the dish name and restaurant name from this query.
+Query: "{query}"
+
+Rules:
+1. Return ONLY a JSON object with keys "dish" and "restaurant".
+2. If either is missing, return "none" for that key.
+3. Example: "Pizza from Dominos" -> {{"dish": "pizza", "restaurant": "dominos"}}
+4. Example: "Burger at Shake Shack" -> {{"dish": "burger", "restaurant": "shake shack"}}
+5. Example: "I want pasta" -> {{"dish": "pasta", "restaurant": "none"}}
+
+Response:"""
+
+        completion = client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.3-70b-versatile",
+            temperature=0,
+            response_format={"type": "json_object"}
+        )
+        
+        result = json.loads(completion.choices[0].message.content)
+        dish = result.get("dish", "none")
+        restaurant = result.get("restaurant", "none")
+        
+        if dish != "none" and restaurant != "none":
+            return (dish, restaurant)
+            
+        return None
+
+    except Exception as e:
+        print(f"[ERROR] Dish/Restaurant extraction failed: {e}")
+        return None

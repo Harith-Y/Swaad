@@ -12,30 +12,11 @@ from embeddings import embed_text, combine_vectors
 from taste_analysis import user_profile_to_taste_vector, infer_taste_from_text_hybrid
 from pinecone_client import get_pinecone_index, maybe_upsert_ingredients_to_pinecone
 from recommendations import filter_and_rank_recommendations
-from dish_processing import get_groq_client, extract_dish_from_query, is_relevant_query, detect_diet_from_query, extract_location_from_query
+from dish_processing import get_groq_client, extract_dish_from_query, is_relevant_query, detect_diet_from_query, extract_location_from_query, classify_intent, extract_dish_and_restaurant, check_location_match
 from config import GROQ_API_KEY, USE_SEMANTIC_INGREDIENT_TASTE
 
 
-def is_greeting(query: str) -> bool:
-    """
-    Check if the query is a greeting.
 
-    Returns:
-        True if query is a greeting, False otherwise
-    """
-    query_lower = query.lower().strip()
-    greetings = [
-        "hi", "hello", "hey", "hola", "greetings", "good morning",
-        "good afternoon", "good evening", "howdy", "what's up",
-        "whats up", "sup", "yo", "hiya", "heya"
-    ]
-
-    # Check if query is exactly a greeting or starts with greeting
-    for greeting in greetings:
-        if query_lower == greeting or query_lower.startswith(greeting + " "):
-            return True
-
-    return False
 
 
 def is_dish_query(query: str) -> Optional[str]:
@@ -79,25 +60,7 @@ def is_dish_query(query: str) -> Optional[str]:
     return None
 
 
-def parse_specific_query(query: str) -> Optional[Tuple[str, str]]:
-    """
-    Parse query to detect if user is asking about a specific dish at a specific restaurant.
 
-    Returns:
-        Tuple of (dish_name, restaurant_name) if specific query detected, None otherwise
-    """
-    query_lower = query.lower()
-
-    # Pattern: "dish ... where restaurant is X" or "dish ... at/from X"
-    pattern1 = r"(.+?)\s+where\s+restaurant\s+is\s+(.+?)$"
-    match = re.search(pattern1, query_lower)
-    if match:
-        dish = match.group(1).strip()
-        restaurant = match.group(2).strip()
-        # Clean up common prefixes
-        dish = re.sub(r"^(?:i want|i'd like|give me|show me|find)\s+", "", dish).strip()
-        dish = re.sub(r"\s+like\s+", " ", dish).strip()  # Remove "like"
-        return (dish, restaurant)
 
     return None
 
@@ -205,8 +168,11 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
     dish_not_found = False
     dish_not_found_name = None
 
-    # Check if this is a greeting
-    if is_greeting(request.query):
+    # Classify intent
+    intent = classify_intent(request.query)
+    print(f"[DEBUG] Query intent: {intent}")
+
+    if intent == "greeting":
         print(f"[DEBUG] Greeting detected")
         greeting_responses = [
             "Hello! 👋 I'm Swaad, your AI food companion. I can help you discover amazing restaurants and dishes based on your taste preferences. What are you craving today?",
@@ -222,8 +188,7 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
             "menu_buddy": {"recommendations": []}
         }
 
-    # Check relevance for non-greeting queries
-    if not is_relevant_query(request.query):
+    if intent == "irrelevant":
         print(f"[DEBUG] Irrelevant query detected: {request.query}")
         return {
             "response": {
@@ -311,11 +276,30 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
                 if has_dish:
                     # Check location filter if present
                     if fallback_location:
-                        rest_location = meta.get("location", "")
-                        # Looser check: bidirectional containment
-                        u_loc = fallback_location.lower().split(',')[0].strip() # "New York" from "New York, NY"
-                        r_loc = rest_location.lower()
-                        if u_loc not in r_loc and r_loc not in u_loc:
+                        rest_location = meta.get("location")
+                        if not rest_location:
+                            loc_json = meta.get("location_json")
+                            if isinstance(loc_json, str) and loc_json:
+                                try:
+                                    import json
+                                    rest_location = json.loads(loc_json)
+                                except Exception:
+                                    rest_location = loc_json
+                        
+                        # Handle dict location
+                        if isinstance(rest_location, dict):
+                            parts = []
+                            for key in ["address", "city", "state", "zip_code", "country"]:
+                                if key in rest_location and rest_location[key]:
+                                    parts.append(str(rest_location[key]))
+                            if parts:
+                                rest_location = ", ".join(parts)
+                            else:
+                                rest_location = ", ".join([str(v) for v in rest_location.values() if isinstance(v, (str, int))])
+                        
+                        if not rest_location: rest_location = ""
+                        
+                        if not check_location_match(fallback_location, str(rest_location)):
                              continue
 
                     restaurants_with_dish.append({
@@ -395,7 +379,7 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
             traceback.print_exc()
 
     # Check if this is a specific query (dish at specific restaurant)
-    specific_query = parse_specific_query(request.query)
+    specific_query = extract_dish_and_restaurant(request.query)
     if specific_query:
         dish_name, restaurant_name = specific_query
         print(f"[DEBUG] Specific query detected: dish='{dish_name}', restaurant='{restaurant_name}'")
@@ -511,7 +495,8 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
             diet_type=diet_type,
             allergies=allergies,
             max_results=final_max_results,
-            query_text=request.query
+            query_text=request.query,
+            location_filter=fallback_location
         )
 
         print(f"[DEBUG] Total ranked restaurants: {len(ranked)}")

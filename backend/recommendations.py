@@ -5,7 +5,7 @@ from typing import List, Dict, Optional
 import re
 from embeddings import embed_text, calculate_cosine_similarity
 from taste_analysis import taste_similarity, infer_taste_from_text_hybrid
-from dish_processing import filter_dishes_by_diet, allergy_filter
+from dish_processing import filter_dishes_by_diet, allergy_filter, filter_dishes_by_allergy
 from config import USE_SEMANTIC_DISH_TASTE
 
 
@@ -45,11 +45,7 @@ def dish_recommendations_for_restaurant(
     
     # Filter by allergies
     if allergies:
-        safe_names = []
-        for name in filtered_names:
-            if allergy_filter(name, allergies):
-                safe_names.append(name)
-        filtered_names = safe_names
+        filtered_names = filter_dishes_by_allergy(filtered_names, allergies)
 
     if not filtered_names:
         return []
@@ -153,12 +149,13 @@ def filter_and_rank_recommendations(
     diet_type: Optional[str],
     allergies: List[str],
     max_results: int = 10,
-    query_text: Optional[str] = None
+    query_text: Optional[str] = None,
+    location_filter: Optional[str] = None
 ) -> List[Dict]:
     """
     Filter and rank restaurant recommendations from Pinecone matches.
     """
-    from dish_processing import allergy_filter
+    from dish_processing import check_location_match
     
     # Pre-process query for keyword matching
     query_tokens = set()
@@ -186,8 +183,10 @@ def filter_and_rank_recommendations(
             continue
         
         # Filter by allergies
-        if not allergy_filter(menu_items, allergies):
-            continue
+        if allergies:
+            menu_items = filter_dishes_by_allergy(menu_items, allergies)
+            if not menu_items:
+                continue
         
         # Parse location and coordinates
         location = meta.get("location")
@@ -199,6 +198,29 @@ def filter_and_rank_recommendations(
                     location = json.loads(loc_json)
                 except Exception:
                     location = loc_json
+        
+        # Filter by location if provided
+        if location_filter and location:
+            loc_str = location
+            if isinstance(location, dict):
+                # Try to extract standard fields or join all values
+                parts = []
+                for key in ["address", "city", "state", "zip_code", "country"]:
+                    if key in location and location[key]:
+                        parts.append(str(location[key]))
+                
+                if parts:
+                    loc_str = ", ".join(parts)
+                else:
+                    # Fallback: join all string values
+                    loc_str = ", ".join([str(v) for v in location.values() if isinstance(v, (str, int))])
+            
+            # Ensure it's a string
+            if not isinstance(loc_str, str):
+                loc_str = str(loc_str)
+
+            if not check_location_match(location_filter, loc_str):
+                continue
         
         coordinates = meta.get("coordinates")
         if coordinates is None:
