@@ -27,14 +27,102 @@ def get_groq_client():
 NON_VEG_KEYWORDS = [
     "chicken", "mutton", "lamb", "beef", "pork", "fish", "prawn", "shrimp",
     "crab", "lobster", "meat", "bacon", "sausage", "ham", "turkey", "duck",
-    "egg", "eggs", "omelette", "omelet", "seafood", "salmon", "tuna"
+    "egg", "eggs", "omelette", "omelet", "seafood", "salmon", "tuna",
+    "steak", "ribs", "rib", "veal", "venison", "squid", "calamari", "octopus",
+    "scallop", "mussel", "oyster", "clam", "anchovy", "sardine", "pepperoni",
+    "salami", "prosciutto", "chorizo", "pastrami", "bologna", "liver", "kidney",
+    "wings", "drumstick", "breast", "thigh", "filet", "sirloin", "brisket",
+    "shank", "chop", "cutlet", "schnitzel", "kebab", "kabab", "shawarma",
+    "gyro", "tandoori", "tikka", "curry chicken", "curry lamb", "curry goat",
+    "goat", "rabbit", "quail", "goose", "pheasant", "boar", "bison", "buffalo",
+    "bone", "marrow", "oxtail", "tripe", "tongue", "cheek", "belly", "shoulder",
+    "leg", "loin", "tenderloin", "roast", "grill", "bbq", "barbecue", "fried chicken",
+    "hot dog", "burger", "cheeseburger", "hamburger", "slider", "meatball",
+    "meatloaf", "shepherd's pie", "cottage pie", "banger", "mash", "gravy",
+    "stock", "broth", "consomme", "bisque", "chowder", "stew", "casserole",
+    "chili", "gumbo", "jambalaya", "paella", "risotto", "carbonara", "alfredo",
+    "bolognese", "lasagna", "ravioli", "tortellini", "dumpling", "wonton",
+    "potsticker", "spring roll", "egg roll", "sushi", "sashimi", "nigiri",
+    "maki", "roll", "tempura", "teriyaki", "katsu", "donburi", "udon", "soba",
+    "ramen", "pho", "pad thai", "satay", "rendang", "nasi goreng", "mie goreng",
+    "dim sum", "bao", "bun", "taco", "burrito", "enchilada", "quesadilla",
+    "fajita", "nacho", "ceviche", "carpaccio", "tartare", "pate", "terrine",
+    "foie gras", "caviar", "roe", "escargot", "frog"
 ]
 
+# Keywords that might be ambiguous (like "burger" could be "veg burger")
+# We will handle these carefully. If a dish contains these but ALSO contains "veg", "tofu", etc., it might be veg.
+AMBIGUOUS_NON_VEG = {
+    "burger", "slider", "sausage", "steak", "wings", "nuggets", "roll", "dumpling", "wonton",
+    "soup", "stew", "broth", "curry", "chili", "taco", "burrito", "sandwich", "wrap", "pizza",
+    "pasta", "noodle", "rice", "bowl", "salad", "platter", "combo", "special", "plate"
+}
+
+# Explicit vegetarian keywords to override ambiguous ones
+VEG_KEYWORDS = [
+    "veg", "vegetarian", "vegan", "plant", "plant-based", "tofu", "paneer",
+    "mushroom", "spinach", "corn", "potato", "cheese", "margherita", "bean",
+    "lentil", "chickpea", "falafel", "hummus", "eggplant", "aubergine",
+    "zucchini", "courgette", "cauliflower", "broccoli", "cabbage", "kale",
+    "lettuce", "tomato", "onion", "garlic", "ginger", "herb", "spice",
+    "fruit", "nut", "seed", "grain", "rice", "quinoa", "couscous", "bulgur",
+    "pasta", "noodle", "bread", "roti", "naan", "paratha", "dosa", "idli",
+    "sambar", "dal", "daal", "kofta", "pakora", "samosa", "chaat", "lassi",
+    "milk", "yogurt", "curd", "cream", "butter", "ghee", "honey", "sugar",
+    "sweet", "dessert", "cake", "pie", "tart", "cookie", "biscuit", "ice cream",
+    "sorbet", "gelato", "chocolate", "vanilla", "coffee", "tea", "juice",
+    "smoothie", "shake", "soda", "water", "wine", "beer", "cocktail", "mocktail"
+]
 
 def is_nonveg_text(text: str) -> bool:
     """Check if text contains non-vegetarian keywords."""
     text_lower = text.lower()
-    return any(keyword in text_lower for keyword in NON_VEG_KEYWORDS)
+    
+    # First check if it's explicitly veg
+    if any(vk in text_lower for vk in VEG_KEYWORDS):
+        # If it has veg keywords, we need to be careful.
+        # "Chicken Burger" has "burger" (ambiguous) but "chicken" (strict non-veg).
+        # "Veg Burger" has "burger" (ambiguous) and "veg" (veg).
+        
+        # Check for STRICT non-veg keywords (exclude ambiguous ones from this check if needed, 
+        # but for now let's just check if any strict non-veg keyword is present)
+        
+        # Let's refine the list. The big list above has both strict and ambiguous.
+        # We should probably split them.
+        pass
+
+    # Simple approach for now:
+    # 1. If it contains a strict non-veg keyword (chicken, beef, etc), it's non-veg.
+    # 2. If it contains ONLY ambiguous keywords (burger), it's suspicious but maybe veg?
+    #    Actually, "Burger" usually implies meat. "Veg Burger" implies veg.
+    
+    # Let's use a set of strict non-veg keywords
+    strict_non_veg = {
+        "chicken", "mutton", "lamb", "beef", "pork", "fish", "prawn", "shrimp",
+        "crab", "lobster", "meat", "bacon", "ham", "turkey", "duck",
+        "seafood", "salmon", "tuna", "ribs", "rib", "veal", "venison", "squid", 
+        "calamari", "octopus", "scallop", "mussel", "oyster", "clam", "anchovy", 
+        "sardine", "pepperoni", "salami", "prosciutto", "chorizo", "pastrami", 
+        "bologna", "liver", "kidney", "wings", "drumstick", "filet", "sirloin", 
+        "brisket", "shank", "schnitzel", "kebab", "kabab", "shawarma", "gyro", 
+        "tandoori", "tikka", "goat", "rabbit", "goose", "pheasant", "boar", 
+        "bison", "buffalo", "marrow", "oxtail", "tripe", "tongue", "cheek", 
+        "belly", "tenderloin", "short rib", "short ribs", "kalbi", "bulgogi", "galbi"
+    }
+    
+    # Check strict keywords first
+    for kw in strict_non_veg:
+        # Word boundary check is better but simple substring is okay for now
+        if kw in text_lower:
+            return True
+            
+    # Check for "egg" if user is strict veg (usually "veg" in India includes milk but excludes egg, 
+    # but in West "veg" includes egg. Let's assume "veg" excludes egg for safety or make it configurable.
+    # The user prompt implies "veg burger" -> usually means plant patty.
+    if "egg" in text_lower and "eggplant" not in text_lower and "veggie" not in text_lower:
+         return True
+
+    return False
 
 
 def filter_dishes_by_diet(dishes: List[str], diet_type: Optional[str]) -> List[str]:
@@ -54,27 +142,102 @@ def filter_dishes_by_diet(dishes: List[str], diet_type: Optional[str]) -> List[s
     return dishes
 
 
+def detect_diet_from_query(query: str) -> Optional[str]:
+    """
+    Detect diet preference from query string.
+    Returns 'veg', 'non-veg', or None.
+    """
+    query_lower = query.lower()
+    
+    # Check for explicit non-veg mentions first (longer match)
+    if any(x in query_lower for x in ["non-veg", "non veg", "nonvegetarian", "non vegetarian", "meat"]):
+        return "non-veg"
+        
+    # Check for explicit veg mentions
+    if any(x in query_lower for x in ["veg", "vegetarian", "pure veg"]):
+        return "veg"
+        
+    return None
+
+
+# Allergen mapping for smarter filtering
+ALLERGEN_MAPPING = {
+    "shellfish": ["shrimp", "prawn", "crab", "lobster", "clam", "mussel", "oyster", "scallop", "squid", "octopus", "calamari", "seafood"],
+    "nut": ["nut", "almond", "cashew", "walnut", "pecan", "pistachio", "macadamia", "hazelnut", "peanut"],
+    "nuts": ["nut", "almond", "cashew", "walnut", "pecan", "pistachio", "macadamia", "hazelnut", "peanut"],
+    "dairy": ["milk", "cheese", "cream", "butter", "yogurt", "ghee", "paneer", "whey", "casein", "lactose"],
+    "gluten": ["wheat", "barley", "rye", "bread", "pasta", "noodle", "flour", "cake", "biscuit", "cookie", "soy sauce"],
+    "egg": ["egg", "mayonnaise", "meringue"],
+    "eggs": ["egg", "mayonnaise", "meringue"],
+    "soy": ["soy", "tofu", "edamame", "miso", "tempeh"],
+}
+
 def allergy_filter(menu_items: List[str], allergies: List[str]) -> bool:
     """
     Check if menu items are safe for user allergies.
     Returns True if safe (no allergens found), False if allergens detected.
     """
-    if not allergies:
+    if not allergies or not menu_items:
         return True
     
-    menu_text = " ".join(menu_items).lower()
+    # If menu_items is a list of strings, join them. 
+    # If it's a single string (dish name), treat it as such.
+    if isinstance(menu_items, str):
+        text_to_check = menu_items.lower()
+    else:
+        text_to_check = " ".join(menu_items).lower()
+
     for allergen in allergies:
-        if allergen.lower() in menu_text:
+        allergen_lower = allergen.lower()
+        
+        # Check direct match
+        if allergen_lower in text_to_check:
             return False
+            
+        # Check mapped keywords
+        if allergen_lower in ALLERGEN_MAPPING:
+            for keyword in ALLERGEN_MAPPING[allergen_lower]:
+                # Use word boundary check for short keywords to avoid false positives
+                # e.g. "nut" in "coconut" (maybe okay?) or "soy" in "soybean"
+                if keyword in text_to_check:
+                    return False
     
     return True
 
 
 def extract_dish_from_query(query: str) -> Optional[str]:
     """
-    Use Groq to extract the specific dish name from a user query.
+    Use regex and Groq to extract the specific dish name from a user query.
     Returns None if no specific dish is requested.
     """
+    query_lower = query.lower().strip()
+    
+    # 1. Fast Regex Extraction for common patterns
+    patterns = [
+        r"i want to eat (?:a |an )?(.+)",
+        r"i want (?:a |an )?(.+)",
+        r"craving (?:for )?(?:a |an )?(.+)",
+        r"looking for (?:a |an )?(.+)",
+        r"where can i (?:get|find|eat) (?:a |an )?(.+)",
+        r"show me (?:places with |restaurants with )?(.+)",
+        r"do you have (?:a |an )?(.+)"
+    ]
+    
+    for pattern in patterns:
+        match = re.search(pattern, query_lower)
+        if match:
+            candidate = match.group(1).strip()
+            # Clean up common trailing words
+            candidate = re.sub(r"\s+(?:near|in|at|from)\s+.*$", "", candidate).strip()
+            # Remove punctuation
+            candidate = re.sub(r"[^\w\s]", "", candidate).strip()
+            
+            # Filter out generic terms that regex might catch
+            generic_terms = {"food", "something", "anything", "restaurant", "place", "restaurants", "places", "dinner", "lunch", "breakfast"}
+            if candidate and candidate not in generic_terms and len(candidate) > 2 and len(candidate) < 50:
+                return candidate
+
+    # 2. Fallback to LLM for complex queries
     try:
         client = get_groq_client()
         
@@ -110,6 +273,10 @@ Response:"""
         # Clean up any quotes or extra whitespace
         result = result.replace('"', '').replace("'", "").strip()
         
+        # Sanity check: reject long repetitive strings (hallucinations)
+        if len(result) > 50 or len(set(result.split())) < len(result.split()) / 2:
+             return None
+        
         if len(result) < 2:
             return None
             
@@ -117,6 +284,58 @@ Response:"""
             
     except Exception as e:
         print(f"[ERROR] Dish extraction failed: {e}")
+        return None
+
+
+def extract_location_from_query(query: str) -> Optional[str]:
+    """
+    Extract location from user query using Groq.
+    Returns None if no specific location is mentioned.
+    """
+    # Fast check: if no prepositions, unlikely to have location (unless it's just "New York")
+    query_lower = query.lower()
+    if not any(p in query_lower for p in ["in ", "at ", "near ", "from "]):
+        return None
+
+    try:
+        client = get_groq_client()
+        
+        prompt = f"""Extract the geographic location (city, neighborhood, or area) from this query.
+Query: "{query}"
+
+Rules:
+1. Return ONLY the location name (e.g., "San Francisco", "New York", "Brooklyn").
+2. If no location is mentioned, return "none".
+3. Ignore "near me", "here", "my place".
+4. Return "none" if the user is talking about ingredients (e.g. "in a bowl", "in the sauce").
+
+Example 1: "Pasta in San Francisco" -> "San Francisco"
+Example 2: "Best burger near downtown" -> "downtown"
+Example 3: "I want pizza" -> "none"
+
+Response:"""
+
+        completion = client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.3-70b-versatile",
+            temperature=0,
+            max_tokens=20
+        )
+        
+        result = completion.choices[0].message.content.strip()
+        
+        if result.lower() == "none":
+            return None
+            
+        # Clean up
+        result = result.replace('"', '').replace("'", "").strip()
+        if len(result) < 2:
+            return None
+            
+        return result
+
+    except Exception as e:
+        print(f"[ERROR] Location extraction failed: {e}")
         return None
 
 
@@ -131,6 +350,29 @@ def is_relevant_query(query: str) -> bool:
         
     greetings = {"hi", "hello", "hey", "hola", "greetings", "yo", "sup", "thanks", "thank you", "bye", "goodbye"}
     if query_lower in greetings or any(query_lower.startswith(g + " ") for g in greetings):
+        return True
+
+    # Fast path: Check for obvious food keywords to avoid LLM call
+    food_keywords = {
+        "eat", "food", "hungry", "restaurant", "place", "dinner", "lunch", "breakfast",
+        "snack", "drink", "coffee", "tea", "cafe", "bar", "menu", "dish", "recipe",
+        "cook", "chef", "kitchen", "meal", "diet", "vegan", "veg", "vegetarian",
+        "non-veg", "meat", "chicken", "beef", "pork", "fish", "burger", "pizza",
+        "pasta", "salad", "soup", "curry", "rice", "noodle", "sushi", "taco",
+        "sandwich", "steak", "dessert", "cake", "ice cream", "chocolate", "spicy",
+        "sweet", "sour", "salty", "bitter", "umami", "flavor", "taste", "delicious",
+        "yummy", "tasty", "cuisine", "indian", "chinese", "italian", "mexican",
+        "thai", "japanese", "korean", "american", "french", "mediterranean"
+    }
+    
+    # Check if any keyword is present as a whole word
+    words = set(re.sub(r"[^\w\s]", "", query_lower).split())
+    if not words.isdisjoint(food_keywords):
+        return True
+        
+    # Also check for partial matches for some strong keywords
+    strong_keywords = ["veg", "restaur", "hungr", "cook", "recipe"]
+    if any(k in query_lower for k in strong_keywords):
         return True
 
     try:

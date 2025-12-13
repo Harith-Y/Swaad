@@ -5,7 +5,7 @@ from typing import List, Dict, Optional
 import re
 from embeddings import embed_text, calculate_cosine_similarity
 from taste_analysis import taste_similarity, infer_taste_from_text_hybrid
-from dish_processing import filter_dishes_by_diet
+from dish_processing import filter_dishes_by_diet, allergy_filter
 from config import USE_SEMANTIC_DISH_TASTE
 
 
@@ -13,6 +13,7 @@ def dish_recommendations_for_restaurant(
     menu_items,  # Can be List[str] or List[Dict] with pre-calculated taste vectors
     user_taste_vec: List[float],
     diet_type: Optional[str],
+    allergies: List[str] = None,
     top_n: int = 5
 ) -> List[Dict]:
     """
@@ -22,6 +23,7 @@ def dish_recommendations_for_restaurant(
         menu_items: Either list of dish names (strings) or list of dicts with 'name' and 'taste' keys
         user_taste_vec: User's taste preference vector [sweet, salty, sour, bitter, umami, spicy]
         diet_type: Diet filter (veg, non-veg, mix)
+        allergies: List of user allergies
         top_n: Number of top dishes to return
     """
     if not menu_items:
@@ -40,6 +42,15 @@ def dish_recommendations_for_restaurant(
     # Filter by diet
     dish_names = [d.get("name") if isinstance(d, dict) else d for d in dishes]
     filtered_names = filter_dishes_by_diet(dish_names, diet_type)
+    
+    # Filter by allergies
+    if allergies:
+        safe_names = []
+        for name in filtered_names:
+            if allergy_filter(name, allergies):
+                safe_names.append(name)
+        filtered_names = safe_names
+
     if not filtered_names:
         return []
 
@@ -47,6 +58,9 @@ def dish_recommendations_for_restaurant(
     dish_scores = []
     for dish in dishes:
         dish_name = dish.get("name") if isinstance(dish, dict) else dish
+        
+        if dish_name not in filtered_names:
+            continue
 
         if dish_name not in filtered_names:
             continue

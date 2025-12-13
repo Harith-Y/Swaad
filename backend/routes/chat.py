@@ -12,7 +12,7 @@ from embeddings import embed_text, combine_vectors
 from taste_analysis import user_profile_to_taste_vector, infer_taste_from_text_hybrid
 from pinecone_client import get_pinecone_index, maybe_upsert_ingredients_to_pinecone
 from recommendations import filter_and_rank_recommendations
-from dish_processing import get_groq_client, extract_dish_from_query, is_relevant_query
+from dish_processing import get_groq_client, extract_dish_from_query, is_relevant_query, detect_diet_from_query, extract_location_from_query
 from config import GROQ_API_KEY, USE_SEMANTIC_INGREDIENT_TASTE
 
 
@@ -136,6 +136,12 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
         favorite_dishes = [d.model_dump() for d in (dummy_profile.favorite_dishes or [])] or favorite_dishes
         diet_type = dummy_profile.diet_type or diet_type
 
+    # Override diet type if detected in query
+    query_diet = detect_diet_from_query(request.query)
+    if query_diet:
+        print(f"[DEBUG] Detected diet from query: {query_diet} (overriding {diet_type})")
+        diet_type = query_diet
+
     # Calculate user taste vector
     user_taste_vec = user_profile_to_taste_vector(dummy_profile) if dummy_profile else [0.0] * 6
     fav_text = ""
@@ -150,6 +156,12 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
     
     inferred_user = infer_taste_from_text_hybrid(fav_text, semantic=USE_SEMANTIC_INGREDIENT_TASTE)
     user_taste_vec = combine_vectors(user_taste_vec, inferred_user, secondary_weight=0.35)
+
+    # Extract location from query (highest priority)
+    query_location = extract_location_from_query(request.query)
+    if query_location:
+        print(f"[DEBUG] Extracted location from query: {query_location}")
+        request.location = query_location
 
     # Handle location and pending queries
     is_first_turn = not request.chat_id
@@ -169,6 +181,21 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
     print(f"[DEBUG] user_db_location: {user_db_location}")
     print(f"[DEBUG] request.location: {request.location}")
     print(f"[DEBUG] fallback_location: {fallback_location}")
+
+    # CRITICAL: If no location is found anywhere, ask the user for it
+    if not fallback_location or not fallback_location.strip():
+        print("[DEBUG] No location found in query or profile. Asking user for location.")
+        # Save the current query as pending so we can process it after they provide location
+        if isinstance(dummy_user, dict):
+            dummy_user["pending_query"] = request.query
+        
+        return {
+            "response": {
+                "text": "I'd love to help you find that! 🌍 Could you please tell me which city or area you're in so I can find the best restaurants near you?"
+            },
+            "chat_id": request.chat_id,
+            "menu_buddy": {"recommendations": []}
+        }
 
     # Set max results
     final_max_results = request.max_results or 10
@@ -212,6 +239,16 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
     
     if dish_query:
         print(f"[DEBUG] Dish-specific query detected: '{dish_query}'")
+        
+        # If diet is veg, and dish query contains "veg", try to broaden search to base dish
+        # e.g. "veg burger" -> search for "burger" but apply strict veg filter later
+        search_query = dish_query
+        if diet_type in ["veg", "vegetarian"] and "veg" in dish_query.lower():
+            # Remove "veg", "vegetarian", "pure veg" from search query
+            base_dish = re.sub(r"\b(veg|vegetarian|pure veg)\b", "", dish_query, flags=re.IGNORECASE).strip()
+            if base_dish and len(base_dish) > 2:
+                print(f"[DEBUG] Broadening search from '{dish_query}' to '{base_dish}' with strict veg filter")
+                search_query = base_dish
 
         try:
             pc_index = get_pinecone_index()
@@ -236,12 +273,32 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
                 
                 # 1. Check exact substring match
                 for menu_item in menu_items:
-                    if dish_query.lower() in menu_item.lower():
+                    if search_query.lower() in menu_item.lower():
+                        # If we broadened the search, we MUST check if the found item is veg
+                        if search_query != dish_query and diet_type in ["veg", "vegetarian"]:
+                             from dish_processing import is_nonveg_text
+                             if is_nonveg_text(menu_item):
+                                 continue
+                        
                         has_dish = True
                         matched_dish_name = menu_item
                         break
                 
                 # 2. If no substring match, check word overlap (e.g. "burger" matches "Cheeseburger")
+                if not has_dish:
+                    dish_words = set(search_query.lower().split())
+                    for menu_item in menu_items:
+                        menu_words = set(re.sub(r"[^\w\s]", "", menu_item.lower()).split())
+                        if dish_words.issubset(menu_words):
+                            # If we broadened the search, we MUST check if the found item is veg
+                            if search_query != dish_query and diet_type in ["veg", "vegetarian"]:
+                                 from dish_processing import is_nonveg_text
+                                 if is_nonveg_text(menu_item):
+                                     continue
+
+                            has_dish = True
+                            matched_dish_name = menu_item
+                            break
                 if not has_dish:
                     dish_words = set(dish_query.lower().split())
                     for menu_item in menu_items:
@@ -252,6 +309,15 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
                             break
 
                 if has_dish:
+                    # Check location filter if present
+                    if fallback_location:
+                        rest_location = meta.get("location", "")
+                        # Looser check: bidirectional containment
+                        u_loc = fallback_location.lower().split(',')[0].strip() # "New York" from "New York, NY"
+                        r_loc = rest_location.lower()
+                        if u_loc not in r_loc and r_loc not in u_loc:
+                             continue
+
                     restaurants_with_dish.append({
                         "name": meta.get("name"),
                         "rating": meta.get("avg_rating"),
@@ -263,13 +329,13 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
 
             if not restaurants_with_dish:
                 # Dish not found - continue to general recommendations below
-                print(f"[DEBUG] Dish '{dish_query}' not found in any restaurant, will provide general recommendations")
+                print(f"[DEBUG] Dish '{search_query}' not found in any restaurant, will provide general recommendations")
                 # Set a flag to modify the response text later
                 dish_not_found = True
                 dish_not_found_name = dish_query
             else:
                 # Dish found - return restaurants that have it
-                print(f"[DEBUG] Found '{dish_query}' at {len(restaurants_with_dish)} restaurants")
+                print(f"[DEBUG] Found '{search_query}' at {len(restaurants_with_dish)} restaurants")
 
                 # Rank by rating and taste similarity
                 from recommendations import dish_recommendations_for_restaurant
@@ -283,16 +349,26 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
                         menu_items=menu_items,
                         user_taste_vec=user_taste_vec,
                         diet_type=diet_type,
+                        allergies=allergies,
                         top_n=5
                     )
                     
-                    # Ensure the matched dish is at the top if it fits the diet
+                    # Ensure the matched dish is at the top if it fits the diet AND allergies
                     matched_dish = rest["dish"]
-                    # Check if matched dish is already in recommendations
-                    if not any(d["name"] == matched_dish for d in recommended_dishes):
-                        # Add it to the top (with a high similarity score)
-                        recommended_dishes.insert(0, {"name": matched_dish, "similarity": 0.99})
-                        recommended_dishes = recommended_dishes[:5]
+                    from dish_processing import allergy_filter
+                    if allergy_filter(matched_dish, allergies):
+                        # Check if matched dish is already in recommendations
+                        if not any(d["name"] == matched_dish for d in recommended_dishes):
+                            # Add it to the top (with a high similarity score)
+                            recommended_dishes.insert(0, {"name": matched_dish, "similarity": 0.99})
+                            recommended_dishes = recommended_dishes[:5]
+                    else:
+                        # If the matched dish is allergic, we shouldn't recommend it even if it matched the search
+                        # But we can still recommend the restaurant if it has other safe dishes
+                        pass
+
+                    if not recommended_dishes:
+                        continue
 
                     ranked_restaurants.append({
                         "name": rest["name"],
