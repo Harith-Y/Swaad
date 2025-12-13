@@ -12,7 +12,7 @@ from embeddings import embed_text, combine_vectors
 from taste_analysis import user_profile_to_taste_vector, infer_taste_from_text_hybrid
 from pinecone_client import get_pinecone_index, maybe_upsert_ingredients_to_pinecone
 from recommendations import filter_and_rank_recommendations
-from dish_processing import get_groq_client
+from dish_processing import get_groq_client, extract_dish_from_query, is_relevant_query
 from config import GROQ_API_KEY, USE_SEMANTIC_INGREDIENT_TASTE
 
 
@@ -195,9 +195,22 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
             "menu_buddy": {"recommendations": []}
         }
 
+    # Check relevance for non-greeting queries
+    if not is_relevant_query(request.query):
+        print(f"[DEBUG] Irrelevant query detected: {request.query}")
+        return {
+            "response": {
+                "text": "I apologize, but this is beyond my capability. I can only assist you with food and restaurant recommendations."
+            },
+            "chat_id": request.chat_id,
+            "menu_buddy": {"recommendations": []}
+        }
+
     # Check if this is a dish-specific query (not at a specific restaurant)
-    dish_query = is_dish_query(request.query)
-    if dish_query and "where restaurant is" not in request.query.lower():
+    # Use Groq for smarter extraction instead of regex
+    dish_query = extract_dish_from_query(request.query)
+    
+    if dish_query:
         print(f"[DEBUG] Dish-specific query detected: '{dish_query}'")
 
         try:
@@ -216,19 +229,37 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
             for m in matches:
                 meta = m.get("metadata") if isinstance(m, dict) else getattr(m, "metadata", {})
                 menu_items = meta.get("menu_items", [])
-
-                # Check if dish exists in menu
+                
+                # HARD FILTER: Check if dish exists in menu (fuzzy match)
+                has_dish = False
+                matched_dish_name = ""
+                
+                # 1. Check exact substring match
                 for menu_item in menu_items:
-                    if dish_query.lower() in menu_item.lower() or menu_item.lower() in dish_query.lower():
-                        restaurants_with_dish.append({
-                            "name": meta.get("name"),
-                            "rating": meta.get("avg_rating"),
-                            "price_range": meta.get("price_range"),
-                            "cuisine_types": meta.get("cuisine_types", []),
-                            "dish": menu_item,
-                            "metadata": meta
-                        })
-                        break  # Only add restaurant once
+                    if dish_query.lower() in menu_item.lower():
+                        has_dish = True
+                        matched_dish_name = menu_item
+                        break
+                
+                # 2. If no substring match, check word overlap (e.g. "burger" matches "Cheeseburger")
+                if not has_dish:
+                    dish_words = set(dish_query.lower().split())
+                    for menu_item in menu_items:
+                        menu_words = set(re.sub(r"[^\w\s]", "", menu_item.lower()).split())
+                        if dish_words.issubset(menu_words):
+                            has_dish = True
+                            matched_dish_name = menu_item
+                            break
+
+                if has_dish:
+                    restaurants_with_dish.append({
+                        "name": meta.get("name"),
+                        "rating": meta.get("avg_rating"),
+                        "price_range": meta.get("price_range"),
+                        "cuisine_types": meta.get("cuisine_types", []),
+                        "dish": matched_dish_name,
+                        "metadata": meta
+                    })
 
             if not restaurants_with_dish:
                 # Dish not found - continue to general recommendations below
@@ -246,12 +277,22 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
                 for rest in restaurants_with_dish[:10]:  # Limit to top 10
                     # Get recommended dishes for this restaurant
                     menu_items = rest["metadata"].get("menu_items", [])
+                    
+                    # Prioritize the requested dish in recommendations
                     recommended_dishes = dish_recommendations_for_restaurant(
                         menu_items=menu_items,
                         user_taste_vec=user_taste_vec,
                         diet_type=diet_type,
                         top_n=5
                     )
+                    
+                    # Ensure the matched dish is at the top if it fits the diet
+                    matched_dish = rest["dish"]
+                    # Check if matched dish is already in recommendations
+                    if not any(d["name"] == matched_dish for d in recommended_dishes):
+                        # Add it to the top (with a high similarity score)
+                        recommended_dishes.insert(0, {"name": matched_dish, "similarity": 0.99})
+                        recommended_dishes = recommended_dishes[:5]
 
                     ranked_restaurants.append({
                         "name": rest["name"],
@@ -393,7 +434,8 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
             favorite_dishes=favorite_dishes,
             diet_type=diet_type,
             allergies=allergies,
-            max_results=final_max_results
+            max_results=final_max_results,
+            query_text=request.query
         )
 
         print(f"[DEBUG] Total ranked restaurants: {len(ranked)}")

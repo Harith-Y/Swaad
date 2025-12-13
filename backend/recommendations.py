@@ -2,6 +2,7 @@
 Restaurant and dish recommendation logic.
 """
 from typing import List, Dict, Optional
+import re
 from embeddings import embed_text, calculate_cosine_similarity
 from taste_analysis import taste_similarity, infer_taste_from_text_hybrid
 from dish_processing import filter_dishes_by_diet
@@ -137,12 +138,23 @@ def filter_and_rank_recommendations(
     favorite_dishes: List[Dict],
     diet_type: Optional[str],
     allergies: List[str],
-    max_results: int = 10
+    max_results: int = 10,
+    query_text: Optional[str] = None
 ) -> List[Dict]:
     """
     Filter and rank restaurant recommendations from Pinecone matches.
     """
     from dish_processing import allergy_filter
+    
+    # Pre-process query for keyword matching
+    query_tokens = set()
+    if query_text:
+        # Simple tokenization: remove punctuation, lowercase
+        q_clean = re.sub(r"[^\w\s]", "", query_text.lower())
+        query_tokens = set(q_clean.split())
+        # Remove common stop words
+        stop_words = {"i", "want", "to", "eat", "some", "a", "the", "in", "at", "near", "me", "place", "restaurant", "find", "show", "give", "food", "good", "best", "delicious", "yummy", "looking", "for"}
+        query_tokens = query_tokens - stop_words
     
     ranked = []
     
@@ -205,7 +217,32 @@ def filter_and_rank_recommendations(
         from taste_analysis import favorites_boost
         tscore = taste_similarity(user_taste_vec, taste_vec)
         boost = favorites_boost(menu_items, favorite_dishes)
-        combined = score + 0.35 * tscore + boost
+        
+        # Calculate query relevance boost
+        query_boost = 0.0
+        if query_tokens:
+            # Check menu items
+            menu_text = " ".join(menu_items).lower()
+            # Check popular dishes
+            pop_dishes = meta.get("popular_dishes") or []
+            if isinstance(pop_dishes, list):
+                pop_text = " ".join([str(p) for p in pop_dishes]).lower()
+            else:
+                pop_text = ""
+            
+            # Check name and cuisine
+            name_text = (meta.get("name") or "").lower()
+            cuisine_text = " ".join(meta.get("cuisine_types") or []).lower()
+            
+            full_text = menu_text + " " + pop_text + " " + name_text + " " + cuisine_text
+            full_text_clean = re.sub(r"[^\w\s]", "", full_text)
+            restaurant_tokens = set(full_text_clean.split())
+            
+            overlap = len(query_tokens.intersection(restaurant_tokens))
+            if overlap > 0:
+                query_boost = 0.5 + (0.2 * overlap)
+
+        combined = score + 0.35 * tscore + boost + query_boost
         
         # Get recommended dishes
         # Check if metadata has pre-calculated dish taste vectors (stored as JSON)
