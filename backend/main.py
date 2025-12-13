@@ -825,22 +825,15 @@ def _safe_lower_list(values: Optional[List[str]]) -> List[str]:
             out.append(v.lower())
     return out
 
-def _filter_dishes_by_allergy(menu_items: List[str], allergies: List[str]) -> List[str]:
-    if not allergies or not menu_items:
-        return menu_items or []
-    
-    safe_dishes = []
-    for dish in menu_items:
-        d_lower = dish.lower()
-        is_safe = True
-        for allergy in allergies:
-            a = (allergy or "").strip().lower()
-            if a and a in d_lower:
-                is_safe = False
-                break
-        if is_safe:
-            safe_dishes.append(dish)
-    return safe_dishes
+def _allergy_filter(menu_items: List[str], allergies: List[str]) -> bool:
+    if not allergies:
+        return True
+    menu_text = "\n".join(menu_items).lower()
+    for allergy in allergies:
+        a = (allergy or "").strip().lower()
+        if a and a in menu_text:
+            return False
+    return True
 
 def _favorites_boost(menu_items: List[str], favorite_dishes: List[Dict]) -> float:
     if not favorite_dishes:
@@ -2424,8 +2417,11 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
                 if not menu_items:
                     continue
                 
-                menu_items = _filter_dishes_by_allergy(menu_items, allergies)
+                menu_items = meta.get("menu_items") or []
+                menu_items = _filter_dishes_by_diet(menu_items, diet_type)
                 if not menu_items:
+                    continue
+                if not _allergy_filter(menu_items, allergies):
                     continue
 
                 location = meta.get("location")
@@ -2513,10 +2509,10 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
             ranked.sort(key=lambda x: x.get("score", 0.0), reverse=True)
             
             # Filter out irrelevant results if we have good matches
-            # has_keyword_match = any(r.get("has_keyword_match") for r in ranked)
-            # if has_keyword_match:
-            #     # Keep only those with keyword matches
-            #     ranked = [r for r in ranked if r.get("has_keyword_match")]
+            has_keyword_match = any(r.get("has_keyword_match") for r in ranked)
+            if has_keyword_match:
+                # Keep only those with keyword matches
+                ranked = [r for r in ranked if r.get("has_keyword_match")]
             
             ranked = ranked[:final_max_results]
         except Exception as e:
