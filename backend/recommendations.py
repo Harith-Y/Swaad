@@ -9,36 +9,67 @@ from config import USE_SEMANTIC_DISH_TASTE
 
 
 def dish_recommendations_for_restaurant(
-    menu_items: List[str],
+    menu_items,  # Can be List[str] or List[Dict] with pre-calculated taste vectors
     user_taste_vec: List[float],
     diet_type: Optional[str],
     top_n: int = 5
 ) -> List[Dict]:
     """
     Get recommended dishes from a restaurant's menu based on user taste preferences.
+
+    Args:
+        menu_items: Either list of dish names (strings) or list of dicts with 'name' and 'taste' keys
+        user_taste_vec: User's taste preference vector [sweet, salty, sour, bitter, umami, spicy]
+        diet_type: Diet filter (veg, non-veg, mix)
+        top_n: Number of top dishes to return
     """
     if not menu_items:
         return []
-    
+
+    # Check if menu_items has pre-calculated taste vectors
+    has_taste_vectors = isinstance(menu_items, list) and len(menu_items) > 0 and isinstance(menu_items[0], dict)
+
+    if has_taste_vectors:
+        # Use pre-calculated taste vectors from Pinecone
+        dishes = menu_items
+    else:
+        # Legacy: menu_items is just a list of strings
+        dishes = [{"name": dish, "taste": None} for dish in menu_items]
+
     # Filter by diet
-    filtered_items = filter_dishes_by_diet(menu_items, diet_type)
-    if not filtered_items:
+    dish_names = [d.get("name") if isinstance(d, dict) else d for d in dishes]
+    filtered_names = filter_dishes_by_diet(dish_names, diet_type)
+    if not filtered_names:
         return []
-    
+
     # Calculate similarity for each dish
     dish_scores = []
-    for dish in filtered_items:
-        # Get taste vector for dish
-        dish_taste_vec = infer_taste_from_text_hybrid(dish, semantic=USE_SEMANTIC_DISH_TASTE)
-        
+    for dish in dishes:
+        dish_name = dish.get("name") if isinstance(dish, dict) else dish
+
+        if dish_name not in filtered_names:
+            continue
+
+        # Get taste vector (pre-calculated or calculate on-the-fly)
+        if has_taste_vectors and dish.get("taste"):
+            dish_taste_vec = dish["taste"]
+        else:
+            dish_taste_vec = infer_taste_from_text_hybrid(dish_name, semantic=USE_SEMANTIC_DISH_TASTE)
+
         # Calculate similarity
         similarity = taste_similarity(user_taste_vec, dish_taste_vec)
-        
+
+        # Handle zero vectors
+        user_sum = sum(abs(x) for x in user_taste_vec)
+        dish_sum = sum(abs(x) for x in dish_taste_vec)
+        if user_sum == 0 or dish_sum == 0:
+            similarity = 0.5
+
         dish_scores.append({
-            "name": dish,
-            "similarity": similarity
+            "name": dish_name,
+            "similarity": round(similarity, 3)
         })
-    
+
     # Sort by similarity and return top N
     dish_scores.sort(key=lambda x: x["similarity"], reverse=True)
     return dish_scores[:top_n]
@@ -177,9 +208,27 @@ def filter_and_rank_recommendations(
         combined = score + 0.35 * tscore + boost
         
         # Get recommended dishes
-        recommended_dishes = dish_recommendations_for_restaurant(
-            menu_items, user_taste_vec, diet_type, top_n=5
-        )
+        # Check if metadata has pre-calculated dish taste vectors (stored as JSON)
+        dishes_with_taste = None
+        dishes_json = meta.get("dishes_json")
+        if dishes_json:
+            try:
+                import json
+                dishes_with_taste = json.loads(dishes_json)
+            except Exception as e:
+                print(f"[WARNING] Failed to parse dishes_json: {e}")
+                dishes_with_taste = None
+
+        if dishes_with_taste:
+            # Use pre-calculated taste vectors
+            recommended_dishes = dish_recommendations_for_restaurant(
+                dishes_with_taste, user_taste_vec, diet_type, top_n=5
+            )
+        else:
+            # Fallback to calculating on-the-fly
+            recommended_dishes = dish_recommendations_for_restaurant(
+                menu_items, user_taste_vec, diet_type, top_n=5
+            )
         
         # Build restaurant object
         ranked.append({

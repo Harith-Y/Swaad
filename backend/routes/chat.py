@@ -2,8 +2,9 @@
 Chat endpoint for restaurant recommendations.
 """
 from fastapi import HTTPException
-from typing import Dict, Any
+from typing import Dict, Any, Optional, Tuple
 import json
+import re
 
 from models import ChatRequest
 from database import get_dummy_user, sync_dummy_user_from_request, dummy_user_to_user_profile
@@ -13,6 +14,29 @@ from pinecone_client import get_pinecone_index, maybe_upsert_ingredients_to_pine
 from recommendations import filter_and_rank_recommendations
 from dish_processing import get_groq_client
 from config import GROQ_API_KEY, USE_SEMANTIC_INGREDIENT_TASTE
+
+
+def parse_specific_query(query: str) -> Optional[Tuple[str, str]]:
+    """
+    Parse query to detect if user is asking about a specific dish at a specific restaurant.
+
+    Returns:
+        Tuple of (dish_name, restaurant_name) if specific query detected, None otherwise
+    """
+    query_lower = query.lower()
+
+    # Pattern: "dish ... where restaurant is X" or "dish ... at/from X"
+    pattern1 = r"(.+?)\s+where\s+restaurant\s+is\s+(.+?)$"
+    match = re.search(pattern1, query_lower)
+    if match:
+        dish = match.group(1).strip()
+        restaurant = match.group(2).strip()
+        # Clean up common prefixes
+        dish = re.sub(r"^(?:i want|i'd like|give me|show me|find)\s+", "", dish).strip()
+        dish = re.sub(r"\s+like\s+", " ", dish).strip()  # Remove "like"
+        return (dish, restaurant)
+
+    return None
 
 
 async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
@@ -87,7 +111,79 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
     final_max_results = request.max_results or 10
     print(f"[DEBUG] max_results set to: {final_max_results}")
 
-    # Check if location is provided
+    # Check if this is a specific query (dish at specific restaurant)
+    specific_query = parse_specific_query(request.query)
+    if specific_query:
+        dish_name, restaurant_name = specific_query
+        print(f"[DEBUG] Specific query detected: dish='{dish_name}', restaurant='{restaurant_name}'")
+
+        # Search for the specific restaurant and dish
+        try:
+            pc_index = get_pinecone_index()
+            # Search for the restaurant
+            restaurant_vec = embed_text(restaurant_name)
+            query_res = pc_index.query(vector=restaurant_vec, top_k=20, include_metadata=True, namespace="restaurants")
+            matches = query_res.get("matches", []) if isinstance(query_res, dict) else getattr(query_res, "matches", [])
+
+            # Find the matching restaurant
+            target_restaurant = None
+            for m in matches:
+                meta = m.get("metadata") if isinstance(m, dict) else getattr(m, "metadata", {})
+                rest_name = meta.get("name", "").lower()
+                if restaurant_name.lower() in rest_name or rest_name in restaurant_name.lower():
+                    target_restaurant = meta
+                    target_restaurant["id"] = m.get("id") if isinstance(m, dict) else getattr(m, "id", None)
+                    break
+
+            if not target_restaurant:
+                return {
+                    "response": {
+                        "text": f"Sorry, I couldn't find a restaurant named '{restaurant_name}' in our database."
+                    },
+                    "chat_id": request.chat_id,
+                    "menu_buddy": {"recommendations": []}
+                }
+
+            # Find the specific dish in the restaurant's menu
+            menu_items = target_restaurant.get("menu_items", [])
+            matching_dish = None
+            for dish in menu_items:
+                if dish_name.lower() in dish.lower() or dish.lower() in dish_name.lower():
+                    matching_dish = dish
+                    break
+
+            if not matching_dish:
+                return {
+                    "response": {
+                        "text": f"Sorry, '{dish_name}' is not available at {target_restaurant.get('name')}. Available dishes: {', '.join(menu_items[:5])}"
+                    },
+                    "chat_id": request.chat_id,
+                    "menu_buddy": {"recommendations": []}
+                }
+
+            # Return minimal response with just the dish and restaurant
+            avg_rating = target_restaurant.get("avg_rating", "N/A")
+            return {
+                "response": {
+                    "text": f"{matching_dish} is available at {target_restaurant.get('name')} (Rating: {avg_rating}/5)"
+                },
+                "chat_id": request.chat_id,
+                "menu_buddy": {
+                    "recommendations": [{
+                        "restaurant_name": target_restaurant.get("name"),
+                        "dish_name": matching_dish,
+                        "rating": avg_rating,
+                        "price_range": target_restaurant.get("price_range"),
+                        "location": target_restaurant.get("location")
+                    }]
+                }
+            }
+        except Exception as e:
+            print(f"[DEBUG] Error in specific query: {e}")
+            import traceback
+            traceback.print_exc()
+
+    # Check if location is provided (for general queries)
     if is_first_turn and not fallback_location:
         if isinstance(dummy_user, dict):
             dummy_user["pending_query"] = request.query
@@ -115,7 +211,7 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
         qvec = embed_text(request.query)
         top_k = max(final_max_results, 10)
         print(f"[DEBUG] Querying Pinecone with top_k={top_k}")
-        query_res = pc_index.query(vector=qvec, top_k=top_k, include_metadata=True)
+        query_res = pc_index.query(vector=qvec, top_k=top_k, include_metadata=True, namespace="restaurants")
         matches = query_res.get("matches", []) if isinstance(query_res, dict) else getattr(query_res, "matches", [])
         print(f"[DEBUG] Pinecone returned {len(matches)} matches")
 
@@ -138,8 +234,26 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
         traceback.print_exc()
         ranked = []
 
+    # Filter response to only include essential fields
+    filtered_recommendations = []
+    for restaurant in ranked:
+        filtered_restaurant = {
+            "name": restaurant.get("name"),
+            "rating": restaurant.get("avg_rating"),
+            "price_range": restaurant.get("price_range"),
+            "cuisine_types": restaurant.get("cuisine_types", []),
+            "recommended_dishes": [
+                {
+                    "name": dish.get("name"),
+                    "similarity": dish.get("similarity")
+                }
+                for dish in restaurant.get("recommended_dishes", [])[:5]  # Limit to top 5 dishes
+            ]
+        }
+        filtered_recommendations.append(filtered_restaurant)
+
     ai_json["menu_buddy"] = {
-        "recommendations": ranked
+        "recommendations": filtered_recommendations
     }
     
     # Rewrite response text to match filtered results
