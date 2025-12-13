@@ -1,0 +1,1001 @@
+index,ingredient,spicy,sweet,umami,sour,salty
+1,Salt,0,0,0,0,1
+2,Sugar,0,1,0,0,0
+3,Black Pepper,0.7,0,0,0,0
+4,Cayenne Pepper,0.95,0,0,0,0
+5,Chili Powder,0.8,0,0,0,0
+6,Paprika,0.3,0.2,0,0,0
+7,Garlic,0.1,0.1,0.5,0,0
+8,Onion,0.1,0.3,0.4,0,0
+9,Ginger,0.6,0.2,0,0,0
+10,Tomato,0,0.4,0.7,0.3,0
+11,Lemon,0,0.1,0,0.95,0
+12,Lime,0,0.1,0,0.95,0
+13,Vinegar,0,0,0,0.9,0
+14,Soy Sauce,0,0.1,0.9,0.1,0.9
+15,Fish Sauce,0,0,0.95,0.2,0.9
+16,Parmesan Cheese,0,0,0.9,0,0.7
+17,Mushrooms,0,0.1,0.8,0,0.1
+18,Anchovies,0,0,0.95,0.1,0.9
+19,Miso Paste,0,0.2,0.9,0.1,0.8
+20,Seaweed,0,0,0.85,0,0.8
+21,Bacon,0,0.2,0.7,0,0.8
+22,Beef,0,0.1,0.7,0,0.2
+23,Chicken,0,0,0.5,0,0.1
+24,Pork,0,0.2,0.6,0,0.1
+25,Salmon,0,0.1,0.6,0,0.3
+26,Shrimp,0,0.3,0.6,0,0.3
+27,Butter,0,0.1,0.3,0,0.2
+28,Cream,0,0.2,0.2,0,0.1
+29,Yogurt,0,0.3,0.2,0.4,0.1
+30,Cheddar Cheese,0,0,0.6,0,0.6
+31,Honey,0,0.95,0,0,0
+32,Maple Syrup,0,0.9,0,0,0
+33,Basil,0,0.1,0,0,0
+34,Cilantro,0,0,0,0.1,0
+35,Mint,0,0.2,0,0,0
+36,Rosemary,0,0,0,0,0
+37,Thyme,0,0,0.1,0,0
+38,Oregano,0,0,0.1,0,0
+39,Cumin,0.3,0,0.2,0,0
+40,Coriander,0.2,0.2,0,0,0
+41,Cinnamon,0.1,0.4,0,0,0
+42,Nutmeg,0.1,0.3,0,0,0
+43,Vanilla,0,0.7,0,0,0
+44,Chocolate,0.1,0.6,0.1,0.1,0
+45,Coffee,0,0.1,0.3,0.3,0
+46,Apple,0,0.8,0,0.2,0
+47,Banana,0,0.85,0,0,0
+48,Orange,0,0.7,0,0.4,0
+49,Strawberry,0,0.8,0,0.2,0
+50,Blueberry,0,0.7,0,0.3,0
+51,Mango,0,0.9,0.1,0.1,0
+52,Pineapple,0,0.8,0,0.5,0
+53,Coconut,0,0.5,0.1,0,0.1
+54,Avocado,0,0,0.4,0,0
+55,Potato,0,0.1,0.2,0,0
+56,Carrot,0,0.5,0.1,0,0
+57,Broccoli,0,0.1,0.2,0,0
+58,Spinach,0,0,0.3,0,0.1
+59,Kale,0,0,0.2,0.1,0
+60,Bell Pepper,0,0.4,0.1,0,0
+61,Jalapeño,0.8,0,0,0,0
+62,Corn,0,0.6,0.2,0,0
+63,Peas,0,0.5,0.3,0,0
+64,Rice,0,0.1,0.1,0,0
+65,Pasta,0,0.1,0.1,0,0
+66,Bread,0,0.2,0.1,0,0.2
+67,Oats,0,0.2,0.1,0,0
+68,Quinoa,0,0.1,0.2,0,0
+69,Beans,0,0.1,0.4,0,0
+70,Lentils,0,0.1,0.4,0,0
+71,Chickpeas,0,0.2,0.4,0,0
+72,Peanuts,0,0.1,0.3,0,0.2
+73,Almonds,0,0.2,0.2,0,0.1
+74,Cashews,0,0.3,0.2,0,0.1
+75,Olive Oil,0,0,0.1,0,0
+76,Sesame Oil,0,0.1,0.3,0,0
+77,Mustard,0.4,0.1,0.1,0.5,0.3
+78,Mayonnaise,0,0.2,0.2,0.2,0.3
+79,Ketchup,0,0.7,0.4,0.4,0.5
+80,Hot Sauce,0.9,0.1,0.1,0.5,0.5
+81,Worcestershire Sauce,0,0.3,0.8,0.4,0.7
+82,Balsamic Vinegar,0,0.4,0.2,0.7,0
+83,Rice Vinegar,0,0.2,0,0.6,0
+84,Tahini,0,0.1,0.3,0.1,0.1
+85,Pesto,0,0,0.5,0.1,0.4
+86,Sriracha,0.85,0.3,0.2,0.3,0.4
+87,Wasabi,0.9,0,0,0,0
+88,Horseradish,0.8,0,0,0.1,0
+89,Capers,0,0,0.3,0.6,0.9
+90,Olives,0,0,0.4,0.2,0.8
+91,Pickles,0,0.1,0.1,0.8,0.6
+92,Kimchi,0.6,0.1,0.5,0.7,0.6
+93,Sauerkraut,0,0,0.2,0.8,0.5
+94,Tamarind,0,0.4,0.1,0.8,0.1
+95,Pomegranate,0,0.6,0.1,0.4,0
+96,Dates,0,0.95,0,0,0
+97,Figs,0,0.85,0,0,0
+98,Prunes,0,0.8,0.1,0.2,0
+99,Raisins,0,0.9,0.1,0,0
+100,Cranberries,0,0.5,0,0.7,0
+101,Cherries,0,0.8,0,0.2,0
+102,Peach,0,0.8,0,0.2,0
+103,Plum,0,0.7,0,0.3,0
+104,Apricot,0,0.8,0,0.2,0
+105,Pear,0,0.7,0,0.1,0
+106,Grape,0,0.8,0,0.2,0
+107,Watermelon,0,0.8,0,0,0
+108,Cantaloupe,0,0.8,0,0,0
+109,Honeydew,0,0.75,0,0,0
+110,Kiwi,0,0.6,0,0.5,0
+111,Papaya,0,0.7,0,0.1,0
+112,Guava,0,0.7,0,0.2,0
+113,Dragon Fruit,0,0.5,0,0,0
+114,Passion Fruit,0,0.6,0,0.8,0
+115,Lychee,0,0.8,0,0.1,0
+116,Persimmon,0,0.85,0,0,0
+117,Star Fruit,0,0.5,0,0.5,0
+118,Grapefruit,0,0.4,0,0.7,0
+119,Tangerine,0,0.8,0,0.3,0
+120,Blackberry,0,0.6,0,0.3,0
+121,Raspberry,0,0.6,0,0.4,0
+122,Gooseberry,0,0.5,0,0.6,0
+123,Elderberry,0,0.5,0,0.4,0
+124,Currant,0,0.5,0,0.6,0
+125,Asparagus,0,0.1,0.3,0,0
+126,Artichoke,0,0.2,0.4,0.1,0.1
+127,Brussels Sprouts,0,0.1,0.3,0.1,0
+128,Cabbage,0,0.1,0.2,0,0
+129,Cauliflower,0,0.2,0.2,0,0
+130,Celery,0,0.1,0.2,0,0.2
+131,Cucumber,0,0.2,0,0.1,0
+132,Eggplant,0,0.1,0.3,0,0
+133,Zucchini,0,0.2,0.2,0,0
+134,Squash,0,0.4,0.2,0,0
+135,Pumpkin,0,0.4,0.2,0,0
+136,Butternut Squash,0,0.5,0.2,0,0
+137,Acorn Squash,0,0.4,0.2,0,0
+138,Sweet Potato,0,0.7,0.2,0,0
+139,Beet,0,0.6,0.3,0.1,0.1
+140,Turnip,0,0.2,0.2,0,0
+141,Radish,0.3,0.1,0,0.1,0
+142,Daikon,0.2,0.1,0.1,0,0
+143,Jicama,0,0.3,0,0,0
+144,Fennel,0,0.3,0.1,0,0
+145,Leek,0,0.2,0.3,0,0
+146,Shallot,0.1,0.3,0.4,0,0
+147,Scallion,0.2,0.1,0.3,0,0
+148,Chives,0.1,0,0.2,0,0.1
+149,Bok Choy,0,0.1,0.2,0,0
+150,Napa Cabbage,0,0.2,0.2,0,0
+151,Swiss Chard,0,0.1,0.3,0.1,0.1
+152,Collard Greens,0,0.1,0.3,0.1,0.1
+153,Mustard Greens,0.4,0,0.2,0.2,0.1
+154,Arugula,0.3,0,0.1,0.2,0
+155,Watercress,0.4,0,0.1,0.2,0
+156,Endive,0,0,0.1,0.3,0
+157,Radicchio,0,0,0.1,0.4,0.1
+158,Lettuce,0,0.1,0,0,0
+159,Romaine,0,0.1,0.1,0,0
+160,Iceberg Lettuce,0,0.1,0,0,0
+161,Butterhead Lettuce,0,0.1,0,0,0
+162,Okra,0,0.2,0.3,0,0
+163,Green Beans,0,0.2,0.2,0,0
+164,Snap Peas,0,0.5,0.3,0,0
+165,Snow Peas,0,0.4,0.3,0,0
+166,Edamame,0,0.3,0.4,0,0.1
+167,Lima Beans,0,0.2,0.3,0,0
+168,Fava Beans,0,0.2,0.4,0,0.1
+169,Black Beans,0,0.1,0.4,0,0.1
+170,Kidney Beans,0,0.1,0.4,0,0.1
+171,Pinto Beans,0,0.1,0.4,0,0
+172,Navy Beans,0,0.1,0.3,0,0
+173,Cannellini Beans,0,0.1,0.4,0,0
+174,Red Lentils,0,0.1,0.4,0,0
+175,Green Lentils,0,0.1,0.4,0,0
+176,Black Lentils,0,0.1,0.4,0,0
+177,Yellow Split Peas,0,0.2,0.3,0,0
+178,Mung Beans,0,0.1,0.3,0,0
+179,Adzuki Beans,0,0.3,0.3,0,0
+180,Tofu,0,0,0.4,0,0.1
+181,Tempeh,0,0.1,0.5,0.1,0.1
+182,Seitan,0,0,0.5,0,0.3
+183,Lamb,0,0.1,0.7,0,0.2
+184,Veal,0,0.1,0.6,0,0.1
+185,Duck,0,0.2,0.7,0,0.2
+186,Turkey,0,0.1,0.5,0,0.1
+187,Goose,0,0.1,0.7,0,0.2
+188,Quail,0,0.1,0.6,0,0.1
+189,Venison,0,0.1,0.8,0,0.2
+190,Bison,0,0.1,0.7,0,0.2
+191,Rabbit,0,0.1,0.6,0,0.1
+192,Prosciutto,0,0.3,0.8,0,0.9
+193,Salami,0,0.1,0.7,0,0.8
+194,Chorizo,0.7,0.2,0.6,0,0.7
+195,Pepperoni,0.4,0,0.6,0,0.8
+196,Ham,0,0.2,0.5,0,0.7
+197,Sausage,0.3,0.1,0.6,0,0.7
+198,Bratwurst,0.2,0,0.6,0,0.6
+199,Hot Dog,0,0.2,0.4,0,0.7
+200,Pastrami,0.2,0,0.7,0,0.8
+201,Corned Beef,0,0,0.6,0,0.9
+202,Tuna,0,0.1,0.7,0,0.3
+203,Cod,0,0.1,0.5,0,0.2
+204,Halibut,0,0.1,0.6,0,0.2
+205,Tilapia,0,0.1,0.4,0,0.1
+206,Trout,0,0.1,0.6,0,0.2
+207,Sea Bass,0,0.1,0.6,0,0.3
+208,Snapper,0,0.1,0.6,0,0.3
+209,Swordfish,0,0.1,0.7,0,0.3
+210,Mackerel,0,0.1,0.7,0,0.4
+211,Sardines,0,0.1,0.8,0,0.5
+212,Herring,0,0.1,0.7,0,0.5
+213,Scallops,0,0.4,0.6,0,0.3
+214,Clams,0,0.2,0.7,0,0.4
+215,Mussels,0,0.2,0.8,0,0.4
+216,Oysters,0,0.2,0.9,0.1,0.5
+217,Crab,0,0.4,0.7,0,0.4
+218,Lobster,0,0.4,0.7,0,0.4
+219,Crawfish,0,0.3,0.6,0,0.3
+220,Squid,0,0.2,0.6,0,0.3
+221,Octopus,0,0.2,0.7,0,0.3
+222,Caviar,0,0.1,0.9,0,0.9
+223,Roe,0,0.2,0.8,0,0.6
+224,Imitation Crab,0,0.3,0.5,0,0.5
+225,Milk,0,0.3,0.1,0,0.1
+226,Heavy Cream,0,0.2,0.2,0,0.1
+227,Sour Cream,0,0.2,0.2,0.6,0.1
+228,Crème Fraîche,0,0.2,0.2,0.4,0.1
+229,Greek Yogurt,0,0.2,0.2,0.5,0.1
+230,Cottage Cheese,0,0.2,0.3,0.2,0.4
+231,Ricotta,0,0.2,0.3,0.1,0.2
+232,Mozzarella,0,0.1,0.5,0,0.4
+233,Provolone,0,0.1,0.6,0,0.5
+234,Swiss Cheese,0,0.2,0.5,0,0.4
+235,Gouda,0,0.2,0.5,0,0.5
+236,Brie,0,0.1,0.6,0,0.4
+237,Camembert,0,0.1,0.6,0,0.4
+238,Blue Cheese,0,0.1,0.7,0,0.7
+239,Gorgonzola,0,0.1,0.8,0,0.7
+240,Roquefort,0,0.1,0.7,0,0.8
+241,Feta,0,0.1,0.5,0.3,0.8
+242,Goat Cheese,0,0.1,0.5,0.3,0.5
+243,Manchego,0,0.1,0.6,0,0.6
+244,Gruyère,0,0.1,0.7,0,0.6
+245,Pecorino Romano,0,0,0.8,0,0.9
+246,Asiago,0,0.1,0.7,0,0.6
+247,Fontina,0,0.1,0.6,0,0.5
+248,Havarti,0,0.2,0.4,0,0.4
+249,Monterey Jack,0,0.2,0.4,0,0.4
+250,Pepper Jack,0.5,0.1,0.4,0,0.5
+251,Cream Cheese,0,0.2,0.2,0.1,0.3
+252,Mascarpone,0,0.3,0.2,0,0.1
+253,Ghee,0,0.1,0.3,0,0.1
+254,Lard,0,0.1,0.3,0,0.1
+255,Tallow,0,0,0.3,0,0.1
+256,Coconut Oil,0,0.3,0,0,0
+257,Avocado Oil,0,0,0.1,0,0
+258,Vegetable Oil,0,0,0,0,0
+259,Canola Oil,0,0,0,0,0
+260,Sunflower Oil,0,0,0,0,0
+261,Peanut Oil,0,0.1,0.1,0,0
+262,Grapeseed Oil,0,0,0,0,0
+263,Walnut Oil,0,0.1,0.2,0,0
+264,Flaxseed Oil,0,0,0.1,0,0
+265,Truffle Oil,0,0,0.7,0,0.2
+266,Sesame Seeds,0,0.1,0.3,0,0.1
+267,Poppy Seeds,0,0.1,0.1,0,0
+268,Chia Seeds,0,0.1,0.1,0,0
+269,Flax Seeds,0,0.1,0.1,0,0
+270,Pumpkin Seeds,0,0.2,0.3,0,0.2
+271,Sunflower Seeds,0,0.2,0.2,0,0.2
+272,Hemp Seeds,0,0.1,0.3,0,0
+273,Walnuts,0,0.2,0.3,0,0.1
+274,Pecans,0,0.3,0.2,0,0
+275,Hazelnuts,0,0.3,0.2,0,0
+276,Macadamia Nuts,0,0.3,0.2,0,0.1
+277,Brazil Nuts,0,0.2,0.2,0,0
+278,Pine Nuts,0,0.2,0.3,0,0.1
+279,Pistachios,0,0.3,0.3,0,0.2
+280,Chestnuts,0,0.5,0.2,0,0
+281,Peanut Butter,0,0.2,0.3,0,0.3
+282,Almond Butter,0,0.2,0.2,0,0.2
+283,Sunflower Seed Butter,0,0.2,0.2,0,0.2
+284,White Rice,0,0.1,0.1,0,0
+285,Brown Rice,0,0.1,0.2,0,0
+286,Jasmine Rice,0,0.2,0.1,0,0
+287,Basmati Rice,0,0.1,0.1,0,0
+288,Wild Rice,0,0.1,0.3,0,0
+289,Arborio Rice,0,0.2,0.1,0,0
+290,Sushi Rice,0,0.2,0.1,0,0
+291,Black Rice,0,0.1,0.3,0,0
+292,Red Rice,0,0.1,0.2,0,0
+293,Couscous,0,0.1,0.1,0,0
+294,Bulgur,0,0.1,0.2,0,0
+295,Farro,0,0.1,0.3,0,0
+296,Barley,0,0.1,0.2,0,0
+297,Rye,0,0.1,0.2,0,0.1
+298,Wheat Berries,0,0.1,0.2,0,0
+299,Millet,0,0.1,0.2,0,0
+300,Amaranth,0,0.1,0.2,0,0
+301,Buckwheat,0,0.2,0.2,0,0
+302,Teff,0,0.1,0.2,0,0
+303,Sorghum,0,0.2,0.2,0,0
+304,Polenta,0,0.2,0.2,0,0
+305,Cornmeal,0,0.3,0.1,0,0
+306,All-Purpose Flour,0,0.1,0.1,0,0
+307,Whole Wheat Flour,0,0.1,0.2,0,0
+308,Bread Flour,0,0.1,0.1,0,0
+309,Cake Flour,0,0.1,0,0,0
+310,Almond Flour,0,0.2,0.2,0,0.1
+311,Coconut Flour,0,0.3,0.1,0,0
+312,Rice Flour,0,0.1,0.1,0,0
+313,Chickpea Flour,0,0.1,0.4,0,0
+314,Cornstarch,0,0,0,0,0
+315,Tapioca Flour,0,0.1,0,0,0
+316,Baking Powder,0,0,0,0,0.3
+317,Baking Soda,0,0,0,0,0.5
+318,Yeast,0,0,0.4,0,0
+319,Sourdough Starter,0,0.1,0.3,0.6,0.2
+320,White Bread,0,0.2,0.1,0,0.3
+321,Whole Wheat Bread,0,0.2,0.2,0,0.3
+322,Rye Bread,0,0.2,0.2,0,0.4
+323,Sourdough Bread,0,0.2,0.3,0.4,0.3
+324,Bagel,0,0.2,0.1,0,0.4
+325,Pita Bread,0,0.2,0.1,0,0.2
+326,Naan,0,0.2,0.1,0,0.3
+327,Tortilla,0,0.2,0.1,0,0.3
+328,Croissant,0,0.3,0.2,0,0.3
+329,Baguette,0,0.2,0.2,0,0.4
+330,Ciabatta,0,0.2,0.2,0,0.3
+331,Focaccia,0,0.2,0.2,0,0.4
+332,Spaghetti,0,0.1,0.1,0,0
+333,Penne,0,0.1,0.1,0,0
+334,Fettuccine,0,0.1,0.1,0,0
+335,Linguine,0,0.1,0.1,0,0
+336,Rigatoni,0,0.1,0.1,0,0
+337,Lasagna Noodles,0,0.1,0.1,0,0
+338,Macaroni,0,0.1,0.1,0,0
+339,Orzo,0,0.1,0.1,0,0
+340,Ramen Noodles,0,0.1,0.2,0,0.3
+341,Udon Noodles,0,0.1,0.2,0,0.2
+342,Soba Noodles,0,0.1,0.3,0,0.2
+343,Rice Noodles,0,0.1,0.1,0,0
+344,Glass Noodles,0,0.1,0.1,0,0
+345,Egg Noodles,0,0.1,0.2,0,0.1
+346,Gnocchi,0,0.2,0.1,0,0.2
+347,Ravioli,0,0.2,0.4,0,0.3
+348,Tortellini,0,0.2,0.4,0,0.3
+349,Dried Shiitake,0,0,0.9,0,0.1
+350,Porcini,0,0.1,0.9,0,0.1
+351,Chanterelle,0,0.1,0.7,0,0.1
+352,Morel,0,0.1,0.8,0,0.1
+353,Oyster Mushroom,0,0.1,0.7,0,0.1
+354,Portobello,0,0.1,0.8,0,0.1
+355,Cremini,0,0.1,0.7,0,0.1
+356,Enoki,0,0.1,0.5,0,0
+357,Truffle,0,0,0.95,0,0.2
+358,Kombu,0,0,0.9,0,0.7
+359,Nori,0,0.1,0.8,0,0.8
+360,Wakame,0,0.1,0.8,0,0.7
+361,Dulse,0,0,0.7,0,0.8
+362,Kelp,0,0,0.85,0,0.8
+363,Spirulina,0,0,0.6,0,0.4
+364,Chlorella,0,0,0.5,0,0.3
+365,Hoisin Sauce,0.1,0.7,0.7,0.1,0.6
+366,Oyster Sauce,0,0.3,0.9,0.1,0.7
+367,Teriyaki Sauce,0,0.6,0.6,0.1,0.7
+368,Ponzu Sauce,0,0.2,0.5,0.7,0.6
+369,Tamari,0,0.1,0.9,0.1,0.9
+370,Liquid Aminos,0,0.1,0.8,0,0.8
+371,Coconut Aminos,0,0.4,0.6,0,0.6
+372,BBQ Sauce,0.2,0.7,0.4,0.3,0.5
+373,Steak Sauce,0.1,0.4,0.6,0.4,0.6
+374,Tartar Sauce,0,0.2,0.1,0.3,0.3
+375,Cocktail Sauce,0.1,0.3,0.3,0.4,0.4
+376,Ranch Dressing,0,0.2,0.2,0.3,0.4
+377,Blue Cheese Dressing,0,0.2,0.6,0.3,0.6
+378,Caesar Dressing,0,0.1,0.6,0.2,0.6
+379,Italian Dressing,0,0.2,0.1,0.5,0.4
+380,Thousand Island,0,0.4,0.2,0.3,0.4
+381,Honey Mustard,0.2,0.6,0.1,0.3,0.3
+382,Dijon Mustard,0.5,0.1,0.1,0.6,0.4
+383,Yellow Mustard,0.3,0.2,0.1,0.5,0.4
+384,Whole Grain Mustard,0.4,0.1,0.2,0.5,0.4
+385,Relish,0,0.4,0.1,0.6,0.4
+386,Chutney,0.2,0.7,0.2,0.4,0.2
+387,Salsa,0.4,0.2,0.3,0.5,0.4
+388,Guacamole,0.1,0,0.3,0.2,0.3
+389,Hummus,0.1,0.1,0.4,0.2,0.4
+390,Tzatziki,0,0.1,0.2,0.4,0.4
+391,Aioli,0.1,0,0.2,0.1,0.3
+392,Pico de Gallo,0.3,0.1,0.2,0.4,0.3
+393,Chimichurri,0.2,0,0.1,0.5,0.3
+394,Harissa,0.9,0.1,0.2,0.3,0.5
+395,Gochujang,0.7,0.3,0.6,0.1,0.5
+396,Sambal Oelek,0.85,0.1,0.2,0.2,0.4
+397,Thai Chili Sauce,0.8,0.5,0.2,0.3,0.4
+398,XO Sauce,0.3,0.2,0.9,0.1,0.7
+399,Chili Oil,0.8,0,0.1,0,0.2
+400,Agave Nectar,0,0.9,0,0,0
+401,Molasses,0,0.8,0.2,0.1,0.1
+402,Brown Sugar,0,0.95,0,0,0
+403,Powdered Sugar,0,1,0,0,0
+404,Corn Syrup,0,0.95,0,0,0
+405,Stevia,0,0.9,0,0,0
+406,Monk Fruit,0,0.85,0,0,0
+407,Erythritol,0,0.7,0,0,0
+408,Xylitol,0,0.75,0,0,0
+409,Parsley,0,0,0.1,0.1,0
+410,Dill,0,0,0.1,0.1,0
+411,Tarragon,0,0.1,0.1,0.1,0
+412,Bay Leaf,0,0,0.2,0,0
+413,Sage,0,0,0.2,0,0
+414,Marjoram,0,0.1,0.1,0,0
+415,Chervil,0,0,0.1,0,0
+416,Lemongrass,0,0.1,0,0.3,0
+417,Curry Leaf,0.2,0,0.3,0,0
+418,Kaffir Lime Leaf,0,0.1,0,0.4,0
+419,Lavender,0,0.2,0,0,0
+420,Chamomile,0,0.3,0,0,0
+421,Hibiscus,0,0.2,0,0.6,0
+422,Turmeric,0.2,0,0.2,0,0
+423,Cardamom,0.3,0.4,0,0,0
+424,Cloves,0.5,0.3,0.1,0,0
+425,Star Anise,0.2,0.4,0.1,0,0
+426,Allspice,0.3,0.3,0.1,0,0
+427,Juniper Berries,0.1,0.1,0.1,0.1,0
+428,Fenugreek,0.3,0.2,0.3,0,0
+429,Mustard Seeds,0.5,0,0.1,0.2,0
+430,Celery Seeds,0.1,0,0.2,0,0.3
+431,Caraway Seeds,0.2,0.1,0.1,0,0
+432,Anise Seeds,0.1,0.5,0,0,0
+433,Fennel Seeds,0.1,0.4,0.1,0,0
+434,Nigella Seeds,0.2,0,0.1,0,0.1
+435,Saffron,0,0.1,0.2,0,0
+436,Sumac,0,0.1,0,0.8,0.2
+437,Za'atar,0.1,0,0.1,0.3,0.3
+438,Garam Masala,0.6,0.2,0.2,0,0.1
+439,Curry Powder,0.5,0.1,0.3,0,0.2
+440,Chinese Five Spice,0.4,0.3,0.2,0,0.1
+441,Ras el Hanout,0.4,0.3,0.2,0,0.1
+442,Berbere,0.8,0.1,0.2,0.1,0.2
+443,Herbes de Provence,0,0.1,0.1,0,0
+444,Italian Seasoning,0,0,0.2,0,0
+445,Old Bay Seasoning,0.2,0,0.2,0,0.8
+446,Cajun Seasoning,0.7,0,0.2,0,0.7
+447,Taco Seasoning,0.5,0,0.2,0,0.5
+448,Everything Bagel Seasoning,0.1,0,0.2,0,0.8
+449,Furikake,0,0.2,0.7,0,0.7
+450,Shichimi Togarashi,0.7,0.1,0.4,0,0.4
+451,MSG,0,0,0.95,0,0.3
+452,Nutritional Yeast,0,0.1,0.7,0,0.2
+453,Gelatin,0,0,0.3,0,0
+454,Agar Agar,0,0,0.1,0,0.1
+455,Pectin,0,0,0,0,0
+456,Xanthan Gum,0,0,0,0,0
+457,Cornichons,0,0.1,0.1,0.8,0.7
+458,Pickled Onions,0,0.2,0.2,0.7,0.5
+459,Pickled Jalapeños,0.7,0.1,0,0.8,0.6
+460,Pickled Ginger,0.3,0.1,0.1,0.7,0.3
+461,Sun-Dried Tomatoes,0,0.5,0.8,0.2,0.4
+462,Roasted Red Peppers,0,0.4,0.3,0.1,0.1
+463,Marinated Artichokes,0,0.2,0.4,0.3,0.5
+464,Espresso,0,0.1,0.4,0.4,0
+465,Black Tea,0,0.1,0.2,0.2,0
+466,Green Tea,0,0.1,0.3,0.2,0
+467,Matcha,0,0.2,0.5,0.1,0
+468,Chai,0.3,0.4,0.1,0,0
+469,Earl Grey,0,0.2,0.1,0.1,0
+470,Oolong Tea,0,0.2,0.3,0.1,0
+471,White Tea,0,0.2,0.2,0,0
+472,Rooibos,0,0.3,0.1,0,0
+473,Cocoa Powder,0.1,0.3,0.2,0.2,0
+474,Dark Chocolate,0.2,0.5,0.2,0.2,0
+475,Milk Chocolate,0,0.7,0.1,0,0.1
+476,White Chocolate,0,0.8,0,0,0.1
+477,Caramel,0,0.9,0.1,0,0.2
+478,Butterscotch,0,0.9,0.1,0,0.2
+479,Marshmallow,0,0.9,0,0,0
+480,Meringue,0,0.8,0,0,0
+481,Condensed Milk,0,0.9,0.2,0,0.2
+482,Evaporated Milk,0,0.3,0.2,0,0.1
+483,Coconut Milk,0,0.4,0.1,0,0.1
+484,Coconut Cream,0,0.5,0.1,0,0.1
+485,Almond Milk,0,0.3,0.1,0,0.1
+486,Oat Milk,0,0.4,0.1,0,0.1
+487,Soy Milk,0,0.2,0.3,0,0.1
+488,Rice Milk,0,0.5,0,0,0
+489,Cashew Milk,0,0.4,0.1,0,0.1
+490,Hemp Milk,0,0.2,0.2,0,0.1
+491,Habanero,0.95,0.1,0,0,0
+492,Serrano Pepper,0.85,0,0,0,0
+493,Thai Chili,0.9,0.1,0,0,0
+494,Poblano Pepper,0.3,0.2,0.1,0,0
+495,Anaheim Pepper,0.2,0.2,0.1,0,0
+496,Chipotle Pepper,0.7,0.2,0.1,0.1,0.1
+497,Ghost Pepper,1,0,0,0,0
+498,Carolina Reaper,1,0,0,0,0
+499,Scotch Bonnet,0.95,0.1,0,0,0
+500,Banana Pepper,0.1,0.3,0,0.1,0
+501,Pepperoncini,0.3,0,0,0.4,0.3
+502,Cherry Pepper,0.2,0.2,0,0.1,0
+503,Pimento,0,0.3,0.1,0,0
+504,Red Pepper Flakes,0.8,0,0,0,0.1
+505,White Pepper,0.6,0,0,0,0
+506,Pink Peppercorns,0.2,0.2,0,0,0
+507,Green Peppercorns,0.5,0,0.1,0.1,0.2
+508,Szechuan Pepper,0.6,0,0.1,0,0
+509,Long Pepper,0.7,0.1,0,0,0
+510,Aleppo Pepper,0.5,0.1,0,0,0.2
+511,Espelette Pepper,0.4,0.2,0,0,0
+512,Guajillo Chili,0.4,0.3,0.2,0,0
+513,Ancho Chili,0.3,0.4,0.2,0,0
+514,Pasilla Chili,0.4,0.2,0.2,0,0
+515,New Mexico Chili,0.3,0.3,0.2,0,0
+516,Kashmiri Chili,0.4,0.1,0,0,0
+517,Bird's Eye Chili,0.9,0,0,0,0
+518,Calabrian Chili,0.6,0,0,0,0.1
+519,Shishito Pepper,0.1,0.2,0,0,0
+520,Padrón Pepper,0.2,0.1,0,0,0
+521,Red Wine Vinegar,0,0.1,0,0.8,0
+522,White Wine Vinegar,0,0.1,0,0.8,0
+523,Apple Cider Vinegar,0,0.3,0,0.8,0
+524,Sherry Vinegar,0,0.2,0.1,0.8,0
+525,Champagne Vinegar,0,0.1,0,0.7,0
+526,Malt Vinegar,0,0.2,0.1,0.8,0.1
+527,Distilled White Vinegar,0,0,0,0.95,0
+528,Coconut Vinegar,0,0.2,0,0.7,0
+529,Ume Plum Vinegar,0,0.1,0.2,0.9,0.4
+530,Black Vinegar,0,0.4,0.3,0.6,0.2
+531,Red Wine,0,0.2,0.1,0.5,0
+532,White Wine,0,0.3,0,0.4,0
+533,Sake,0,0.3,0.2,0.1,0
+534,Mirin,0,0.7,0.2,0,0.1
+535,Cooking Sherry,0,0.3,0.2,0.2,0.3
+536,Vermouth,0,0.2,0.1,0.3,0.2
+537,Port,0,0.8,0.1,0.2,0
+538,Marsala,0,0.7,0.2,0.2,0.1
+539,Beer,0,0.2,0.2,0.1,0
+540,Stout,0,0.3,0.3,0.2,0
+541,Ale,0,0.2,0.2,0.1,0
+542,Lager,0,0.1,0.1,0.1,0
+543,Red Meat Stock,0,0.1,0.9,0,0.5
+544,Chicken Stock,0,0.1,0.8,0,0.5
+545,Vegetable Stock,0,0.1,0.6,0,0.5
+546,Fish Stock,0,0.1,0.8,0.1,0.5
+547,Dashi,0,0.1,0.9,0,0.4
+548,Beef Broth,0,0.1,0.8,0,0.5
+549,Chicken Broth,0,0.1,0.7,0,0.5
+550,Bone Broth,0,0.1,0.9,0,0.4
+551,Clam Juice,0,0.1,0.8,0.1,0.6
+552,Tomato Paste,0,0.5,0.8,0.3,0.2
+553,Tomato Sauce,0,0.4,0.6,0.3,0.3
+554,Marinara Sauce,0,0.3,0.6,0.3,0.4
+555,Pizza Sauce,0,0.4,0.6,0.3,0.4
+556,Pasta Sauce,0,0.4,0.6,0.2,0.4
+557,Alfredo Sauce,0,0.2,0.5,0,0.5
+558,Bolognese Sauce,0,0.2,0.8,0.1,0.4
+559,Puttanesca Sauce,0.2,0.2,0.7,0.4,0.7
+560,Arrabbiata Sauce,0.7,0.3,0.6,0.3,0.4
+561,Vodka Sauce,0,0.3,0.6,0.1,0.4
+562,Carbonara Sauce,0,0.1,0.7,0,0.6
+563,Pesto Rosso,0,0.2,0.6,0.1,0.4
+564,Romesco Sauce,0.3,0.2,0.4,0.2,0.3
+565,Mole Sauce,0.5,0.4,0.5,0.1,0.2
+566,Enchilada Sauce,0.4,0.2,0.4,0.2,0.3
+567,Verde Sauce,0.3,0.1,0.3,0.5,0.3
+568,Tomatillo Salsa,0.3,0.1,0.2,0.6,0.3
+569,Salsa Roja,0.5,0.2,0.3,0.4,0.4
+570,Salsa Verde,0.3,0.1,0.2,0.5,0.3
+571,Mango Salsa,0.2,0.7,0.1,0.3,0.2
+572,Pineapple Salsa,0.2,0.7,0.1,0.4,0.2
+573,Corn Salsa,0.1,0.5,0.2,0.3,0.3
+574,Black Bean Salsa,0.2,0.1,0.4,0.3,0.3
+575,Peach Salsa,0.1,0.8,0.1,0.2,0.2
+576,Cranberry Sauce,0,0.7,0,0.5,0
+577,Apple Sauce,0,0.8,0,0.3,0
+578,Plum Sauce,0,0.7,0.1,0.4,0.2
+579,Duck Sauce,0,0.8,0.2,0.3,0.2
+580,Sweet and Sour Sauce,0,0.7,0.1,0.6,0.3
+581,General Tso Sauce,0.4,0.6,0.4,0.2,0.4
+582,Orange Chicken Sauce,0.2,0.7,0.3,0.5,0.3
+583,Kung Pao Sauce,0.6,0.4,0.5,0.2,0.4
+584,Black Bean Sauce,0.1,0.2,0.8,0.1,0.7
+585,Satay Sauce,0.3,0.4,0.5,0.1,0.3
+586,Peanut Sauce,0.2,0.3,0.4,0.2,0.3
+587,Curry Sauce,0.6,0.2,0.4,0.1,0.3
+588,Tikka Masala Sauce,0.4,0.3,0.5,0.2,0.3
+589,Korma Sauce,0.2,0.4,0.4,0.1,0.2
+590,Vindaloo Sauce,0.9,0.2,0.4,0.4,0.3
+591,Madras Sauce,0.7,0.2,0.4,0.2,0.3
+592,Jalfrezi Sauce,0.6,0.2,0.4,0.3,0.3
+593,Rogan Josh Sauce,0.5,0.2,0.5,0.1,0.3
+594,Butter Chicken Sauce,0.2,0.4,0.5,0.1,0.3
+595,Saag Sauce,0.3,0.1,0.4,0.1,0.3
+596,Daal Sauce,0.2,0.1,0.4,0.1,0.3
+597,Biryani Sauce,0.4,0.2,0.5,0.1,0.3
+598,Rendang Sauce,0.5,0.3,0.6,0.2,0.3
+599,Massaman Sauce,0.3,0.5,0.5,0.2,0.3
+600,Panang Sauce,0.5,0.3,0.5,0.1,0.4
+601,Green Curry Paste,0.7,0.1,0.3,0.2,0.4
+602,Red Curry Paste,0.8,0.1,0.3,0.1,0.4
+603,Yellow Curry Paste,0.5,0.2,0.3,0.1,0.3
+604,Massaman Curry Paste,0.4,0.3,0.4,0.1,0.3
+605,Panang Curry Paste,0.6,0.2,0.4,0.1,0.4
+606,Tom Yum Paste,0.4,0.1,0.4,0.7,0.4
+607,Laksa Paste,0.6,0.2,0.5,0.2,0.4
+608,Nam Prik Pao,0.7,0.3,0.5,0.1,0.4
+609,Fish Paste,0,0,0.9,0.1,0.8
+610,Shrimp Paste,0,0.1,0.95,0.1,0.8
+611,Anchovy Paste,0,0,0.9,0.1,0.9
+612,Tomato Ketchup,0,0.7,0.4,0.4,0.5
+613,Banana Ketchup,0,0.8,0.2,0.2,0.4
+614,Mushroom Ketchup,0,0.2,0.9,0.1,0.6
+615,Fruit Ketchup,0,0.8,0.2,0.4,0.3
+616,HP Sauce,0,0.4,0.4,0.5,0.5
+617,A1 Sauce,0,0.4,0.6,0.4,0.6
+618,Maggi Seasoning,0,0.1,0.7,0.1,0.8
+619,Kitchen Bouquet,0,0.1,0.6,0,0.4
+620,Gravy Master,0,0.2,0.7,0,0.5
+621,Beef Gravy,0,0.2,0.8,0,0.6
+622,Chicken Gravy,0,0.2,0.7,0,0.6
+623,Turkey Gravy,0,0.2,0.7,0,0.6
+624,Mushroom Gravy,0,0.1,0.8,0,0.5
+625,Onion Gravy,0,0.3,0.7,0,0.6
+626,Sausage Gravy,0.1,0.2,0.7,0,0.7
+627,Brown Gravy,0,0.2,0.7,0,0.6
+628,White Gravy,0,0.2,0.5,0,0.6
+629,Red Eye Gravy,0,0.1,0.6,0.1,0.7
+630,Sawmill Gravy,0,0.2,0.6,0,0.7
+631,Hollandaise Sauce,0,0.1,0.3,0.3,0.3
+632,Béarnaise Sauce,0.1,0.1,0.3,0.3,0.3
+633,Mornay Sauce,0,0.1,0.6,0,0.5
+634,Béchamel Sauce,0,0.2,0.3,0,0.3
+635,Velouté Sauce,0,0.1,0.6,0,0.5
+636,Espagnole Sauce,0,0.2,0.8,0,0.5
+637,Demi-Glace,0,0.2,0.9,0,0.5
+638,Bordelaise Sauce,0,0.2,0.8,0.1,0.5
+639,Chasseur Sauce,0,0.2,0.8,0.1,0.5
+640,Diane Sauce,0.1,0.2,0.8,0.1,0.5
+641,Choron Sauce,0,0.2,0.4,0.2,0.3
+642,Maltaise Sauce,0,0.3,0.3,0.4,0.3
+643,Mousseline Sauce,0,0.2,0.3,0.2,0.3
+644,Sauce Gribiche,0,0.1,0.2,0.5,0.4
+645,Sauce Ravigote,0,0.1,0.2,0.4,0.4
+646,Sauce Verte,0,0.1,0.2,0.3,0.3
+647,Remoulade Sauce,0.1,0.1,0.2,0.3,0.4
+648,Rouille,0.6,0,0.2,0.2,0.3
+649,Skordalia,0.2,0,0.2,0.3,0.3
+650,Tarator,0,0.1,0.2,0.4,0.3
+651,Amba,0.3,0.3,0.2,0.5,0.4
+652,Schug,0.8,0,0.1,0.4,0.3
+653,Zhoug,0.8,0,0.1,0.4,0.3
+654,Chermoula,0.3,0,0.2,0.4,0.3
+655,Dukkah,0.2,0,0.3,0,0.4
+656,Muhammara,0.4,0.3,0.3,0.2,0.3
+657,Baba Ganoush,0.1,0.1,0.4,0.3,0.3
+658,Labneh,0,0.1,0.3,0.5,0.4
+659,Zhug,0.8,0,0.1,0.4,0.3
+660,Toum,0.3,0,0.1,0.2,0.2
+661,Persillade,0.1,0,0.1,0.1,0.2
+662,Gremolata,0.1,0,0.1,0.3,0.1
+663,Salsa Macha,0.7,0.1,0.3,0.1,0.3
+664,Salsa Matcha,0.1,0,0.4,0,0
+665,Adzhika,0.8,0,0.2,0.3,0.5
+666,Ajvar,0.2,0.3,0.3,0.2,0.3
+667,Lutenica,0.3,0.3,0.3,0.2,0.3
+668,Pindjur,0.2,0.3,0.3,0.2,0.3
+669,Chrain,0.7,0.1,0,0.3,0.2
+670,Prepared Horseradish,0.8,0,0,0.2,0.2
+671,Horseradish Cream,0.4,0.2,0.2,0.2,0.2
+672,Béarnaise Butter,0.1,0.1,0.4,0.2,0.4
+673,Maitre d'Hotel Butter,0,0,0.2,0.2,0.4
+674,Garlic Butter,0.2,0.1,0.4,0,0.4
+675,Herb Butter,0,0.1,0.2,0.1,0.4
+676,Compound Butter,0,0.1,0.3,0.1,0.4
+677,Brown Butter,0,0.2,0.4,0,0.2
+678,Clarified Butter,0,0.1,0.3,0,0.1
+679,Anchovy Butter,0,0,0.8,0.1,0.8
+680,Shrimp Butter,0,0.1,0.7,0,0.5
+681,Snail Butter,0.1,0,0.4,0,0.5
+682,Café de Paris Butter,0.1,0.1,0.3,0.1,0.5
+683,Escargot Butter,0.1,0,0.4,0,0.5
+684,Beurre Blanc,0,0.1,0.2,0.3,0.3
+685,Beurre Rouge,0,0.2,0.3,0.3,0.3
+686,Beurre Noisette,0,0.2,0.4,0,0.2
+687,Beurre Monté,0,0.1,0.3,0.1,0.3
+688,Pistou,0,0,0.4,0.1,0.3
+689,Tapenade,0,0,0.6,0.2,0.8
+690,Anchoïade,0,0,0.9,0.2,0.9
+691,Brandade,0,0.1,0.7,0.1,0.6
+692,Rouille de Poulpe,0.5,0,0.5,0.2,0.4
+693,Sofrito,0,0.2,0.4,0.1,0.2
+694,Sofregit,0,0.3,0.4,0.1,0.2
+695,Recaito,0.1,0.1,0.3,0.2,0.2
+696,Mirepoix,0,0.2,0.3,0,0.1
+697,Trinity,0,0.2,0.3,0,0.1
+698,Battuto,0,0.2,0.3,0,0.1
+699,Soffrito,0,0.2,0.4,0.1,0.2
+700,Refogado,0.1,0.2,0.4,0.1,0.2
+701,Sambar Powder,0.5,0,0.3,0.3,0.2
+702,Rasam Powder,0.5,0,0.3,0.4,0.2
+703,Goda Masala,0.4,0.2,0.3,0.1,0.2
+704,Panch Phoron,0.3,0.1,0.2,0,0.1
+705,Chat Masala,0.3,0,0.2,0.6,0.4
+706,Amchur Powder,0,0.1,0.1,0.9,0.1
+707,Asafoetida,0.1,0,0.4,0,0.1
+708,Mango Powder,0,0.3,0.1,0.7,0.1
+709,Kokum,0,0.1,0.2,0.9,0.1
+710,Tamarind Concentrate,0,0.5,0.2,0.9,0.2
+711,Black Salt,0.1,0,0.2,0.2,0.9
+712,Pink Salt,0,0,0,0,0.95
+713,Himalayan Salt,0,0,0,0,0.95
+714,Sea Salt,0,0,0,0,1
+715,Kosher Salt,0,0,0,0,1
+716,Fleur de Sel,0,0,0.1,0,1
+717,Maldon Salt,0,0,0.1,0,1
+718,Smoked Salt,0,0,0.3,0,0.9
+719,Flavored Salt,0,0.1,0.2,0,0.9
+720,Celery Salt,0.1,0,0.3,0,0.9
+721,Garlic Salt,0.2,0,0.4,0,0.9
+722,Onion Salt,0.1,0.1,0.4,0,0.9
+723,Seasoned Salt,0.1,0.1,0.3,0,0.9
+724,Lemon Salt,0,0.1,0,0.5,0.9
+725,Lime Salt,0,0.1,0,0.5,0.9
+726,Chili Lime Salt,0.5,0.1,0,0.5,0.9
+727,Truffle Salt,0,0,0.8,0,0.9
+728,Herb Salt,0,0,0.2,0,0.9
+729,Seaweed Salt,0,0,0.7,0,0.9
+730,Bacon Salt,0,0.2,0.7,0,0.9
+731,Pickled Salt,0,0.1,0.1,0.5,0.9
+732,Rock Salt,0,0,0,0,1
+733,Table Salt,0,0,0,0,1
+734,Iodized Salt,0,0,0,0,1
+735,Curing Salt,0,0,0,0,1
+736,Pickling Salt,0,0,0,0,1
+737,Coarse Salt,0,0,0,0,1
+738,Fine Salt,0,0,0,0,1
+739,Popcorn Salt,0,0,0.1,0,1
+740,Pretzel Salt,0,0,0,0,1
+741,Hawaiian Black Salt,0,0,0.1,0,0.95
+742,Red Hawaiian Salt,0,0,0.1,0,0.95
+743,Sel Gris,0,0,0.1,0,1
+744,Black Lava Salt,0,0,0.1,0,0.95
+745,Cyprus Black Salt,0,0,0.2,0,0.95
+746,Kala Namak,0.1,0,0.2,0.2,0.9
+747,Bamboo Salt,0,0,0.1,0,0.95
+748,Danish Smoked Salt,0,0,0.4,0,0.9
+749,Alder Smoked Salt,0,0,0.3,0,0.9
+750,Applewood Smoked Salt,0,0.1,0.3,0,0.9
+751,Cherry Smoked Salt,0,0.1,0.3,0,0.9
+752,Hickory Smoked Salt,0,0,0.4,0,0.9
+753,Mesquite Smoked Salt,0,0,0.4,0,0.9
+754,Vanilla Sugar,0,0.9,0,0,0
+755,Cinnamon Sugar,0.1,0.9,0,0,0
+756,Lemon Sugar,0,0.9,0,0.3,0
+757,Lavender Sugar,0,0.9,0,0,0
+758,Rose Sugar,0,0.9,0,0,0
+759,Cardamom Sugar,0.2,0.9,0,0,0
+760,Ginger Sugar,0.4,0.9,0,0,0
+761,Orange Sugar,0,0.9,0,0.3,0
+762,Mint Sugar,0,0.9,0,0,0
+763,Chai Sugar,0.3,0.9,0,0,0
+764,Pumpkin Spice Sugar,0.2,0.9,0,0,0
+765,Apple Pie Spice,0.2,0.4,0,0,0
+766,Pumpkin Pie Spice,0.2,0.4,0,0,0
+767,Gingerbread Spice,0.3,0.4,0,0,0
+768,Speculoos Spice,0.3,0.4,0,0,0
+769,Mulling Spice,0.3,0.4,0,0,0
+770,Pickling Spice,0.3,0.1,0.1,0.5,0.2
+771,Crab Boil,0.4,0,0.2,0.1,0.7
+772,Shrimp Boil,0.4,0,0.2,0.1,0.7
+773,Fish Fry Seasoning,0.3,0,0.2,0.1,0.6
+774,Blackening Seasoning,0.7,0,0.2,0,0.6
+775,Jerk Seasoning,0.8,0.2,0.2,0.1,0.4
+776,Adobo Seasoning,0.3,0,0.3,0.1,0.7
+777,Sazon Seasoning,0.2,0,0.3,0,0.6
+778,Recado Rojo,0.4,0.1,0.2,0.2,0.2
+779,Recado Negro,0.3,0.2,0.3,0.1,0.2
+780,Baharat,0.5,0.3,0.2,0,0.1
+781,Hawaij,0.4,0.2,0.2,0,0.1
+782,Advieh,0.3,0.4,0.2,0,0.1
+783,Duqqa,0.2,0.1,0.3,0,0.4
+784,Chermoula Spice,0.3,0.1,0.2,0.2,0.2
+785,Harissa Spice,0.8,0.1,0.2,0.2,0.3
+786,Merguez Spice,0.6,0.1,0.2,0,0.3
+787,Ras el Hanout Spice,0.4,0.3,0.2,0,0.1
+788,Tandoori Masala,0.6,0.1,0.3,0.1,0.3
+789,Biryani Masala,0.5,0.2,0.3,0,0.2
+790,Chana Masala,0.5,0.1,0.3,0.3,0.3
+791,Chole Masala,0.5,0.1,0.3,0.3,0.3
+792,Pav Bhaji Masala,0.5,0.1,0.3,0.1,0.3
+793,Kitchen King Masala,0.4,0.2,0.3,0.1,0.2
+794,Meat Masala,0.5,0.1,0.4,0.1,0.3
+795,Fish Masala,0.5,0.1,0.3,0.2,0.4
+796,Sambar Masala,0.5,0,0.3,0.3,0.2
+797,Rasam Masala,0.5,0,0.3,0.4,0.2
+798,Garam Masala Sweet,0.4,0.3,0.2,0,0.1
+799,Madras Curry Powder,0.6,0.1,0.3,0.1,0.2
+800,Vindaloo Paste,0.9,0.2,0.4,0.4,0.3
+801,Korma Paste,0.2,0.4,0.4,0.1,0.2
+802,Tikka Paste,0.4,0.2,0.4,0.2,0.3
+803,Butter Chicken Paste,0.2,0.4,0.5,0.1,0.3
+804,Rogan Josh Paste,0.5,0.2,0.5,0.1,0.3
+805,Jalfrezi Paste,0.6,0.2,0.4,0.3,0.3
+806,Madras Paste,0.7,0.2,0.4,0.2,0.3
+807,Balti Paste,0.5,0.2,0.4,0.2,0.3
+808,Dopiaza Paste,0.4,0.3,0.4,0.1,0.3
+809,Pathia Paste,0.6,0.3,0.4,0.4,0.3
+810,Dhansak Paste,0.5,0.3,0.4,0.3,0.3
+811,Coconut Curry Paste,0.4,0.3,0.4,0.1,0.3
+812,Laksa Curry Paste,0.6,0.2,0.5,0.2,0.4
+813,Rendang Paste,0.5,0.3,0.6,0.2,0.3
+814,Satay Paste,0.3,0.3,0.5,0.1,0.3
+815,Tom Kha Paste,0.3,0.2,0.4,0.5,0.3
+816,Pad Thai Sauce,0.2,0.5,0.4,0.5,0.4
+817,Pad See Ew Sauce,0.1,0.4,0.6,0.1,0.5
+818,Drunken Noodle Sauce,0.6,0.3,0.5,0.2,0.5
+819,Larb Sauce,0.4,0.2,0.4,0.6,0.5
+820,Nam Jim Sauce,0.5,0.3,0.3,0.6,0.4
+821,Nuoc Cham,0.3,0.3,0.4,0.7,0.5
+822,Nuoc Mam,0,0.1,0.95,0.2,0.9
+823,Vietnamese Fish Sauce,0,0.1,0.95,0.2,0.9
+824,Patis,0,0.1,0.9,0.2,0.9
+825,Bagoong,0.1,0.1,0.95,0.1,0.9
+826,Kecap Manis,0,0.8,0.6,0,0.5
+827,Kecap Asin,0,0.1,0.7,0,0.9
+828,ABC Sweet Soy Sauce,0,0.8,0.6,0,0.5
+829,Maggi Sauce,0,0.1,0.7,0,0.8
+830,Golden Mountain Sauce,0,0.2,0.7,0,0.7
+831,Healthy Boy Sauce,0,0.3,0.6,0,0.6
+832,Thin Soy Sauce,0,0.1,0.8,0.1,0.9
+833,Thick Soy Sauce,0,0.3,0.8,0,0.7
+834,Dark Soy Sauce,0,0.2,0.9,0,0.8
+835,Light Soy Sauce,0,0.1,0.9,0.1,0.9
+836,Mushroom Soy Sauce,0,0.2,0.95,0,0.8
+837,Shrimp Soy Sauce,0,0.1,0.9,0,0.9
+838,Double Black Soy Sauce,0,0.3,0.9,0,0.8
+839,White Soy Sauce,0,0.1,0.7,0,0.8
+840,Usukuchi Soy Sauce,0,0.1,0.8,0,0.9
+841,Koikuchi Soy Sauce,0,0.1,0.9,0.1,0.9
+842,Saishikomi Soy Sauce,0,0.2,0.9,0.1,0.8
+843,Shiro Soy Sauce,0,0.2,0.7,0,0.7
+844,Reduced Sodium Soy Sauce,0,0.1,0.8,0.1,0.6
+845,Gluten-Free Soy Sauce,0,0.1,0.8,0.1,0.8
+846,Low Sodium Tamari,0,0.1,0.85,0.1,0.6
+847,San-J Tamari,0,0.1,0.9,0.1,0.9
+848,Bragg Liquid Aminos,0,0.1,0.8,0,0.8
+849,Coconut Aminos Sauce,0,0.4,0.6,0,0.6
+850,Soy-Free Aminos,0,0.2,0.7,0,0.7
+851,Tonkatsu Sauce,0,0.6,0.5,0.3,0.4
+852,Okonomiyaki Sauce,0,0.6,0.5,0.2,0.4
+853,Yakisoba Sauce,0,0.5,0.6,0.2,0.5
+854,Takoyaki Sauce,0,0.6,0.5,0.2,0.4
+855,Unagi Sauce,0,0.7,0.7,0.1,0.5
+856,Eel Sauce,0,0.7,0.7,0.1,0.5
+857,Kabayaki Sauce,0,0.7,0.7,0.1,0.5
+858,Mentsuyu,0,0.3,0.8,0.1,0.6
+859,Tsuyu,0,0.3,0.8,0.1,0.6
+860,Soba Tsuyu,0,0.3,0.8,0.1,0.6
+861,Udon Sauce,0,0.3,0.7,0.1,0.6
+862,Tempura Sauce,0,0.3,0.6,0.1,0.5
+863,Katsu Sauce,0,0.6,0.5,0.3,0.4
+864,Bull-Dog Sauce,0,0.6,0.5,0.3,0.4
+865,Japanese BBQ Sauce,0,0.6,0.6,0.2,0.5
+866,Yakiniku Sauce,0,0.5,0.7,0.1,0.5
+867,Tare Sauce,0,0.4,0.8,0.1,0.6
+868,Shoyu Tare,0,0.2,0.9,0.1,0.7
+869,Shio Tare,0,0.1,0.6,0,0.9
+870,Miso Tare,0,0.2,0.9,0.1,0.7
+871,Tonkotsu Base,0,0.2,0.8,0,0.5
+872,Shoyu Ramen Base,0,0.2,0.9,0.1,0.7
+873,Miso Ramen Base,0,0.2,0.9,0.1,0.7
+874,Shio Ramen Base,0,0.1,0.6,0,0.9
+875,Tantanmen Base,0.6,0.3,0.7,0.2,0.5
+876,Curry Ramen Base,0.5,0.2,0.7,0.1,0.5
+877,Tsukemen Dipping Sauce,0,0.3,0.9,0.1,0.6
+878,Mazemen Sauce,0,0.3,0.8,0.1,0.6
+879,Aburasoba Sauce,0,0.3,0.8,0.1,0.7
+880,Karashi Mustard,0.6,0,0.1,0.2,0.2
+881,Yuzu Kosho,0.7,0.1,0.2,0.7,0.4
+882,Shichimi,0.7,0.1,0.4,0,0.4
+883,Rayu,0.8,0,0.2,0,0.3
+884,Mayu,0,0.1,0.6,0,0.3
+885,Negi Oil,0.2,0,0.3,0,0.2
+886,Sesame Paste,0,0.1,0.4,0,0.2
+887,Japanese Sesame Dressing,0,0.3,0.4,0.3,0.3
+888,Goma Dare,0,0.2,0.5,0.2,0.4
+889,Wafu Dressing,0,0.2,0.4,0.4,0.4
+890,Carrot Ginger Dressing,0.3,0.3,0.2,0.3,0.3
+891,Miso Dressing,0,0.2,0.7,0.1,0.6
+892,Ponzu Dressing,0,0.2,0.5,0.7,0.6
+893,Yuzu Dressing,0,0.3,0.2,0.8,0.3
+894,Sesame Ginger Dressing,0.3,0.3,0.4,0.2,0.3
+895,Asian Vinaigrette,0,0.2,0.3,0.5,0.4
+896,Chinese Chicken Salad Dressing,0,0.4,0.3,0.3,0.3
+897,Peanut Dressing,0.2,0.3,0.4,0.2,0.3
+898,Thai Peanut Dressing,0.3,0.4,0.4,0.3,0.3
+899,Vietnamese Dressing,0.2,0.3,0.3,0.6,0.4
+900,Korean BBQ Sauce,0.3,0.5,0.7,0.1,0.5
+901,Gochugaru Flakes,0.7,0,0.1,0,0.1
+902,Doenjang,0,0.1,0.9,0.1,0.8
+903,Ssamjang,0.3,0.3,0.8,0.1,0.6
+904,Chogochujang,0.5,0.4,0.5,0.3,0.4
+905,Yangnyeom Sauce,0.5,0.5,0.5,0.2,0.4
+906,Bulgogi Marinade,0.2,0.5,0.7,0.1,0.5
+907,Galbi Marinade,0.2,0.5,0.7,0.1,0.5
+908,Korean Chili Paste,0.7,0.3,0.6,0.1,0.5
+909,Korean Soybean Paste,0,0.1,0.9,0.1,0.8
+910,Perilla Oil,0,0.1,0.2,0,0
+911,Sesame Perilla Oil,0,0.1,0.3,0,0.1
+912,Korean Sesame Oil,0,0.1,0.3,0,0
+913,Black Sesame Oil,0,0.1,0.4,0,0
+914,Toasted Sesame Oil,0,0.1,0.4,0,0
+915,Korean Fish Sauce,0,0.1,0.9,0.2,0.9
+916,Korean Soy Sauce,0,0.1,0.9,0.1,0.9
+917,Joseon Ganjang,0,0.1,0.9,0.1,0.9
+918,Yangjo Ganjang,0,0.2,0.8,0.1,0.8
+919,Jin Ganjang,0,0.1,0.9,0.1,0.9
+920,Guk Ganjang,0,0.1,0.8,0.1,0.9
+921,Mat Ganjang,0,0.2,0.8,0.1,0.8
+922,Anchovy Stock,0,0.1,0.9,0.1,0.6
+923,Korean Anchovy Sauce,0,0.1,0.9,0.1,0.7
+924,Myeolchi Aekjeot,0,0.1,0.9,0.1,0.8
+925,Saeujeot,0,0.1,0.95,0.1,0.9
+926,Kkanpunggi Sauce,0.6,0.4,0.6,0.2,0.5
+927,Jjajang Sauce,0,0.3,0.7,0,0.6
+928,Jjamppong Sauce,0.6,0.2,0.7,0.2,0.5
+929,Tangsuyuk Sauce,0,0.7,0.3,0.6,0.3
+930,Dakgangjeong Sauce,0.4,0.6,0.5,0.2,0.4
+931,Buldak Sauce,0.9,0.3,0.5,0.1,0.4
+932,Tteokbokki Sauce,0.6,0.4,0.6,0.1,0.4
+933,Rabokki Sauce,0.5,0.3,0.7,0.1,0.5
+934,Japchae Sauce,0,0.3,0.7,0,0.5
+935,Bibimbap Sauce,0.4,0.3,0.6,0.1,0.5
+936,Naengmyeon Sauce,0.2,0.2,0.5,0.5,0.4
+937,Kongguksu Sauce,0,0.2,0.6,0,0.3
+938,Kimchi Jjigae Base,0.5,0.1,0.7,0.5,0.6
+939,Soondubu Base,0.5,0.1,0.6,0.1,0.5
+940,Doenjang Jjigae Base,0.1,0.1,0.9,0.1,0.7
+941,Gamjatang Base,0.4,0.1,0.8,0.1,0.6
+942,Budae Jjigae Base,0.3,0.2,0.7,0.1,0.7
+943,Kimchi Base,0.6,0.1,0.5,0.7,0.6
+944,White Kimchi Brine,0.1,0.1,0.3,0.4,0.6
+945,Water Kimchi Brine,0.1,0.2,0.3,0.5,0.5
+946,Kkakdugi Brine,0.5,0.1,0.4,0.6,0.6
+947,Nabak Kimchi Brine,0.2,0.2,0.3,0.5,0.5
+948,Dongchimi Brine,0.1,0.2,0.3,0.5,0.5
+949,Bossam Kimchi Brine,0.3,0.1,0.5,0.5,0.6
+950,Chonggak Kimchi Brine,0.5,0.1,0.4,0.6,0.6
+951,Pa Kimchi Brine,0.4,0.1,0.4,0.6,0.6
+952,Mustard Kimchi Brine,0.5,0,0.4,0.7,0.6
+953,Perilla Kimchi Brine,0.4,0.1,0.5,0.6,0.6
+954,Sesame Leaf Kimchi Brine,0.3,0.1,0.5,0.5,0.6
+955,Green Onion Kimchi Brine,0.4,0.1,0.4,0.6,0.6
+956,Young Radish Kimchi Brine,0.4,0.1,0.4,0.6,0.6
+957,Cucumber Kimchi Brine,0.4,0.1,0.3,0.6,0.6
+958,Cabbage Kimchi Brine,0.5,0.1,0.4,0.7,0.6
+959,Wrapped Kimchi Brine,0.4,0.1,0.5,0.6,0.6
+960,Stuffed Kimchi Brine,0.4,0.2,0.5,0.6,0.6
+961,Fermented Soybean Paste,0,0.1,0.9,0.1,0.8
+962,Fermented Shrimp Paste,0,0.1,0.95,0.1,0.9
+963,Fermented Anchovy Sauce,0,0.1,0.9,0.1,0.8
+964,Fermented Fish Sauce,0,0.1,0.95,0.2,0.9
+965,Fermented Black Beans,0,0.1,0.9,0.1,0.8
+966,Fermented Tofu,0,0.1,0.8,0.2,0.8
+967,Preserved Radish,0,0.2,0.3,0.3,0.7
+968,Preserved Mustard Greens,0.3,0,0.4,0.4,0.7
+969,Preserved Vegetables,0.1,0.1,0.4,0.4,0.7
+970,Salted Duck Egg,0,0.1,0.6,0,0.9
+971,Century Egg,0,0.1,0.7,0.1,0.5
+972,Tea Egg,0,0.1,0.5,0.1,0.6
+973,Soy Sauce Egg,0,0.2,0.6,0,0.7
+974,Ajitsuke Tamago,0,0.2,0.6,0,0.6
+975,Onsen Tamago,0,0.1,0.4,0,0.1
+976,Hanjuku Tamago,0,0.1,0.4,0,0.1
+977,Deviled Egg,0.1,0.1,0.3,0.2,0.4
+978,Scotch Egg,0.1,0.1,0.6,0,0.5
+979,Pickled Egg,0,0.1,0.3,0.7,0.6
+980,Smoked Egg,0,0.1,0.5,0,0.3
+981,Marinated Egg,0,0.2,0.5,0.1,0.5
+982,Seasoned Egg,0.1,0.1,0.5,0,0.5
+983,Ramen Egg,0,0.2,0.6,0,0.6
+984,Shoyu Egg,0,0.2,0.6,0,0.7
+985,Miso Egg,0,0.2,0.7,0.1,0.6
+986,Curry Egg,0.4,0.2,0.5,0.1,0.4
+987,Spicy Egg,0.6,0.1,0.4,0.1,0.4
+988,Herb Egg,0,0.1,0.3,0.1,0.3
+989,Truffle Egg,0,0.1,0.7,0,0.3
+990,Caviar Topped Egg,0,0.1,0.8,0,0.7
+991,Smoked Salmon Egg,0,0.1,0.7,0,0.5
+992,Bacon Egg,0,0.2,0.7,0,0.7
+993,Cheese Egg,0,0.1,0.6,0,0.6
+994,Avocado Egg,0,0.1,0.5,0,0.2
+995,Egg Salad,0,0.2,0.4,0.2,0.4
+996,Egg Mayo,0,0.2,0.4,0.2,0.4
+997,Egg White,0,0,0.2,0,0.1
+998,Egg Yolk,0,0.1,0.5,0,0.1
+999,Whole Egg,0,0.1,0.4,0,0.1
+1000,Liquid Egg,0,0.1,0.4,0,0.1
