@@ -825,15 +825,22 @@ def _safe_lower_list(values: Optional[List[str]]) -> List[str]:
             out.append(v.lower())
     return out
 
-def _allergy_filter(menu_items: List[str], allergies: List[str]) -> bool:
-    if not allergies:
-        return True
-    menu_text = "\n".join(menu_items).lower()
-    for allergy in allergies:
-        a = (allergy or "").strip().lower()
-        if a and a in menu_text:
-            return False
-    return True
+def _filter_dishes_by_allergy(menu_items: List[str], allergies: List[str]) -> List[str]:
+    if not allergies or not menu_items:
+        return menu_items or []
+    
+    safe_dishes = []
+    for dish in menu_items:
+        d_lower = dish.lower()
+        is_safe = True
+        for allergy in allergies:
+            a = (allergy or "").strip().lower()
+            if a and a in d_lower:
+                is_safe = False
+                break
+        if is_safe:
+            safe_dishes.append(dish)
+    return safe_dishes
 
 def _favorites_boost(menu_items: List[str], favorite_dishes: List[Dict]) -> float:
     if not favorite_dishes:
@@ -2380,11 +2387,15 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
         try:
             pc_index = _get_pinecone_index()
             qvec = _embed_text(request.query)
-            top_k = max(final_max_results, 10)
+            # Increase top_k to fetch more candidates for re-ranking
+            top_k = max(final_max_results, 50)
             location_key = _normalize_key(search_location)
             # Handle "City, State" format by taking only the city part
             if "," in location_key:
                 location_key = location_key.split(",")[0].strip()
+            
+            # Special case for "New York" -> "new york" (already handled by lower())
+            # But ensure we match what repopulate_db.py stored
             
             flt = {"location_key": {"$eq": location_key}} if location_key else None
             print(f"[DEBUG] Querying Pinecone with top_k={top_k}, filter={flt}, namespace='restaurants'")
@@ -2395,6 +2406,16 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
             matches = query_res.get("matches", []) if isinstance(query_res, dict) else getattr(query_res, "matches", [])
             print(f"[DEBUG] Pinecone returned {len(matches)} matches")
 
+            # Pre-process query for keyword matching
+            query_tokens = set()
+            if request.query:
+                # Simple tokenization: remove punctuation, lowercase
+                q_clean = re.sub(r"[^\w\s]", "", request.query.lower())
+                query_tokens = set(q_clean.split())
+                # Remove common stop words
+                stop_words = {"i", "want", "to", "eat", "some", "a", "the", "in", "at", "near", "me", "place", "restaurant", "find", "show", "give", "food", "good", "best", "delicious", "yummy", "looking", "for"}
+                query_tokens = query_tokens - stop_words
+
             for m in matches:
                 meta = m.get("metadata") if isinstance(m, dict) else getattr(m, "metadata", {})
                 score = float(m.get("score", 0.0)) if isinstance(m, dict) else float(getattr(m, "score", 0.0))
@@ -2402,7 +2423,9 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
                 menu_items = _filter_dishes_by_diet(menu_items, diet_type)
                 if not menu_items:
                     continue
-                if not _allergy_filter(menu_items, allergies):
+                
+                menu_items = _filter_dishes_by_allergy(menu_items, allergies)
+                if not menu_items:
                     continue
 
                 location = meta.get("location")
@@ -2439,7 +2462,34 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
 
                 tscore = _taste_similarity(user_taste_vec, taste_vec)
                 boost = _favorites_boost(menu_items, [d.model_dump() if hasattr(d, "model_dump") else d for d in favorite_dishes] if favorite_dishes else [])
-                combined = score + 0.35 * tscore + boost
+                
+                # Calculate query relevance boost
+                query_boost = 0.0
+                if query_tokens:
+                    # Check menu items
+                    menu_text = " ".join(menu_items).lower()
+                    # Check popular dishes
+                    pop_dishes = meta.get("popular_dishes") or []
+                    if isinstance(pop_dishes, list):
+                        pop_text = " ".join([str(p) for p in pop_dishes]).lower()
+                    else:
+                        pop_text = ""
+                    
+                    # Check name and cuisine
+                    name_text = (meta.get("name") or "").lower()
+                    cuisine_text = " ".join(meta.get("cuisine_types") or []).lower()
+                    
+                    full_text = menu_text + " " + pop_text + " " + name_text + " " + cuisine_text
+                    full_text_clean = re.sub(r"[^\w\s]", "", full_text)
+                    restaurant_tokens = set(full_text_clean.split())
+                    
+                    overlap = len(query_tokens.intersection(restaurant_tokens))
+                    has_keyword_match = False
+                    if overlap > 0:
+                        query_boost = 0.5 + (0.2 * overlap)
+                        has_keyword_match = True
+
+                combined = score + 0.35 * tscore + boost + query_boost
 
                 ranked.append({
                     "id": m.get("id") if isinstance(m, dict) else getattr(m, "id", None),
@@ -2456,10 +2506,18 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
                     "recommended_dishes": _dish_recommendations_for_restaurant(menu_items, user_taste_vec, diet_type, top_n=5),
                     "photos": meta.get("photos"),
                     "menu_url": meta.get("menu_url"),
-                    "score": combined
+                    "score": combined,
+                    "has_keyword_match": has_keyword_match
                 })
 
             ranked.sort(key=lambda x: x.get("score", 0.0), reverse=True)
+            
+            # Filter out irrelevant results if we have good matches
+            # has_keyword_match = any(r.get("has_keyword_match") for r in ranked)
+            # if has_keyword_match:
+            #     # Keep only those with keyword matches
+            #     ranked = [r for r in ranked if r.get("has_keyword_match")]
+            
             ranked = ranked[:final_max_results]
         except Exception as e:
             print(f"[DEBUG] Error in ranking: {e}")
@@ -2481,11 +2539,17 @@ async def chat_with_yelp(request: ChatRequest, db: Session = Depends(get_db)):
             original_text = ai_json.get("response", {}).get("text", "")
             if original_text and ranked:
                 restaurant_names = [r.get("name") for r in ranked if r.get("name")]
-                diet_label = "vegetarian" if diet_type in {"veg", "vegetarian"} else diet_type or "any diet"
+                
+                is_veg = diet_type in {"veg", "vegetarian"}
+                diet_instruction = ""
+                if is_veg:
+                    diet_instruction = "2. Only mention dishes suitable for a vegetarian diet (NO meat, fish, eggs, or animal products)."
+                else:
+                    diet_instruction = "2. Mention a mix of popular dishes (no dietary restrictions)."
 
                 rewrite_prompt = f"""Rewrite this restaurant recommendation text to:
 1. Match the actual {len(ranked)} restaurants shown: {', '.join(restaurant_names[:5])}
-2. Only mention dishes suitable for {diet_label} diet (NO meat, fish, eggs, or animal products if vegetarian)
+{diet_instruction}
 3. Keep the tone friendly and helpful
 4. Be concise (2-3 sentences max)
 
@@ -2501,7 +2565,7 @@ Rewritten text:"""
                 )
                 rewritten_text = completion.choices[0].message.content.strip()
                 ai_json["response"]["text"] = rewritten_text
-                print(f"[DEBUG] Rewrote response text for {diet_label} diet")
+                print(f"[DEBUG] Rewrote response text for {diet_type} diet")
         except Exception as e:
             print(f"[DEBUG] Failed to rewrite response text: {e}")
 
