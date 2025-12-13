@@ -424,8 +424,14 @@ async def _fetch_menu_url(menu_url: str) -> Optional[httpx.Response]:
         return None
     try:
         print(f"[DEBUG] Fetching URL: {menu_url}")
-        async with httpx.AsyncClient(follow_redirects=True, timeout=20.0) as http_client:
-            resp = await http_client.get(menu_url, headers={"User-Agent": "Mozilla/5.0"})
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://www.google.com/"
+        }
+        async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as http_client:
+            resp = await http_client.get(menu_url, headers=headers)
             print(f"[DEBUG] Status code: {resp.status_code}")
             if resp.status_code >= 400:
                 return None
