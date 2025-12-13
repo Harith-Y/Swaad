@@ -2,6 +2,7 @@ backend/venv
 frontend/venv
 .env
 venv
+.idea
 
 .DS_Store
 *.log
