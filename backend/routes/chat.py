@@ -596,6 +596,24 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
             "menu_buddy": {"recommendations": []}
         }
 
+    # Check if query is relevant to food/restaurants
+    from dish_processing import is_relevant_query
+    if not is_relevant_query(request.query):
+        print(f"[DEBUG] Non-food query detected: '{request.query}'")
+        out_of_scope_responses = [
+            "I'm Swaad, your food and restaurant recommendation assistant! 🍽️ I specialize in helping you discover amazing dishes and restaurants. For questions about tourist attractions, hotels, or other travel info, you might want to check a travel guide. But if you're hungry and looking for great food recommendations, I'm here to help! What are you craving?",
+            "I focus on food and restaurant recommendations! 😊 While I can't help with general travel or tourist spots, I'm excellent at finding delicious restaurants and dishes that match your taste. Want to explore some amazing food options instead?",
+            "That's outside my expertise! I'm your AI food companion, specialized in restaurant and dish recommendations. 🍴 If you're looking for places to eat or specific dishes to try, I'm your go-to assistant! What kind of food are you in the mood for?"
+        ]
+        import random
+        return {
+            "response": {
+                "text": random.choice(out_of_scope_responses)
+            },
+            "chat_id": request.chat_id,
+            "menu_buddy": {"recommendations": []}
+        }
+
     # Check if this is a restaurant menu query
     restaurant_name_query = is_restaurant_menu_query(request.query)
     if restaurant_name_query:

@@ -474,18 +474,62 @@ Response:"""
 
 def is_relevant_query(query: str) -> bool:
     """
-    Check if query is relevant to food/restaurant search.
+    Check if query is relevant to food/restaurant search using Groq AI.
+    Returns True if query is about food/restaurants, False otherwise.
     """
     query_lower = query.lower()
 
-    # Food/restaurant keywords
+    # Fast path: obvious food/restaurant keywords
     relevant_keywords = [
         "food", "eat", "restaurant", "dish", "meal", "hungry", "craving",
         "lunch", "dinner", "breakfast", "cuisine", "menu", "order",
-        "pizza", "burger", "sushi", "pasta", "chicken", "veg", "non-veg"
+        "pizza", "burger", "sushi", "pasta", "chicken", "veg", "non-veg",
+        "taste", "flavor", "spicy", "sweet", "savory"
     ]
 
-    return any(keyword in query_lower for keyword in relevant_keywords)
+    # Fast path: obvious non-food keywords
+    irrelevant_keywords = [
+        "tourist", "sightseeing", "museum", "park", "beach", "hotel",
+        "shopping", "mall", "attraction", "landmark", "monument"
+    ]
+
+    # If contains irrelevant keywords and no relevant keywords, reject immediately
+    has_irrelevant = any(keyword in query_lower for keyword in irrelevant_keywords)
+    has_relevant = any(keyword in query_lower for keyword in relevant_keywords)
+
+    if has_irrelevant and not has_relevant:
+        return False
+
+    if has_relevant:
+        return True
+
+    # Use Groq for ambiguous queries
+    try:
+        client = get_groq_client()
+        prompt = f"""Is this query about food, restaurants, or dining?
+Query: "{query}"
+
+Rules:
+1. Return "yes" if asking about food, restaurants, dishes, meals, or dining.
+2. Return "no" if asking about tourist attractions, hotels, shopping, or general travel.
+3. Return "no" if asking about non-food places to visit.
+
+Response (only "yes" or "no"):"""
+
+        completion = client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.3-70b-versatile",
+            temperature=0,
+            max_tokens=5
+        )
+
+        result = completion.choices[0].message.content.strip().lower()
+        return result == "yes"
+
+    except Exception as e:
+        print(f"[ERROR] Relevance check failed: {e}")
+        # Default to True to avoid blocking valid queries
+        return True
 
 
 def check_location_match(user_location: str, restaurant_location: str) -> bool:
