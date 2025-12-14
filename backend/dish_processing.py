@@ -62,13 +62,77 @@ def allergy_filter(menu_items: List[str], allergies: List[str]) -> bool:
     """
     if not allergies:
         return True
-    
+
     menu_text = " ".join(menu_items).lower()
     for allergen in allergies:
         if allergen.lower() in menu_text:
             return False
-    
+
     return True
+
+
+def filter_dishes_by_allergy(dishes: List[str], allergies: List[str]) -> List[str]:
+    """
+    Filter dishes that are safe for the given allergies using Groq.
+    """
+    if not dishes or not allergies:
+        return dishes
+
+    try:
+        client = get_groq_client()
+        safe_dishes = []
+        batch_size = 50
+
+        for i in range(0, len(dishes), batch_size):
+            batch = dishes[i:i+batch_size]
+
+            dishes_text = "\n".join([f"{idx+1}. {d}" for idx, d in enumerate(batch)])
+            allergies_text = ", ".join(allergies)
+
+            prompt = f"""Identify which of these dishes are SAFE for someone with these allergies: {allergies_text}.
+
+Rules:
+1. Analyze the likely ingredients of each dish.
+2. If a dish likely contains an allergen (e.g. "Pesto" contains nuts/dairy, "Carbonara" contains egg/dairy/pork), exclude it.
+3. Be strict. Safety first.
+4. Return ONLY the numbers of the SAFE dishes.
+5. Return comma-separated numbers (e.g. "1,3,5").
+6. If none are safe, return "none".
+
+List:
+{dishes_text}
+
+Response:"""
+
+            completion = client.chat.completions.create(
+                messages=[{"role": "user", "content": prompt}],
+                model="llama-3.3-70b-versatile",
+                temperature=0,
+                max_tokens=100
+            )
+
+            result = completion.choices[0].message.content.strip().lower()
+
+            if result == "none":
+                continue
+
+            try:
+                indices = [int(x.strip()) - 1 for x in result.split(',') if x.strip().isdigit()]
+                for idx in indices:
+                    if 0 <= idx < len(batch):
+                        safe_dishes.append(batch[idx])
+            except Exception:
+                # Fallback
+                for d in batch:
+                    if allergy_filter(d, allergies):
+                        safe_dishes.append(d)
+
+        return safe_dishes
+
+    except Exception as e:
+        print(f"[ERROR] Groq allergy filter failed: {e}")
+        # Fallback
+        return [d for d in dishes if allergy_filter(d, allergies)]
 
 
 def classify_dish_diet_with_groq(dish_name: str) -> str:
