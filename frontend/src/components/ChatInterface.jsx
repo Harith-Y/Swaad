@@ -6,6 +6,7 @@ import './ChatInterface.css'
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 function ChatInterface() {
+  const [selectedUser, setSelectedUser] = useState('default')
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -16,6 +17,12 @@ function ChatInterface() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const messagesEndRef = useRef(null)
+
+  const users = [
+    { id: 'default', name: 'Default User (Veg, Nuts Allergy)' },
+    { id: 'dummy2', name: 'User 2 (Non-Veg, Shellfish Allergy)' },
+    { id: 'dummy3', name: 'User 3 (Mix, Gluten Allergy)' }
+  ]
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -38,7 +45,8 @@ function ChatInterface() {
 
     try {
       const response = await axios.post(`${API_URL}/api/chat`, {
-        query: userMessage
+        query: userMessage,
+        user_key: selectedUser
       })
 
       const data = response.data
@@ -70,6 +78,27 @@ function ChatInterface() {
 
   return (
     <div className="chat-container">
+      <div className="user-selector">
+        <label htmlFor="user-select">Current User: </label>
+        <select 
+          id="user-select" 
+          value={selectedUser} 
+          onChange={(e) => {
+            setSelectedUser(e.target.value)
+            setMessages([{
+              role: 'assistant',
+              content: `Switched to ${users.find(u => u.id === e.target.value).name}. How can I help you today?`,
+              type: 'text'
+            }])
+          }}
+        >
+          {users.map(user => (
+            <option key={user.id} value={user.id}>
+              {user.name}
+            </option>
+          ))}
+        </select>
+      </div>
       <div className="messages-container">
         {messages.map((message, index) => (
           <div key={index} className={`message ${message.role}`}>

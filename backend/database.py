@@ -53,6 +53,29 @@ USER_METADATA_MAP = {
             "diet_type": "non-veg",
         },
         "pending_query": None,
+    },
+    "dummy3": {
+        "location": "San Francisco, CA",
+        "allergies": ["gluten"],
+        "favorite_dishes": [
+            {"name": "Spicy Tuna Roll", "category": "mains"},
+            {"name": "Tonkotsu Ramen", "category": "mains"},
+            {"name": "Mango Mochi", "category": "desserts"}
+        ],
+        "diet_type": "mix",
+        "flavor_profile": {
+            "appetizer": {"spicy": 0.5, "sweet": 0.2, "umami": 0.7, "sour": 0.4, "salty": 0.6},
+            "mains": {"spicy": 0.7, "sweet": 0.2, "umami": 0.9, "sour": 0.3, "salty": 0.7},
+            "desserts": {"spicy": 0.1, "sweet": 0.8, "umami": 0.3, "sour": 0.3, "salty": 0.2},
+            "allergies": ["gluten"],
+            "favorite_dishes": [
+                {"name": "Spicy Tuna Roll", "category": "mains"},
+                {"name": "Tonkotsu Ramen", "category": "mains"},
+                {"name": "Mango Mochi", "category": "desserts"}
+            ],
+            "diet_type": "mix",
+        },
+        "pending_query": None,
     }
 }
 

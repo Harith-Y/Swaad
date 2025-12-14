@@ -2,9 +2,10 @@
 Restaurant and dish recommendation logic.
 """
 from typing import List, Dict, Optional
+import re
 from embeddings import embed_text, calculate_cosine_similarity
 from taste_analysis import taste_similarity, infer_taste_from_text_hybrid
-from dish_processing import filter_dishes_by_diet
+from dish_processing import filter_dishes_by_diet, allergy_filter, filter_dishes_by_allergy
 from config import USE_SEMANTIC_DISH_TASTE
 
 
@@ -12,6 +13,7 @@ def dish_recommendations_for_restaurant(
     menu_items,  # Can be List[str] or List[Dict] with pre-calculated taste vectors
     user_taste_vec: List[float],
     diet_type: Optional[str],
+    allergies: List[str] = None,
     top_n: int = 5
 ) -> List[Dict]:
     """
@@ -21,6 +23,7 @@ def dish_recommendations_for_restaurant(
         menu_items: Either list of dish names (strings) or list of dicts with 'name' and 'taste' keys
         user_taste_vec: User's taste preference vector [sweet, salty, sour, bitter, umami, spicy]
         diet_type: Diet filter (veg, non-veg, mix)
+        allergies: List of user allergies
         top_n: Number of top dishes to return
     """
     if not menu_items:
@@ -39,6 +42,11 @@ def dish_recommendations_for_restaurant(
     # Filter by diet
     dish_names = [d.get("name") if isinstance(d, dict) else d for d in dishes]
     filtered_names = filter_dishes_by_diet(dish_names, diet_type)
+    
+    # Filter by allergies
+    if allergies:
+        filtered_names = filter_dishes_by_allergy(filtered_names, allergies)
+
     if not filtered_names:
         return []
 
@@ -46,6 +54,9 @@ def dish_recommendations_for_restaurant(
     dish_scores = []
     for dish in dishes:
         dish_name = dish.get("name") if isinstance(dish, dict) else dish
+        
+        if dish_name not in filtered_names:
+            continue
 
         if dish_name not in filtered_names:
             continue
@@ -137,12 +148,24 @@ def filter_and_rank_recommendations(
     favorite_dishes: List[Dict],
     diet_type: Optional[str],
     allergies: List[str],
-    max_results: int = 10
+    max_results: int = 10,
+    query_text: Optional[str] = None,
+    location_filter: Optional[str] = None
 ) -> List[Dict]:
     """
     Filter and rank restaurant recommendations from Pinecone matches.
     """
-    from dish_processing import allergy_filter
+    from dish_processing import check_location_match
+    
+    # Pre-process query for keyword matching
+    query_tokens = set()
+    if query_text:
+        # Simple tokenization: remove punctuation, lowercase
+        q_clean = re.sub(r"[^\w\s]", "", query_text.lower())
+        query_tokens = set(q_clean.split())
+        # Remove common stop words
+        stop_words = {"i", "want", "to", "eat", "some", "a", "the", "in", "at", "near", "me", "place", "restaurant", "find", "show", "give", "food", "good", "best", "delicious", "yummy", "looking", "for"}
+        query_tokens = query_tokens - stop_words
     
     ranked = []
     
@@ -160,8 +183,10 @@ def filter_and_rank_recommendations(
             continue
         
         # Filter by allergies
-        if not allergy_filter(menu_items, allergies):
-            continue
+        if allergies:
+            menu_items = filter_dishes_by_allergy(menu_items, allergies)
+            if not menu_items:
+                continue
         
         # Parse location and coordinates
         location = meta.get("location")
@@ -173,6 +198,29 @@ def filter_and_rank_recommendations(
                     location = json.loads(loc_json)
                 except Exception:
                     location = loc_json
+        
+        # Filter by location if provided
+        if location_filter and location:
+            loc_str = location
+            if isinstance(location, dict):
+                # Try to extract standard fields or join all values
+                parts = []
+                for key in ["address", "city", "state", "zip_code", "country"]:
+                    if key in location and location[key]:
+                        parts.append(str(location[key]))
+                
+                if parts:
+                    loc_str = ", ".join(parts)
+                else:
+                    # Fallback: join all string values
+                    loc_str = ", ".join([str(v) for v in location.values() if isinstance(v, (str, int))])
+            
+            # Ensure it's a string
+            if not isinstance(loc_str, str):
+                loc_str = str(loc_str)
+
+            if not check_location_match(location_filter, loc_str):
+                continue
         
         coordinates = meta.get("coordinates")
         if coordinates is None:
@@ -205,7 +253,32 @@ def filter_and_rank_recommendations(
         from taste_analysis import favorites_boost
         tscore = taste_similarity(user_taste_vec, taste_vec)
         boost = favorites_boost(menu_items, favorite_dishes)
-        combined = score + 0.35 * tscore + boost
+        
+        # Calculate query relevance boost
+        query_boost = 0.0
+        if query_tokens:
+            # Check menu items
+            menu_text = " ".join(menu_items).lower()
+            # Check popular dishes
+            pop_dishes = meta.get("popular_dishes") or []
+            if isinstance(pop_dishes, list):
+                pop_text = " ".join([str(p) for p in pop_dishes]).lower()
+            else:
+                pop_text = ""
+            
+            # Check name and cuisine
+            name_text = (meta.get("name") or "").lower()
+            cuisine_text = " ".join(meta.get("cuisine_types") or []).lower()
+            
+            full_text = menu_text + " " + pop_text + " " + name_text + " " + cuisine_text
+            full_text_clean = re.sub(r"[^\w\s]", "", full_text)
+            restaurant_tokens = set(full_text_clean.split())
+            
+            overlap = len(query_tokens.intersection(restaurant_tokens))
+            if overlap > 0:
+                query_boost = 0.5 + (0.2 * overlap)
+
+        combined = score + 0.35 * tscore + boost + query_boost
         
         # Get recommended dishes
         # Check if metadata has pre-calculated dish taste vectors (stored as JSON)
