@@ -656,14 +656,30 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
                 from recommendations import dish_recommendations_for_restaurant
                 ranked_restaurants = []
                 for rest in restaurants_with_dish[:10]:  # Limit to top 10
-                    # Get recommended dishes for this restaurant
+                    # Get the matched dish
+                    matched_dish = rest.get("dish", dish_query)
+
+                    # Get additional recommended dishes for this restaurant
                     menu_items = rest["metadata"].get("menu_items", [])
-                    recommended_dishes = dish_recommendations_for_restaurant(
+                    additional_dishes = dish_recommendations_for_restaurant(
                         menu_items=menu_items,
                         user_taste_vec=user_taste_vec,
                         diet_type=diet_type,
-                        top_n=5
+                        top_n=4  # Get 4 additional recommendations
                     )
+
+                    # Put the matched dish first, then additional recommendations
+                    recommended_dishes = [
+                        {"name": matched_dish, "similarity": 1.0}  # Perfect match
+                    ]
+
+                    # Add additional dishes if they're different from the matched dish
+                    for dish in additional_dishes:
+                        dish_name = dish.get("name") if isinstance(dish, dict) else dish
+                        if dish_name.lower() != matched_dish.lower():
+                            recommended_dishes.append(dish)
+                            if len(recommended_dishes) >= 5:  # Limit to 5 total
+                                break
 
                     ranked_restaurants.append({
                         "name": rest["name"],
