@@ -438,6 +438,36 @@ def is_dish_query(query: str) -> Optional[str]:
     return None
 
 
+def is_restaurant_menu_query(query: str) -> Optional[str]:
+    """
+    Check if the query is asking for a specific restaurant's menu.
+
+    Returns:
+        Restaurant name if detected, None otherwise
+    """
+    query_lower = query.lower().strip()
+
+    # Patterns for restaurant menu queries
+    patterns = [
+        r"(?:what'?s|show|tell me|get)\s+(?:the\s+)?menu\s+(?:for|of|at)\s+(.+?)(?:\s+restaurant)?$",
+        r"menu\s+(?:for|of|at)\s+(.+?)(?:\s+restaurant)?$",
+        r"(?:show|tell)\s+me\s+(.+?)(?:'s|\s+)menu",
+        r"what\s+does\s+(.+?)\s+(?:have|serve|offer)",
+        r"what\s+can\s+i\s+(?:get|order)\s+(?:at|from)\s+(.+?)$",
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, query_lower)
+        if match:
+            restaurant_name = match.group(1).strip()
+            # Clean up common words
+            restaurant_name = re.sub(r'\s+restaurant$', '', restaurant_name).strip()
+            if len(restaurant_name) > 2:
+                return restaurant_name
+
+    return None
+
+
 def parse_specific_query(query: str) -> Optional[Tuple[str, str]]:
     """
     Parse query to detect if user is asking about a specific dish at a specific restaurant.
@@ -565,6 +595,80 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
             "chat_id": request.chat_id,
             "menu_buddy": {"recommendations": []}
         }
+
+    # Check if this is a restaurant menu query
+    restaurant_name_query = is_restaurant_menu_query(request.query)
+    if restaurant_name_query:
+        print(f"[DEBUG] Restaurant menu query detected: '{restaurant_name_query}'")
+
+        # Search for the restaurant in Pinecone
+        pc_index = get_pinecone_index()
+        model = get_embedding_model()
+
+        # Create embedding for restaurant name
+        restaurant_embedding = model.encode(restaurant_name_query).tolist()
+
+        # Search in restaurants namespace
+        result = pc_index.query(
+            vector=restaurant_embedding,
+            top_k=5,
+            include_metadata=True,
+            namespace="restaurants"
+        )
+
+        matches = result.get("matches", []) if isinstance(result, dict) else getattr(result, "matches", [])
+
+        # Find the best matching restaurant
+        best_match = None
+        best_score = 0
+
+        for match in matches:
+            meta = match.get("metadata") if isinstance(match, dict) else getattr(match, "metadata", {})
+            score = match.get("score", 0) if isinstance(match, dict) else getattr(match, "score", 0)
+            rest_name = meta.get("name", "")
+
+            # Check if restaurant name matches
+            if restaurant_name_query.lower() in rest_name.lower() or rest_name.lower() in restaurant_name_query.lower():
+                if score > best_score:
+                    best_score = score
+                    best_match = meta
+
+        if best_match:
+            # Found the restaurant - return its full menu
+            menu_items = best_match.get("menu_items", [])
+
+            # Format menu items as recommended dishes
+            recommended_dishes = []
+            for item in menu_items[:20]:  # Limit to 20 items
+                recommended_dishes.append({
+                    "name": item,
+                    "similarity": 0.5  # Neutral similarity since we're showing the full menu
+                })
+
+            return {
+                "response": {
+                    "text": f"Here's the menu for {best_match.get('name')}:"
+                },
+                "chat_id": request.chat_id,
+                "menu_buddy": {
+                    "recommendations": [{
+                        "name": best_match.get("name"),
+                        "rating": best_match.get("avg_rating"),
+                        "price_range": best_match.get("price_range"),
+                        "cuisine_types": best_match.get("cuisine_types", []),
+                        "recommended_dishes": recommended_dishes
+                    }]
+                }
+            }
+        else:
+            # Restaurant not found
+            return {
+                "response": {
+                    "text": f"Sorry, I couldn't find a restaurant named '{restaurant_name_query}' in our database. Could you try a different name or ask for dish recommendations instead?"
+                },
+                "chat_id": request.chat_id,
+                "menu_buddy": {"recommendations": []}
+            }
 
     # Check if this is a dish-specific query (not at a specific restaurant)
     dish_query = is_dish_query(request.query)
