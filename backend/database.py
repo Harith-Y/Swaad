@@ -8,7 +8,7 @@ from config import DEFAULT_USER_LOCATION
 
 # In-memory user storage (replace with real database in production)
 USER_METADATA_MAP = {
-    "default": {
+    "dummy2": {
         "location": DEFAULT_USER_LOCATION,
         "allergies": ["Nuts", "Cabbage", "Cauliflower"],
         "favorite_dishes": [
@@ -31,7 +31,7 @@ USER_METADATA_MAP = {
         },
         "pending_query": None,
     },
-    "dummy2": {
+    "default": {
         "location": "New York, NY",
         "allergies": ["shellfish"],
         "favorite_dishes": [

@@ -8,12 +8,369 @@ import re
 
 from models import ChatRequest
 from database import get_dummy_user, sync_dummy_user_from_request, dummy_user_to_user_profile
-from embeddings import embed_text, combine_vectors
+from embeddings import embed_text, combine_vectors, get_embedding_model
 from taste_analysis import user_profile_to_taste_vector, infer_taste_from_text_hybrid
 from pinecone_client import get_pinecone_index, maybe_upsert_ingredients_to_pinecone
 from recommendations import filter_and_rank_recommendations
-from dish_processing import get_groq_client
+from dish_processing import get_groq_client, classify_dish_diet_with_groq
 from config import GROQ_API_KEY, USE_SEMANTIC_INGREDIENT_TASTE
+from recipe_database import (
+    load_recipes_database,
+    search_recipe_by_name,
+    get_taste_vector_from_recipe,
+    has_valid_taste_profile
+)
+
+
+def extract_location_from_query(query: str) -> Optional[str]:
+    """
+    Extract location from the query text.
+
+    Returns:
+        Location string if found, None otherwise
+    """
+    query_lower = query.lower()
+
+    # Location patterns
+    patterns = [
+        r'\bnear\s+(.+?)(?:\s*,|\s+also|\s+and|\s*$)',
+        r'\bin\s+(.+?)(?:\s*,|\s+also|\s+and|\s*$)',
+        r'\bat\s+(.+?)(?:\s*,|\s+also|\s+and|\s*$)',
+        r'\baround\s+(.+?)(?:\s*,|\s+also|\s+and|\s*$)',
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, query_lower)
+        if match:
+            location = match.group(1).strip()
+            # Filter out common non-location words
+            non_locations = ["me", "here", "there", "my place", "home"]
+            if location not in non_locations and len(location) > 2:
+                return location
+
+    return None
+
+
+def extract_diet_from_query(query: str) -> Optional[str]:
+    """
+    Extract diet preference from the query text.
+
+    This function checks:
+    1. Explicit diet mentions (e.g., "I want veg food")
+    2. Dish-based diet detection (e.g., "I want chicken curry" -> non-veg)
+
+    Returns:
+        'veg', 'vegetarian', 'non-veg', or None if not specified
+    """
+    query_lower = query.lower()
+
+    # STEP 1: Check for explicit diet preference
+    # Vegetarian indicators
+    veg_patterns = [
+        r'\b(?:i am|i\'m|looking for|want|need|prefer)\s+(?:a\s+)?veg(?:etarian)?\s+(?:food|dish|meal|option)',
+        r'\bveg(?:etarian)?\s+(?:food|dish|meal|option|restaurant)',
+        r'\bonly\s+veg(?:etarian)?',
+        r'\bpure\s+veg(?:etarian)?',
+        r'\bvegetarian\s+only',
+        r'\bno\s+(?:meat|non-veg|nonveg)',
+        r'\bplant[-\s]?based',
+    ]
+
+    # Non-vegetarian indicators
+    nonveg_patterns = [
+        r'\b(?:i am|i\'m|looking for|want|need|prefer)\s+(?:a\s+)?non[-\s]?veg(?:etarian)?\s+(?:food|dish|meal|option)',
+        r'\bnon[-\s]?veg(?:etarian)?\s+(?:food|dish|meal|option|restaurant)',
+        r'\b(?:meat|chicken|fish|seafood)\s+(?:lover|eater)',
+        r'\bonly\s+non[-\s]?veg',
+    ]
+
+    # Check for explicit vegetarian
+    for pattern in veg_patterns:
+        if re.search(pattern, query_lower):
+            print(f"[DEBUG] Explicit veg preference detected in query")
+            return "veg"
+
+    # Check for explicit non-vegetarian
+    for pattern in nonveg_patterns:
+        if re.search(pattern, query_lower):
+            print(f"[DEBUG] Explicit non-veg preference detected in query")
+            return "non-veg"
+
+    # STEP 2: Check for dish-based diet detection
+    # Extract potential dish names from query
+    dish_patterns = [
+        r'(?:i want|i need|looking for|get me|find|where.*get|where.*find)\s+(.+?)(?:\s+(?:near|in|at|and)|$)',
+        r'(?:is there|do you have|any)\s+(.+?)(?:\s+(?:available|near|in|at)|$)',
+    ]
+
+    detected_dishes = []
+    for pattern in dish_patterns:
+        matches = re.findall(pattern, query_lower)
+        for match in matches:
+            # Clean up the match
+            dish = match.strip()
+            # Remove common words
+            dish = re.sub(r'\b(a|an|the|some|any|place|restaurant|where|that|has)\b', '', dish).strip()
+            if dish and len(dish) > 2:
+                detected_dishes.append(dish)
+
+    # Classify detected dishes
+    if detected_dishes:
+        print(f"[DEBUG] Detected potential dishes in query: {detected_dishes}")
+
+        veg_count = 0
+        nonveg_count = 0
+
+        for dish in detected_dishes:
+            classification = classify_dish_diet_with_groq(dish)
+            if classification == "veg":
+                veg_count += 1
+            else:
+                nonveg_count += 1
+
+        # If all dishes are veg, return veg
+        if veg_count > 0 and nonveg_count == 0:
+            print(f"[DEBUG] All detected dishes are vegetarian -> diet: veg")
+            return "veg"
+
+        # If all dishes are non-veg, return non-veg
+        if nonveg_count > 0 and veg_count == 0:
+            print(f"[DEBUG] All detected dishes are non-vegetarian -> diet: non-veg")
+            return "non-veg"
+
+        # If mixed, return None (use user profile default)
+        if veg_count > 0 and nonveg_count > 0:
+            print(f"[DEBUG] Mixed veg/non-veg dishes detected -> using user profile default")
+            return None
+
+    return None
+
+
+def search_dish_in_db(dish_name: str) -> Optional[Dict[str, Any]]:
+    """
+    Search for a dish using hybrid approach:
+    1. Search Pinecone ingredients namespace
+    2. Search recipe CSV database (231K recipes)
+    3. Return None if not found
+
+    Returns:
+        Dict with dish info if found, None otherwise
+    """
+    # STEP 1: Search in Pinecone ingredients namespace
+    try:
+        pc_index = get_pinecone_index()
+        model = get_embedding_model()
+
+        # Create embedding for dish name
+        dish_embedding = model.encode(dish_name).tolist()
+
+        # Search in ingredients namespace first
+        result = pc_index.query(
+            vector=dish_embedding,
+            top_k=5,
+            include_metadata=True,
+            namespace="ingredients"
+        )
+
+        matches = result.get("matches", []) if isinstance(result, dict) else getattr(result, "matches", [])
+
+        # Check if we have a good match (score > 0.8)
+        if matches and len(matches) > 0:
+            best_match = matches[0]
+            score = best_match.get("score", 0) if isinstance(best_match, dict) else getattr(best_match, "score", 0)
+
+            if score > 0.8:
+                metadata = best_match.get("metadata") if isinstance(best_match, dict) else getattr(best_match, "metadata", {})
+                print(f"[DEBUG] Found dish '{dish_name}' in Pinecone with score {score}")
+                return {
+                    "found": True,
+                    "source": "pinecone",
+                    "dish_name": metadata.get("name", dish_name),
+                    "taste_vector": [
+                        metadata.get("sweet", 0),
+                        metadata.get("salty", 0),
+                        metadata.get("sour", 0),
+                        metadata.get("bitter", 0),
+                        metadata.get("umami", 0),
+                        metadata.get("spicy", 0)
+                    ],
+                    "ingredients": metadata.get("ingredients", []),
+                    "metadata": metadata
+                }
+
+    except Exception as e:
+        print(f"[ERROR] Failed to search dish in Pinecone: {e}")
+
+    # STEP 2: Search in recipe CSV database (231K recipes)
+    try:
+        recipe = search_recipe_by_name(dish_name, threshold=0.6)
+
+        if recipe and has_valid_taste_profile(recipe):
+            taste_vector = get_taste_vector_from_recipe(recipe)
+            print(f"[DEBUG] Found dish '{dish_name}' in recipe database: '{recipe['original_name']}'")
+            return {
+                "found": True,
+                "source": "csv",
+                "dish_name": recipe["original_name"],
+                "taste_vector": taste_vector,
+                "ingredients": recipe.get("ingredients", []),
+                "metadata": {
+                    "name": recipe["original_name"],
+                    "ingredients": recipe.get("ingredients", []),
+                    "recipe_id": recipe.get("id", "")
+                }
+            }
+        elif recipe and not has_valid_taste_profile(recipe):
+            print(f"[DEBUG] Found dish '{dish_name}' in CSV but has zero taste vector, will use Groq")
+            return None
+
+    except Exception as e:
+        print(f"[ERROR] Failed to search dish in recipe database: {e}")
+
+    print(f"[DEBUG] Dish '{dish_name}' not found in any database")
+    return None
+
+
+def get_ingredients_from_groq(dish_name: str) -> Optional[Dict[str, Any]]:
+    """
+    Get ingredients and taste profile for a dish using Groq API.
+
+    Returns:
+        Dict with ingredients and taste vector, or None if failed
+    """
+    try:
+        groq_client = get_groq_client()
+
+        prompt = f"""Analyze the dish "{dish_name}" and provide:
+1. Main ingredients (comma-separated list)
+2. Taste profile on a scale of 0-1 for each: sweet, salty, sour, bitter, umami, spicy
+
+Respond in this exact JSON format:
+{{
+    "dish_name": "{dish_name}",
+    "ingredients": ["ingredient1", "ingredient2", ...],
+    "taste_profile": {{
+        "sweet": 0.0-1.0,
+        "salty": 0.0-1.0,
+        "sour": 0.0-1.0,
+        "bitter": 0.0-1.0,
+        "umami": 0.0-1.0,
+        "spicy": 0.0-1.0
+    }}
+}}
+
+Only respond with valid JSON, nothing else."""
+
+        completion = groq_client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.3-70b-versatile",
+            temperature=0.3,
+            max_tokens=500
+        )
+
+        response_text = completion.choices[0].message.content.strip()
+
+        # Try to parse JSON
+        # Remove markdown code blocks if present
+        if "```json" in response_text:
+            response_text = response_text.split("```json")[1].split("```")[0].strip()
+        elif "```" in response_text:
+            response_text = response_text.split("```")[1].split("```")[0].strip()
+
+        dish_info = json.loads(response_text)
+
+        print(f"[DEBUG] Got ingredients from Groq for '{dish_name}': {dish_info.get('ingredients', [])}")
+
+        return dish_info
+
+    except Exception as e:
+        print(f"[ERROR] Failed to get ingredients from Groq: {e}")
+        return None
+
+
+def save_dish_to_db(dish_name: str, dish_info: Dict[str, Any]) -> bool:
+    """
+    Save dish and its ingredients to Pinecone database.
+
+    Args:
+        dish_name: Name of the dish
+        dish_info: Dict containing ingredients and taste_profile from Groq
+
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        pc_index = get_pinecone_index()
+        model = get_embedding_model()
+
+        taste_profile = dish_info.get("taste_profile", {})
+        ingredients = dish_info.get("ingredients", [])
+
+        # Create embedding for dish
+        dish_embedding = model.encode(dish_name).tolist()
+
+        # Create taste vector
+        taste_vector = [
+            float(taste_profile.get("sweet", 0)),
+            float(taste_profile.get("salty", 0)),
+            float(taste_profile.get("sour", 0)),
+            float(taste_profile.get("bitter", 0)),
+            float(taste_profile.get("umami", 0)),
+            float(taste_profile.get("spicy", 0))
+        ]
+
+        # Prepare vectors to upsert
+        vectors = []
+
+        # Add dish vector
+        dish_vector = {
+            "id": f"ingredient:{dish_name.lower().replace(' ', '_')}",
+            "values": dish_embedding,
+            "metadata": {
+                "type": "ingredient",
+                "name": dish_name,
+                "sweet": taste_vector[0],
+                "salty": taste_vector[1],
+                "sour": taste_vector[2],
+                "bitter": taste_vector[3],
+                "umami": taste_vector[4],
+                "spicy": taste_vector[5],
+                "ingredients": ingredients[:10]  # Limit to 10 ingredients
+            }
+        }
+        vectors.append(dish_vector)
+
+        # Add ingredient vectors (if not already in DB)
+        for ingredient in ingredients[:10]:  # Limit to 10 ingredients
+            ingredient_embedding = model.encode(ingredient).tolist()
+
+            # Use average taste profile for individual ingredients
+            # (In a real system, you'd want to get specific taste profiles for each ingredient)
+            ingredient_vector = {
+                "id": f"ingredient:{ingredient.lower().replace(' ', '_')}",
+                "values": ingredient_embedding,
+                "metadata": {
+                    "type": "ingredient",
+                    "name": ingredient,
+                    "sweet": taste_vector[0] * 0.5,  # Reduced weight for individual ingredients
+                    "salty": taste_vector[1] * 0.5,
+                    "sour": taste_vector[2] * 0.5,
+                    "bitter": taste_vector[3] * 0.5,
+                    "umami": taste_vector[4] * 0.5,
+                    "spicy": taste_vector[5] * 0.5,
+                }
+            }
+            vectors.append(ingredient_vector)
+
+        # Upsert to Pinecone
+        pc_index.upsert(vectors=vectors, namespace="ingredients")
+
+        print(f"[DEBUG] Saved dish '{dish_name}' and {len(ingredients)} ingredients to DB")
+        return True
+
+    except Exception as e:
+        print(f"[ERROR] Failed to save dish to DB: {e}")
+        return False
 
 
 def is_greeting(query: str) -> bool:
@@ -42,8 +399,10 @@ def is_dish_query(query: str) -> Optional[str]:
     """
     Check if the query is asking for a specific dish (not at a specific restaurant).
 
+    Handles both single and multiple dishes (e.g., "paratha and paneer curry").
+
     Returns:
-        Dish name if detected, None otherwise
+        Dish name(s) if detected (comma-separated if multiple), None otherwise
     """
     query_lower = query.lower().strip()
 
@@ -51,8 +410,8 @@ def is_dish_query(query: str) -> Optional[str]:
     patterns = [
         # "is there a place where X is available"
         r"is\s+there\s+(?:a\s+)?(?:place|restaurant)\s+(?:where|that\s+has)\s+(.+?)\s+(?:is\s+)?available",
-        # "where can I find X" or "where can I get X"
-        r"where\s+can\s+i\s+(?:find|get)\s+(.+?)(?:\s+near|\s+in|\s+at|\s*$)",
+        # "where can I find X" or "where can I get X" or "where i can get X"
+        r"where\s+(?:can\s+)?i\s+(?:can\s+)?(?:find|get)\s+(.+?)(?:\s+near|\s+in|\s+at|\s*$)",
         # "do you have X" or "is there X"
         r"^(?:do\s+you\s+have|is\s+there)\s+(?:any\s+)?(.+?)(?:\s+available|\s+near|\s+in|\s+at|\s*$)",
         # "I want X" or "show me X"
@@ -136,6 +495,18 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
         favorite_dishes = [d.model_dump() for d in (dummy_profile.favorite_dishes or [])] or favorite_dishes
         diet_type = dummy_profile.diet_type or diet_type
 
+    # Extract diet preference from query (overrides user profile)
+    query_diet = extract_diet_from_query(request.query)
+    if query_diet:
+        diet_type = query_diet
+        print(f"[DEBUG] Diet type overridden from query: {diet_type}")
+
+    # Extract location from query (overrides request.location if not provided)
+    query_location = extract_location_from_query(request.query)
+    if query_location and not request.location:
+        request.location = query_location
+        print(f"[DEBUG] Location extracted from query: {query_location}")
+
     # Calculate user taste vector
     user_taste_vec = user_profile_to_taste_vector(dummy_profile) if dummy_profile else [0.0] * 6
     fav_text = ""
@@ -200,6 +571,39 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
     if dish_query and "where restaurant is" not in request.query.lower():
         print(f"[DEBUG] Dish-specific query detected: '{dish_query}'")
 
+        # STEP 1: Search for dish in our database
+        dish_in_db = search_dish_in_db(dish_query)
+
+        # STEP 2: If not found, get ingredients from Groq and save to DB
+        if not dish_in_db:
+            print(f"[DEBUG] Dish '{dish_query}' not in DB, calling Groq API...")
+            dish_info_from_groq = get_ingredients_from_groq(dish_query)
+
+            if dish_info_from_groq:
+                # Save to database
+                save_dish_to_db(dish_query, dish_info_from_groq)
+
+                # Create dish_in_db structure from Groq response
+                taste_profile = dish_info_from_groq.get("taste_profile", {})
+                dish_in_db = {
+                    "found": True,
+                    "dish_name": dish_query,
+                    "taste_vector": [
+                        float(taste_profile.get("sweet", 0)),
+                        float(taste_profile.get("salty", 0)),
+                        float(taste_profile.get("sour", 0)),
+                        float(taste_profile.get("bitter", 0)),
+                        float(taste_profile.get("umami", 0)),
+                        float(taste_profile.get("spicy", 0))
+                    ],
+                    "ingredients": dish_info_from_groq.get("ingredients", []),
+                    "metadata": {
+                        "name": dish_query,
+                        "ingredients": dish_info_from_groq.get("ingredients", [])
+                    }
+                }
+
+        # STEP 3: Search for restaurants that have this dish
         try:
             pc_index = get_pinecone_index()
             # Search all restaurants for this dish
@@ -231,9 +635,17 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
                         break  # Only add restaurant once
 
             if not restaurants_with_dish:
-                # Dish not found - continue to general recommendations below
-                print(f"[DEBUG] Dish '{dish_query}' not found in any restaurant, will provide general recommendations")
-                # Set a flag to modify the response text later
+                # Dish not found in restaurants - but we have dish info from DB/Groq
+                print(f"[DEBUG] Dish '{dish_query}' not found in any restaurant")
+
+                if dish_in_db:
+                    # We have dish info, use it for taste-based recommendations
+                    print(f"[DEBUG] Using dish taste profile for recommendations")
+                    dish_taste_vec = dish_in_db.get("taste_vector", [0.0] * 6)
+                    # Combine user taste with dish taste
+                    user_taste_vec = combine_vectors(user_taste_vec, dish_taste_vec, secondary_weight=0.6)
+
+                # Set flag to modify response text
                 dish_not_found = True
                 dish_not_found_name = dish_query
             else:
@@ -365,7 +777,11 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
 
     # Initialize response structure
     if dish_not_found:
-        initial_text = f"Sorry, I couldn't find '{dish_not_found_name}' in our restaurant database. But don't worry! Based on your taste preferences, here are some similar recommendations you might enjoy in {fallback_location}:"
+        # Check if multiple dishes were mentioned (contains "and" or ",")
+        if " and " in dish_not_found_name or "," in dish_not_found_name:
+            initial_text = f"Sorry, I couldn't find '{dish_not_found_name}' in our restaurant database. However, based on your preferences and the taste profile of these dishes, here are some recommendations you might enjoy:"
+        else:
+            initial_text = f"Sorry, I couldn't find '{dish_not_found_name}' in our restaurant database. However, based on your preferences and the taste profile of this dish, here are some recommendations you might enjoy:"
     else:
         initial_text = f"Here are some great restaurant recommendations for you in {fallback_location}!"
 

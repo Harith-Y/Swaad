@@ -1,7 +1,7 @@
 """
 Dish extraction, classification, and filtering utilities.
 """
-from typing import List, Optional
+from typing import List, Optional, Dict
 import re
 from groq import Groq
 from config import GROQ_API_KEY
@@ -9,6 +9,9 @@ from config import GROQ_API_KEY
 
 # Global Groq client
 _groq_client = None
+
+# Cache for dish diet classification
+_dish_diet_cache: Dict[str, str] = {}
 
 
 def get_groq_client():
@@ -68,11 +71,63 @@ def allergy_filter(menu_items: List[str], allergies: List[str]) -> bool:
     return True
 
 
+def classify_dish_diet_with_groq(dish_name: str) -> str:
+    """
+    Classify a dish as 'veg' or 'non-veg' using Groq LLM.
+    Returns: 'veg' or 'non-veg'
+    Uses caching to avoid repeated API calls.
+    """
+    if not dish_name or not isinstance(dish_name, str):
+        return "veg"  # Default to veg if invalid
+
+    cache_key = dish_name.lower().strip()
+    if cache_key in _dish_diet_cache:
+        return _dish_diet_cache[cache_key]
+
+    try:
+        groq_client = get_groq_client()
+        prompt = f"""Classify this dish as either 'veg' or 'non-veg'.
+
+Dish: {dish_name}
+
+Rules:
+- 'non-veg' includes: meat, poultry, fish, seafood, eggs, and any animal products (except dairy)
+- 'veg' includes: vegetables, fruits, dairy, grains, legumes, plant-based items
+- If unclear or dish name doesn't specify, default to 'veg'
+
+Respond with ONLY the word 'veg' or 'non-veg', nothing else."""
+
+        completion = groq_client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.3-70b-versatile",
+            temperature=0,
+            max_tokens=10
+        )
+
+        result = completion.choices[0].message.content.strip().lower()
+        classification = "non-veg" if "non" in result else "veg"
+
+        _dish_diet_cache[cache_key] = classification
+        print(f"[DEBUG] Classified '{dish_name}' as '{classification}'")
+        return classification
+
+    except Exception as e:
+        print(f"[WARNING] Groq diet classification failed for '{dish_name}': {e}")
+        # Fallback to basic keyword check
+        t = dish_name.lower()
+        nonveg_keywords = {"chicken", "beef", "pork", "bacon", "ham", "turkey", "lamb",
+                          "mutton", "duck", "fish", "salmon", "tuna", "shrimp", "prawn",
+                          "crab", "lobster", "egg", "meat", "seafood"}
+        classification = "non-veg" if any(k in t for k in nonveg_keywords) else "veg"
+        _dish_diet_cache[cache_key] = classification
+        return classification
+
+
 def classify_dish_with_groq(dish_name: str) -> str:
     """Classify dish into category using Groq AI."""
     try:
         client = get_groq_client()
-        
+
         prompt = f"""Classify this dish into ONE category: appetizer, mains, or desserts.
 Dish: {dish_name}
 
@@ -84,9 +139,9 @@ Respond with ONLY the category name (appetizer, mains, or desserts), nothing els
             temperature=0.3,
             max_tokens=10
         )
-        
+
         category = completion.choices[0].message.content.strip().lower()
-        
+
         if category in {"appetizer", "appetizers"}:
             return "appetizer"
         elif category in {"mains", "main", "main course", "entree"}:
@@ -95,7 +150,7 @@ Respond with ONLY the category name (appetizer, mains, or desserts), nothing els
             return "desserts"
         else:
             return "mains"  # Default
-            
+
     except Exception as e:
         print(f"[ERROR] Groq classification failed: {e}")
         return "mains"

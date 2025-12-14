@@ -10,6 +10,7 @@ from embeddings import get_embedding_model
 from dish_processing import get_groq_client
 from models import ChatRequest
 from routes.chat import chat_endpoint
+from recipe_database import load_recipes_database
 
 
 # Initialize FastAPI app
@@ -31,10 +32,15 @@ def preload_models():
     print(f"Preloading sentence-transformer model: {SENTENCE_TRANSFORMER_MODEL}")
     get_embedding_model()
     print("Sentence-transformer model loaded.")
-    
+
     if GROQ_API_KEY:
         get_groq_client()
         print("Groq client initialized.")
+
+    # Load recipe database (231K recipes)
+    print("Loading recipe database...")
+    load_recipes_database()
+    print("Recipe database loaded.")
 
 
 @app.get("/")
