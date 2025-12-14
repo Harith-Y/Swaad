@@ -199,7 +199,7 @@ def filter_and_rank_recommendations(
                 except Exception:
                     location = loc_json
         
-        # Filter by location if provided
+        # Filter by location if provided (FIRST PRIORITY)
         if location_filter and location:
             loc_str = location
             if isinstance(location, dict):
@@ -208,19 +208,22 @@ def filter_and_rank_recommendations(
                 for key in ["address", "city", "state", "zip_code", "country"]:
                     if key in location and location[key]:
                         parts.append(str(location[key]))
-                
+
                 if parts:
                     loc_str = ", ".join(parts)
                 else:
                     # Fallback: join all string values
                     loc_str = ", ".join([str(v) for v in location.values() if isinstance(v, (str, int))])
-            
+
             # Ensure it's a string
             if not isinstance(loc_str, str):
                 loc_str = str(loc_str)
 
             if not check_location_match(location_filter, loc_str):
+                print(f"[DEBUG] Filtered out {meta.get('name')} - location mismatch: {loc_str} vs {location_filter}")
                 continue
+            else:
+                print(f"[DEBUG] Location match for {meta.get('name')}: {loc_str}")
         
         coordinates = meta.get("coordinates")
         if coordinates is None:

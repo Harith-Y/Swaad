@@ -531,11 +531,15 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
         diet_type = query_diet
         print(f"[DEBUG] Diet type overridden from query: {diet_type}")
 
-    # Extract location from query (overrides request.location if not provided)
+    # Extract location from query (PRIORITY: query location overrides everything)
     query_location = extract_location_from_query(request.query)
-    if query_location and not request.location:
+    if query_location:
+        # Query location takes highest priority
         request.location = query_location
-        print(f"[DEBUG] Location extracted from query: {query_location}")
+        print(f"[DEBUG] Location extracted from query (PRIORITY): {query_location}")
+    elif not query_location and not request.location:
+        # No location in query or request, will use fallback later
+        print(f"[DEBUG] No location in query, will use fallback location")
 
     # Calculate user taste vector
     user_taste_vec = user_profile_to_taste_vector(dummy_profile) if dummy_profile else [0.0] * 6
@@ -941,13 +945,23 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
         print(f"[DEBUG] Pinecone returned {len(matches)} matches")
 
         # Filter and rank recommendations
+        # PRIORITY: Use location from query if available, otherwise use fallback_location
+        location_to_filter = query_location if query_location else fallback_location
+
+        if location_to_filter:
+            print(f"[DEBUG] Applying location filter: {location_to_filter}")
+        else:
+            print(f"[DEBUG] No location filter applied")
+
         ranked = filter_and_rank_recommendations(
             matches=matches,
             user_taste_vec=user_taste_vec,
             favorite_dishes=favorite_dishes,
             diet_type=diet_type,
             allergies=allergies,
-            max_results=final_max_results
+            max_results=final_max_results,
+            query_text=request.query,
+            location_filter=location_to_filter
         )
 
         print(f"[DEBUG] Total ranked restaurants: {len(ranked)}")
