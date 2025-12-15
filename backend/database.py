@@ -9,7 +9,7 @@ from config import DEFAULT_USER_LOCATION
 # In-memory user storage (replace with real database in production)
 USER_METADATA_MAP = {
     "dummy2": {
-        "location": DEFAULT_USER_LOCATION,
+        "location": "Mexico",
         "allergies": ["Nuts", "Cabbage", "Cauliflower"],
         "favorite_dishes": [
             {"name": "Paneer butter masala", "category": "mains"},

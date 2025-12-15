@@ -19,8 +19,8 @@ function ChatInterface() {
   const messagesEndRef = useRef(null)
 
   const users = [
-    { id: 'default', name: 'Default User (Veg, Nuts Allergy)' },
-    { id: 'dummy2', name: 'User 2 (Non-Veg, Shellfish Allergy)' },
+    { id: 'default', name: 'Default User (Non-Veg, Shellfish Allergy)' },
+    { id: 'dummy2', name: 'User 2 (Veg, Nuts Allergy)' },
     { id: 'dummy3', name: 'User 3 (Mix, Gluten Allergy)' }
   ]
 

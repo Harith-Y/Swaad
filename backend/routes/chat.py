@@ -414,8 +414,10 @@ def is_dish_query(query: str) -> Optional[str]:
         r"where\s+(?:can\s+)?i\s+(?:can\s+)?(?:find|get)\s+(.+?)(?:\s+near|\s+in|\s+at|\s*$)",
         # "do you have X" or "is there X"
         r"^(?:do\s+you\s+have|is\s+there)\s+(?:any\s+)?(.+?)(?:\s+available|\s+near|\s+in|\s+at|\s*$)",
+        # "I want to eat X" - specific pattern to skip "to eat"
+        r"^(?:i\s+want|i'd\s+like|i\s+need)\s+to\s+(?:eat|have|try)\s+(.+?)(?:\s+near|\s+in|\s+at|\s*$)",
         # "I want X" or "show me X"
-        r"^(?:i\s+want|i'd\s+like|i\s+need|give\s+me|show\s+me|find|get\s+me|looking\s+for)\s+(.+?)(?:\s+near|\s+in|\s+at|\s*$)",
+        r"^(?:i\s+want|i'd\s+like|i\s+need|give\s+me|show\s+me|find|get\s+me|looking\s+for)\s+(?:some\s+)?(.+?)(?:\s+near|\s+in|\s+at|\s*$)",
         # "can I get X"
         r"^can\s+i\s+get\s+(.+?)(?:\s+near|\s+in|\s+at|\s*$)",
     ]
@@ -430,6 +432,8 @@ def is_dish_query(query: str) -> Optional[str]:
             dish_name = match.group(1).strip()
             # Clean up the dish name
             dish_name = re.sub(r'\s+(?:near|in|at|from)\s+.*$', '', dish_name).strip()
+            # Remove articles and common words
+            dish_name = re.sub(r'^(?:a|an|the|some)\s+', '', dish_name).strip()
             # Filter out generic food type queries
             generic_terms = ["food", "something", "anything", "restaurant", "place", "restaurants", "places"]
             if dish_name not in generic_terms and len(dish_name) > 2:
