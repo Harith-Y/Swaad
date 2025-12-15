@@ -17,6 +17,7 @@ function ChatInterface() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const messagesEndRef = useRef(null)
+  const carouselRefs = useRef({})
 
   const users = [
     { id: 'default', name: 'Default User (Non-Veg, Shellfish Allergy)' },
@@ -31,6 +32,17 @@ function ChatInterface() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  const scrollCarousel = (messageIndex, direction) => {
+    const carousel = carouselRefs.current[messageIndex]
+    if (carousel) {
+      const scrollAmount = 350 // Width of one card plus gap
+      carousel.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      })
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -111,10 +123,29 @@ function ChatInterface() {
                   <p key={i}>{line}</p>
                 ))
               ) : message.type === 'restaurants' ? (
-                <div className="restaurants-grid">
-                  {message.content.map((restaurant, idx) => (
-                    <RestaurantCard key={idx} restaurant={restaurant} />
-                  ))}
+                <div className="carousel-container">
+                  <button 
+                    className="carousel-button left"
+                    onClick={() => scrollCarousel(index, 'left')}
+                    aria-label="Previous restaurant"
+                  >
+                    ❮
+                  </button>
+                  <div 
+                    className="restaurants-carousel"
+                    ref={(el) => carouselRefs.current[index] = el}
+                  >
+                    {message.content.map((restaurant, idx) => (
+                      <RestaurantCard key={idx} restaurant={restaurant} />
+                    ))}
+                  </div>
+                  <button 
+                    className="carousel-button right"
+                    onClick={() => scrollCarousel(index, 'right')}
+                    aria-label="Next restaurant"
+                  >
+                    ❯
+                  </button>
                 </div>
               ) : null}
             </div>
