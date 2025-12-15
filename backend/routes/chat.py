@@ -5,6 +5,8 @@ from fastapi import HTTPException
 from typing import Dict, Any, Optional, Tuple
 import json
 import re
+import csv
+import os
 
 from models import ChatRequest
 from database import get_dummy_user, sync_dummy_user_from_request, dummy_user_to_user_profile
@@ -20,6 +22,37 @@ from recipe_database import (
     get_taste_vector_from_recipe,
     has_valid_taste_profile
 )
+
+
+# Load all ingredients from CSV at startup (cached globally)
+_INGREDIENT_LIST = None
+
+def load_ingredients_from_csv() -> list[str]:
+    """Load all ingredient names from ingredient-flavor.csv"""
+    global _INGREDIENT_LIST
+    
+    if _INGREDIENT_LIST is not None:
+        return _INGREDIENT_LIST
+    
+    ingredients = []
+    csv_path = os.path.join(os.path.dirname(__file__), "..", "ingredient-flavor.csv")
+    
+    try:
+        with open(csv_path, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                ingredient = row.get('ingredient', '').strip().lower()
+                if ingredient:
+                    ingredients.append(ingredient)
+        
+        _INGREDIENT_LIST = ingredients
+        print(f"[INFO] Loaded {len(ingredients)} ingredients from CSV")
+        return ingredients
+    except Exception as e:
+        print(f"[ERROR] Failed to load ingredients from CSV: {e}")
+        # Fallback to basic list
+        _INGREDIENT_LIST = ['chicken', 'paneer', 'ginger', 'garlic', 'tomato', 'onion']
+        return _INGREDIENT_LIST
 
 
 def extract_location_from_query(query: str) -> Optional[str]:
@@ -51,6 +84,46 @@ def extract_location_from_query(query: str) -> Optional[str]:
     return None
 
 
+def extract_cuisine_from_query(query: str) -> Optional[str]:
+    """
+    Extract cuisine type from the query text.
+
+    Returns:
+        Cuisine string if found (e.g., 'Thai', 'Italian', 'Chinese'), None otherwise
+    """
+    query_lower = query.lower()
+
+    # Common cuisine types with their variations
+    cuisines = {
+        'thai': ['thai'],
+        'italian': ['italian', 'pizza', 'pasta'],
+        'chinese': ['chinese'],
+        'japanese': ['japanese', 'sushi', 'ramen'],
+        'indian': ['indian', 'curry'],
+        'mexican': ['mexican', 'taco', 'burrito'],
+        'korean': ['korean', 'kimchi', 'bibimbap'],
+        'vietnamese': ['vietnamese', 'pho'],
+        'american': ['american', 'burger'],
+        'french': ['french'],
+        'greek': ['greek'],
+        'mediterranean': ['mediterranean'],
+        'middle eastern': ['middle eastern', 'falafel', 'shawarma'],
+        'spanish': ['spanish', 'tapas', 'paella'],
+    }
+
+    # Pattern: look for cuisine keywords in query
+    # Examples: "Thai food", "Italian restaurant", "I want Chinese"
+    for cuisine_name, keywords in cuisines.items():
+        for keyword in keywords:
+            # Check if keyword appears as a whole word
+            pattern = r'\b' + re.escape(keyword) + r'\b'
+            if re.search(pattern, query_lower):
+                print(f"[DEBUG] Cuisine type detected in query: {cuisine_name}")
+                return cuisine_name
+
+    return None
+
+
 def extract_diet_from_query(query: str) -> Optional[str]:
     """
     Extract diet preference from the query text.
@@ -68,7 +141,7 @@ def extract_diet_from_query(query: str) -> Optional[str]:
     # Vegetarian indicators
     veg_patterns = [
         r'\b(?:i am|i\'m|looking for|want|need|prefer)\s+(?:a\s+)?veg(?:etarian)?\s+(?:food|dish|meal|option)',
-        r'\bveg(?:etarian)?\s+(?:food|dish|meal|option|restaurant)',
+        r'\bveg(?:etarian)?\s+(?:\w+\s+)?(?:food|dish|meal|option|restaurant|cuisine)',  # Allows "vegetarian Thai food"
         r'\bonly\s+veg(?:etarian)?',
         r'\bpure\s+veg(?:etarian)?',
         r'\bvegetarian\s+only',
@@ -79,7 +152,7 @@ def extract_diet_from_query(query: str) -> Optional[str]:
     # Non-vegetarian indicators
     nonveg_patterns = [
         r'\b(?:i am|i\'m|looking for|want|need|prefer)\s+(?:a\s+)?non[-\s]?veg(?:etarian)?\s+(?:food|dish|meal|option)',
-        r'\bnon[-\s]?veg(?:etarian)?\s+(?:food|dish|meal|option|restaurant)',
+        r'\bnon[-\s]?veg(?:etarian)?\s+(?:\w+\s+)?(?:food|dish|meal|option|restaurant|cuisine)',  # Allows "non-veg Thai food"
         r'\b(?:meat|chicken|fish|seafood)\s+(?:lover|eater)',
         r'\bonly\s+non[-\s]?veg',
     ]
@@ -115,8 +188,20 @@ def extract_diet_from_query(query: str) -> Optional[str]:
             dish = match.strip()
             # Remove common words
             dish = re.sub(r'\b(a|an|the|some|any|place|restaurant|where|that|has)\b', '', dish).strip()
+            
+            # Filter out generic/preference-only terms (same as is_dish_query)
             if dish and len(dish) > 2:
-                detected_dishes.append(dish)
+                # Check if it's just preferences/generic terms
+                generic_terms = ["food", "something", "anything", "restaurant", "place", "restaurants", "places"]
+                preference_words = ["spicy", "savory", "sweet", "sour", "salty", "bitter", "hot", "mild", 
+                                   "delicious", "tasty", "good", "fresh", "healthy", "light", "heavy"]
+                
+                words = dish.split()
+                meaningful_words = [w for w in words if w not in (generic_terms + preference_words + ["and", "or"])]
+                
+                # Only add if there are meaningful dish words
+                if len(meaningful_words) > 0 and dish not in generic_terms:
+                    detected_dishes.append(dish)
 
     # Classify detected dishes
     if detected_dishes:
@@ -487,12 +572,60 @@ def is_dish_query(query: str) -> Optional[str]:
             dish_name = re.sub(r'\s+(?:near|in|at|from)\s+.*$', '', dish_name).strip()
             # Remove articles and common words
             dish_name = re.sub(r'^(?:a|an|the|some)\s+', '', dish_name).strip()
-            # Filter out generic food type queries
+            
+            # Filter out generic/vague terms that aren't dish names
             generic_terms = ["food", "something", "anything", "restaurant", "place", "restaurants", "places"]
-            if dish_name not in generic_terms and len(dish_name) > 2:
+            
+            # Filter out preference descriptors (not actual dish names)
+            preference_words = ["spicy", "savory", "sweet", "sour", "salty", "bitter", "hot", "mild", 
+                               "delicious", "tasty", "good", "fresh", "healthy", "light", "heavy"]
+            
+            # Check if dish_name contains only generic terms and preferences
+            words = dish_name.split()
+            meaningful_words = [w for w in words if w not in (generic_terms + preference_words + ["and", "or"])]
+            
+            # If no meaningful dish name words remain, it's not a dish query
+            if len(meaningful_words) == 0:
+                return None  # It's just preferences/generic terms, not a dish name
+            
+            # Also reject if the whole phrase is a generic term
+            if dish_name in generic_terms:
+                return None
+            
+            if len(dish_name) > 2:
                 return dish_name
 
     return None
+
+
+def extract_ingredients_from_query(query: str) -> list[str]:
+    """
+    Extract ingredient names mentioned in the query.
+    Uses the comprehensive ingredient list from ingredient-flavor.csv (622 ingredients).
+    
+    Returns:
+        List of ingredient names found in query
+    """
+    query_lower = query.lower()
+    
+    # Load all ingredients from CSV (cached after first call)
+    all_ingredients = load_ingredients_from_csv()
+    
+    found_ingredients = []
+    
+    # Check for each ingredient in the query
+    # Sort by length (descending) to match longer phrases first
+    # e.g., "soy sauce" before "soy"
+    sorted_ingredients = sorted(all_ingredients, key=len, reverse=True)
+    
+    for ingredient in sorted_ingredients:
+        # Use word boundaries to avoid partial matches
+        # e.g., "ham" shouldn't match "graham"
+        pattern = r'\b' + re.escape(ingredient) + r'\b'
+        if re.search(pattern, query_lower):
+            found_ingredients.append(ingredient)
+    
+    return found_ingredients
 
 
 def is_restaurant_menu_query(query: str) -> Optional[str]:
@@ -588,12 +721,24 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
         diet_type = query_diet
         print(f"[DEBUG] Diet type overridden from query: {diet_type}")
 
+    # Extract cuisine type from query
+    query_cuisine = extract_cuisine_from_query(request.query)
+
     # Extract location from query (PRIORITY: query location overrides everything)
     query_location = extract_location_from_query(request.query)
     if query_location:
         # Query location takes highest priority
         request.location = query_location
         print(f"[DEBUG] Location extracted from query (PRIORITY): {query_location}")
+        
+        # If location is generic (downtown, nearby, etc.) and user has home city, contextualize it
+        generic_locations = ["downtown", "nearby", "near me", "around here", "local", "in the area"]
+        if any(generic in query_location.lower() for generic in generic_locations):
+            user_db_location = (dummy_user.get("location") if isinstance(dummy_user, dict) else None) or ""
+            if user_db_location:
+                # Append user's city to make it specific
+                request.location = f"{query_location}, {user_db_location}"
+                print(f"[DEBUG] Contextualized generic location '{query_location}' with user city: {request.location}")
     elif not query_location and not request.location:
         # No location in query or request, will use fallback later
         print(f"[DEBUG] No location in query, will use fallback location")
@@ -984,9 +1129,9 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
     if dish_not_found:
         # Check if multiple dishes were mentioned (contains "and" or ",")
         if " and " in dish_not_found_name or "," in dish_not_found_name:
-            initial_text = f"Sorry, I couldn't find '{dish_not_found_name}' in our restaurant database. However, based on your preferences and the taste profile of these dishes, here are some recommendations you might enjoy:"
+            initial_text = f"Sorry, I couldn't find '{dish_not_found_name}' at our partner restaurants. However, based on your preferences and the taste profile of these dishes, here are some recommendations you might enjoy:"
         else:
-            initial_text = f"Sorry, I couldn't find '{dish_not_found_name}' in our restaurant database. However, based on your preferences and the taste profile of this dish, here are some recommendations you might enjoy:"
+            initial_text = f"Sorry, I couldn't find '{dish_not_found_name}' at our partner restaurants. However, based on your preferences and the taste profile of this dish, here are some recommendations you might enjoy:"
     else:
         initial_text = f"Here are some great restaurant recommendations for you in {fallback_location}!"
 
@@ -1001,16 +1146,29 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
     try:
         pc_index = get_pinecone_index()
         qvec = embed_text(request.query)
-        top_k = max(final_max_results, 10)
+        
+        # IMPORTANT: When filtering by location, fetch MORE results since many will be filtered out
+        # Use location from query if available, otherwise use fallback_location
+        location_to_filter = query_location if query_location else fallback_location
+        
+        # Increase top_k significantly when location filter is active
+        if location_to_filter:
+            top_k = max(final_max_results * 10, 50)  # Fetch 10x more to account for location filtering
+            print(f"[DEBUG] Location filter active, fetching top_k={top_k} (will filter to {final_max_results})")
+        else:
+            top_k = max(final_max_results, 10)
+            
         print(f"[DEBUG] Querying Pinecone with top_k={top_k}")
         query_res = pc_index.query(vector=qvec, top_k=top_k, include_metadata=True, namespace="restaurants")
         matches = query_res.get("matches", []) if isinstance(query_res, dict) else getattr(query_res, "matches", [])
         print(f"[DEBUG] Pinecone returned {len(matches)} matches")
+        
+        # Extract ingredients from query for ingredient-based boosting
+        query_ingredients = extract_ingredients_from_query(request.query)
+        if query_ingredients:
+            print(f"[DEBUG] Detected ingredients in query: {query_ingredients}")
 
         # Filter and rank recommendations
-        # PRIORITY: Use location from query if available, otherwise use fallback_location
-        location_to_filter = query_location if query_location else fallback_location
-
         if location_to_filter:
             print(f"[DEBUG] Applying location filter: {location_to_filter}")
         else:
@@ -1024,10 +1182,36 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
             allergies=allergies,
             max_results=final_max_results,
             query_text=request.query,
-            location_filter=location_to_filter
+            location_filter=location_to_filter,
+            cuisine_filter=query_cuisine,
+            query_ingredients=query_ingredients
         )
 
         print(f"[DEBUG] Total ranked restaurants: {len(ranked)}")
+        
+        # If no results with cuisine filter, retry without it
+        if len(ranked) == 0 and query_cuisine:
+            print(f"[DEBUG] No {query_cuisine} restaurants found, retrying without cuisine filter")
+            ranked = filter_and_rank_recommendations(
+                matches=matches,
+                user_taste_vec=user_taste_vec,
+                favorite_dishes=favorite_dishes,
+                diet_type=diet_type,
+                allergies=allergies,
+                max_results=final_max_results,
+                query_text=request.query,
+                location_filter=location_to_filter,
+                cuisine_filter=None  # Retry without cuisine filter
+            )
+            print(f"[DEBUG] Found {len(ranked)} restaurants without cuisine filter")
+            
+            # Update the response message to inform user
+            if len(ranked) > 0:
+                location_name = location_to_filter or "your area"
+                diet_label = "vegetarian " if diet_type == 'veg' else ""
+                initial_text = f"I couldn't find any {query_cuisine.title()} restaurants in {location_name}, but here are some other great {diet_label}options nearby:"
+                ai_json["response"]["text"] = initial_text
+        
         print(f"[DEBUG] Returning top {len(ranked)} recommendations")
         
     except Exception as e:
@@ -1036,6 +1220,27 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
         traceback.print_exc()
         ranked = []
 
+    # Check if no results found
+    if len(ranked) == 0:
+        if dish_not_found:
+            no_results_msg = f"Sorry, I couldn't find '{dish_not_found_name}' or any similar dishes at our partner restaurants"
+            if location_to_filter:
+                no_results_msg += f" in {location_to_filter}"
+            if allergies:
+                no_results_msg += f" that are safe for your allergies ({', '.join(allergies)})"
+            no_results_msg += ". Try a different location or dish!"
+            ai_json["response"]["text"] = no_results_msg
+        else:
+            no_results_msg = "Sorry, I couldn't find any restaurants matching your preferences"
+            if location_to_filter:
+                no_results_msg += f" in {location_to_filter}"
+            if diet_type and diet_type != "mix":
+                no_results_msg += f" with {diet_type} options"
+            if allergies:
+                no_results_msg += f" that are safe for your allergies"
+            no_results_msg += ". Try broadening your search or changing your location!"
+            ai_json["response"]["text"] = no_results_msg
+    
     # Filter response to only include essential fields
     filtered_recommendations = []
     for restaurant in ranked:
@@ -1066,9 +1271,9 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
             diet_label = "vegetarian" if diet_type in {"veg", "vegetarian"} else diet_type or "any diet"
 
             if dish_not_found:
-                rewrite_prompt = f"""The user asked for '{dish_not_found_name}' but it's not available in our database.
+                rewrite_prompt = f"""The user asked for '{dish_not_found_name}' but we don't have it at our partner restaurants.
 Rewrite this text to:
-1. Apologize that '{dish_not_found_name}' is not available
+1. Apologize that '{dish_not_found_name}' is not available at our partner restaurants
 2. Mention these {len(ranked)} alternative restaurants: {', '.join(restaurant_names[:5])}
 3. Say these are similar recommendations based on their taste preferences
 4. Only mention dishes suitable for {diet_label} diet

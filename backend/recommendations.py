@@ -150,7 +150,9 @@ def filter_and_rank_recommendations(
     allergies: List[str],
     max_results: int = 10,
     query_text: Optional[str] = None,
-    location_filter: Optional[str] = None
+    location_filter: Optional[str] = None,
+    cuisine_filter: Optional[str] = None,
+    query_ingredients: Optional[List[str]] = None
 ) -> List[Dict]:
     """
     Filter and rank restaurant recommendations from Pinecone matches.
@@ -178,14 +180,18 @@ def filter_and_rank_recommendations(
         menu_items = meta.get("menu_items") or []
         
         # Filter by diet
+        menu_items_before_diet = len(menu_items)
         menu_items = filter_dishes_by_diet(menu_items, diet_type)
         if not menu_items:
+            print(f"[DEBUG] Filtered out {meta.get('name')} - no dishes match diet: {diet_type} (had {menu_items_before_diet} items)")
             continue
         
         # Filter by allergies
         if allergies:
+            menu_items_before_allergy = len(menu_items)
             menu_items = filter_dishes_by_allergy(menu_items, allergies)
             if not menu_items:
+                print(f"[DEBUG] Filtered out {meta.get('name')} - all {menu_items_before_allergy} dishes contain allergies: {allergies}")
                 continue
         
         # Parse location and coordinates
@@ -225,6 +231,30 @@ def filter_and_rank_recommendations(
             else:
                 print(f"[DEBUG] Location match for {meta.get('name')}: {loc_str}")
         
+        # Filter by cuisine type if provided
+        if cuisine_filter:
+            cuisine_types = meta.get("cuisine_types", [])
+            if isinstance(cuisine_types, str):
+                try:
+                    import json
+                    cuisine_types = json.loads(cuisine_types)
+                except:
+                    cuisine_types = [cuisine_types]
+            
+            # Check if any cuisine matches (case-insensitive)
+            cuisine_match = False
+            if cuisine_types:
+                for cuisine in cuisine_types:
+                    if isinstance(cuisine, str) and cuisine_filter.lower() in cuisine.lower():
+                        cuisine_match = True
+                        break
+            
+            if not cuisine_match:
+                print(f"[DEBUG] Filtered out {meta.get('name')} - cuisine mismatch: {cuisine_types} vs {cuisine_filter}")
+                continue
+            else:
+                print(f"[DEBUG] Cuisine match for {meta.get('name')}: {cuisine_types}")
+        
         coordinates = meta.get("coordinates")
         if coordinates is None:
             coords_json = meta.get("coordinates_json")
@@ -259,6 +289,8 @@ def filter_and_rank_recommendations(
         
         # Calculate query relevance boost
         query_boost = 0.0
+        ingredient_boost = 0.0
+        
         if query_tokens:
             # Check menu items
             menu_text = " ".join(menu_items).lower()
@@ -280,8 +312,17 @@ def filter_and_rank_recommendations(
             overlap = len(query_tokens.intersection(restaurant_tokens))
             if overlap > 0:
                 query_boost = 0.5 + (0.2 * overlap)
+        
+        # Calculate ingredient-based boost
+        if query_ingredients:
+            # Check if any menu items contain the requested ingredients
+            menu_text_lower = " ".join(menu_items).lower()
+            matched_ingredients = sum(1 for ing in query_ingredients if ing in menu_text_lower)
+            if matched_ingredients > 0:
+                ingredient_boost = 0.3 * matched_ingredients  # Boost by 0.3 per ingredient match
+                print(f"[DEBUG] Restaurant '{meta.get('name')}' has {matched_ingredients} matching ingredients: boost={ingredient_boost}")
 
-        combined = score + 0.35 * tscore + boost + query_boost
+        combined = score + 0.35 * tscore + boost + query_boost + ingredient_boost
         
         # Get recommended dishes
         # Check if metadata has pre-calculated dish taste vectors (stored as JSON)

@@ -543,12 +543,69 @@ def check_location_match(user_location: str, restaurant_location: str) -> bool:
     if not isinstance(user_location, str): user_location = str(user_location)
     if not isinstance(restaurant_location, str): restaurant_location = str(restaurant_location)
 
-    # Fast path: simple string containment
-    u_loc = user_location.lower().split(',')[0].strip()
-    r_loc = restaurant_location.lower()
-    if u_loc in r_loc or r_loc in u_loc:
+    # Normalize for comparison
+    u_loc = user_location.lower().strip()
+    r_loc = restaurant_location.lower().strip()
+    
+    # Fast path 1: Direct substring match
+    u_loc_parts = u_loc.replace(',', ' ').split()
+    r_loc_lower = r_loc.replace(',', ' ')
+    
+    # Check if main city/location is in the restaurant location
+    main_location = u_loc_parts[0] if u_loc_parts else u_loc
+    if main_location in r_loc_lower:
+        print(f"[DEBUG] Fast path match succeeded")
         return True
+    
+    # Fast path 2: Check for country/region mismatches
+    # Check for US vs non-US locations
+    us_indicators = [', us', 'united states', ', ny', ', ca', ', tx', ', fl']
+    non_us_countries = ['mexico', 'canada', 'uk', 'france', 'italy', 'spain', 'india', 'china', 'japan']
+    
+    u_has_us = any(ind in r_loc for ind in us_indicators)
+    u_has_non_us = any(country in u_loc for country in non_us_countries)
+    
+    r_has_us = any(ind in r_loc for ind in us_indicators)
+    r_has_non_us = any(country in r_loc for country in non_us_countries)
+    
+    # If one is clearly US and the other is clearly non-US, reject
+    if (u_has_non_us and r_has_us) or (u_has_us and r_has_non_us):
+        print(f"[DEBUG] Fast path rejection: country mismatch (US vs non-US)")
+        return False
+    
+    # Fast path 3: Check for obvious mismatches (different well-known cities)
+    known_cities = [
+        'new york', 'brooklyn', 'manhattan', 'queens', 'bronx',
+        'san francisco', 'los angeles', 'chicago', 'boston',
+        'seattle', 'portland', 'austin', 'miami', 'atlanta'
+    ]
+    
+    user_city = None
+    restaurant_city = None
+    
+    for city in known_cities:
+        if city in u_loc:
+            user_city = city
+        if city in r_loc:
+            restaurant_city = city
+    
+    # If both cities are identified and different, no match (skip Groq)
+    if user_city and restaurant_city and user_city != restaurant_city:
+        print(f"[DEBUG] Fast path rejection: {user_city} != {restaurant_city}")
+        return False
 
+    # Fast path 4: State code mismatch (e.g., CA vs NY)
+    # Extract state codes (2 letters after comma)
+    import re
+    user_state = re.search(r',\s*([A-Z]{2})\b', user_location)
+    rest_state = re.search(r',\s*([A-Z]{2})\b', restaurant_location)
+    
+    if user_state and rest_state:
+        if user_state.group(1) != rest_state.group(1):
+            print(f"[DEBUG] Fast path rejection: state mismatch {user_state.group(1)} != {rest_state.group(1)}")
+            return False
+    
+    print(f"[DEBUG] Fast path inconclusive, calling Groq for location match")
     try:
         client = get_groq_client()
         prompt = f"""Determine if these two locations refer to the same area or if one is inside the other.
