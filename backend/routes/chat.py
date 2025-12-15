@@ -11,11 +11,11 @@ import os
 from models import ChatRequest
 from database import get_dummy_user, sync_dummy_user_from_request, dummy_user_to_user_profile
 from embeddings import embed_text, combine_vectors, get_embedding_model
-from taste_analysis import user_profile_to_taste_vector, infer_taste_from_text_hybrid
+from taste_analysis import user_profile_to_taste_vector, infer_taste_from_text_hybrid, taste_similarity
 from pinecone_client import get_pinecone_index, maybe_upsert_ingredients_to_pinecone
 from recommendations import filter_and_rank_recommendations
 from dish_processing import get_groq_client, classify_dish_diet_with_groq
-from config import GROQ_API_KEY, USE_SEMANTIC_INGREDIENT_TASTE
+from config import GROQ_API_KEY, USE_SEMANTIC_INGREDIENT_TASTE, USE_SEMANTIC_DISH_TASTE
 from recipe_database import (
     load_recipes_database,
     search_recipe_by_name,
@@ -1059,8 +1059,13 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
                     if matched_dish_obj:
                         recommended_dishes.append(matched_dish_obj)
                     else:
-                        # Fallback if not found in recommendations
-                        recommended_dishes.append({"name": matched_dish, "similarity": 50.0})
+                        # Calculate similarity for matched dish if not in recommendations
+                        dish_taste_vec = infer_taste_from_text_hybrid(matched_dish, semantic=USE_SEMANTIC_DISH_TASTE)
+                        similarity = taste_similarity(user_taste_vec, dish_taste_vec)
+                        recommended_dishes.append({
+                            "name": matched_dish, 
+                            "similarity": round(similarity * 100, 1)
+                        })
                     
                     # Add other dishes
                     for dish in all_dishes:

@@ -3,11 +3,13 @@ Taste vector analysis and similarity calculations.
 """
 from typing import List, Dict, Optional
 import csv
+import json
 from pathlib import Path
 from embeddings import embed_text, calculate_cosine_similarity, combine_vectors
 from pinecone_client import query_pinecone
 from config import TASTE_VECTOR_SIZE, USE_SEMANTIC_INGREDIENT_TASTE
 from models import UserProfile
+from dish_processing import get_groq_client
 
 
 # Cache for taste inference
@@ -84,6 +86,68 @@ def infer_taste_from_text(text: str) -> List[float]:
     return result
 
 
+def infer_taste_from_groq(dish_name: str) -> List[float]:
+    """Infer taste vector from dish name using Groq API."""
+    if not dish_name:
+        return [0.0] * TASTE_VECTOR_SIZE
+    
+    # Check cache first
+    cache_key = f"groq_{dish_name}"
+    if cache_key in _taste_infer_cache:
+        return _taste_infer_cache[cache_key]
+    
+    try:
+        client = get_groq_client()
+        
+        prompt = f"""Analyze the dish "{dish_name}" and provide taste profile values on a scale of 0.0 to 1.0 for each attribute.
+
+Return ONLY a JSON object with these exact keys (no other text):
+{{
+  "sweet": <value>,
+  "salty": <value>,
+  "sour": <value>,
+  "bitter": <value>,
+  "umami": <value>,
+  "spicy": <value>
+}}
+
+Guidelines:
+- Use 0.0 for no presence, 1.0 for very strong presence
+- Consider typical preparation and ingredients
+- Be realistic about standard recipes
+
+Example for "Margherita Pizza": {{"sweet": 0.2, "salty": 0.6, "sour": 0.1, "bitter": 0.0, "umami": 0.7, "spicy": 0.1}}"""
+
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+            max_tokens=200
+        )
+        
+        content = response.choices[0].message.content.strip()
+        print(f"[DEBUG] Groq taste inference for '{dish_name}': {content}")
+        
+        # Parse JSON response
+        taste_data = json.loads(content)
+        result = [
+            float(taste_data.get("sweet", 0)),
+            float(taste_data.get("salty", 0)),
+            float(taste_data.get("sour", 0)),
+            float(taste_data.get("bitter", 0)),
+            float(taste_data.get("umami", 0)),
+            float(taste_data.get("spicy", 0)),
+        ]
+        
+        print(f"[DEBUG] Groq inferred taste vector: {[round(x, 2) for x in result]}")
+        _taste_infer_cache[cache_key] = result
+        return result
+        
+    except Exception as e:
+        print(f"[ERROR] Groq taste inference failed for '{dish_name}': {e}")
+        return [0.0] * TASTE_VECTOR_SIZE
+
+
 def infer_taste_from_text_semantic(text: str) -> List[float]:
     """Infer taste vector from text using semantic search in Pinecone."""
     if not text:
@@ -103,8 +167,12 @@ def infer_taste_from_text_semantic(text: str) -> List[float]:
         
         if not matches:
             print(f"[DEBUG] Semantic search found no matches for '{text}', falling back to keyword matching")
-            return infer_taste_from_text(text)  # Fallback to keyword matching
-            result = [0.0] * TASTE_VECTOR_SIZE
+            keyword_result = infer_taste_from_text(text)
+            # If keyword matching also fails (returns all zeros), use Groq
+            if sum(abs(x) for x in keyword_result) == 0:
+                print(f"[DEBUG] Keyword matching also failed, using Groq API for '{text}'")
+                return infer_taste_from_groq(text)
+            return keyword_result
         else:
             taste_vectors = []
             for m in matches:
