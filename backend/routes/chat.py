@@ -99,7 +99,11 @@ def extract_diet_from_query(query: str) -> Optional[str]:
     # STEP 2: Check for dish-based diet detection
     # Extract potential dish names from query
     dish_patterns = [
-        r'(?:i want|i need|looking for|get me|find|where.*get|where.*find)\s+(.+?)(?:\s+(?:near|in|at|and)|$)',
+        # Specific pattern for "to eat X" - must come first
+        r'(?:i want|i need)\s+to\s+(?:eat|have|try)\s+(?:some\s+)?(.+?)(?:\s+(?:near|in|at|and)|$)',
+        # General patterns
+        r'(?:i want|i need|looking for|get me|find|show me|give me)\s+(?:some\s+)?(.+?)(?:\s+(?:near|in|at|and)|$)',
+        r'(?:where.*get|where.*find)\s+(.+?)(?:\s+(?:near|in|at|and)|$)',
         r'(?:is there|do you have|any)\s+(.+?)(?:\s+(?:available|near|in|at)|$)',
     ]
 
@@ -393,6 +397,55 @@ def is_greeting(query: str) -> bool:
             return True
 
     return False
+
+
+def normalize_dish_name_with_groq(dish_name: str) -> str:
+    """
+    Use Groq to normalize/correct misspelled or partial dish names.
+    
+    Args:
+        dish_name: Raw dish name extracted from query (may be misspelled)
+        
+    Returns:
+        Normalized dish name or original if Groq fails
+    """
+    try:
+        groq_client = get_groq_client()
+        
+        prompt = f"""You are a food name correction assistant. Given a potentially misspelled or partial dish name, return the correct, most likely full dish name.
+
+Examples:
+- "pizz" -> "pizza"
+- "burgr" -> "burger"  
+- "pasta alfrd" -> "pasta alfredo"
+- "panr tikka" -> "paneer tikka"
+- "biryani" -> "biryani" (already correct)
+
+Dish name: "{dish_name}"
+
+Respond with ONLY the corrected dish name, nothing else. If the name seems correct, return it as is."""
+
+        response = groq_client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.1,
+            max_tokens=50
+        )
+        
+        corrected_name = response.choices[0].message.content.strip().lower()
+        
+        # Clean up the response (remove quotes, extra spaces)
+        corrected_name = corrected_name.strip('"\'').strip()
+        
+        if corrected_name and corrected_name != dish_name.lower():
+            print(f"[DEBUG] Groq corrected '{dish_name}' -> '{corrected_name}'")
+            return corrected_name
+        
+        return dish_name
+        
+    except Exception as e:
+        print(f"[ERROR] Groq normalization failed: {e}")
+        return dish_name
 
 
 def is_dish_query(query: str) -> Optional[str]:
@@ -699,7 +752,13 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
     # Check if this is a dish-specific query (not at a specific restaurant)
     dish_query = is_dish_query(request.query)
     if dish_query and "where restaurant is" not in request.query.lower():
-        print(f"[DEBUG] Dish-specific query detected: '{dish_query}'")
+        # Normalize dish name with Groq (correct typos, partial names)
+        normalized_dish = normalize_dish_name_with_groq(dish_query)
+        print(f"[DEBUG] Dish-specific query detected: '{dish_query}'" + 
+              (f" -> normalized to '{normalized_dish}'" if normalized_dish != dish_query else ""))
+        
+        # Use normalized name for search
+        dish_query = normalized_dish
 
         # STEP 1: Search for dish in our database
         dish_in_db = search_dish_in_db(dish_query)
