@@ -121,6 +121,15 @@
   color: #333;
   font-size: 0.95rem;
   font-weight: 500;
+  flex: 1;
+}
+
+.dish-similarity {
+  color: #667eea;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  margin-left: 0.5rem;
 }
 
 @media (max-width: 768px) {

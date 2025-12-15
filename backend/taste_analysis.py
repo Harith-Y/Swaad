@@ -59,8 +59,10 @@ def infer_taste_from_text(text: str) -> List[float]:
     text_lower = text.lower()
     
     matched_flavors = []
+    matched_ingredients = []
     for ingredient, flavors in flavor_map.items():
         if ingredient in text_lower:
+            matched_ingredients.append(ingredient)
             matched_flavors.append([
                 flavors["sweet"],
                 flavors["salty"],
@@ -71,9 +73,12 @@ def infer_taste_from_text(text: str) -> List[float]:
             ])
     
     if not matched_flavors:
+        print(f"[DEBUG] No ingredients matched in '{text}'")
         result = [0.0] * TASTE_VECTOR_SIZE
     else:
         result = [sum(f[i] for f in matched_flavors) / len(matched_flavors) for i in range(TASTE_VECTOR_SIZE)]
+        print(f"[DEBUG] Matched ingredients in '{text}': {matched_ingredients}")
+        print(f"[DEBUG] Taste vector: {[round(x, 2) for x in result]}")
     
     _taste_infer_cache[text] = result
     return result
@@ -97,6 +102,8 @@ def infer_taste_from_text_semantic(text: str) -> List[float]:
         )
         
         if not matches:
+            print(f"[DEBUG] Semantic search found no matches for '{text}', falling back to keyword matching")
+            return infer_taste_from_text(text)  # Fallback to keyword matching
             result = [0.0] * TASTE_VECTOR_SIZE
         else:
             taste_vectors = []
@@ -142,8 +149,22 @@ def user_profile_to_taste_vector(user_profile: UserProfile) -> List[float]:
     if not dish_texts:
         return [0.0] * TASTE_VECTOR_SIZE
     
-    combined_text = " ".join(dish_texts)
-    return infer_taste_from_text_hybrid(combined_text, semantic=USE_SEMANTIC_INGREDIENT_TASTE)
+    # Get taste vector for each dish separately, then average
+    taste_vectors = []
+    for dish in dish_texts:
+        taste_vec = infer_taste_from_text_hybrid(dish, semantic=USE_SEMANTIC_INGREDIENT_TASTE)
+        # Only include non-zero vectors
+        if sum(abs(x) for x in taste_vec) > 0:
+            taste_vectors.append(taste_vec)
+    
+    if not taste_vectors:
+        print(f"[DEBUG] No taste vectors found for favorite dishes: {dish_texts}")
+        return [0.0] * TASTE_VECTOR_SIZE
+    
+    # Average all taste vectors
+    result = [sum(tv[i] for tv in taste_vectors) / len(taste_vectors) for i in range(TASTE_VECTOR_SIZE)]
+    print(f"[DEBUG] Computed user taste vector from {len(taste_vectors)} dishes: {[round(x, 2) for x in result]}")
+    return result
 
 
 def favorites_boost(menu_items: List[str], favorite_dishes: List[Dict]) -> float:

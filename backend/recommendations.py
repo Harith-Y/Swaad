@@ -74,11 +74,16 @@ def dish_recommendations_for_restaurant(
         user_sum = sum(abs(x) for x in user_taste_vec)
         dish_sum = sum(abs(x) for x in dish_taste_vec)
         if user_sum == 0 or dish_sum == 0:
+            print(f"[DEBUG] Zero vector detected for '{dish_name}': user_sum={user_sum:.2f}, dish_sum={dish_sum:.2f}, defaulting to 50%")
+            print(f"[DEBUG]   user_taste_vec={[round(x, 2) for x in user_taste_vec]}")
+            print(f"[DEBUG]   dish_taste_vec={[round(x, 2) for x in dish_taste_vec]}")
             similarity = 0.5
+        else:
+            print(f"[DEBUG] Similarity for '{dish_name}': {similarity:.3f} (user_sum={user_sum:.2f}, dish_sum={dish_sum:.2f})")
 
         dish_scores.append({
             "name": dish_name,
-            "similarity": round(similarity, 3)
+            "similarity": round(similarity * 100, 1)  # Convert to percentage
         })
 
     # Sort by similarity and return top N

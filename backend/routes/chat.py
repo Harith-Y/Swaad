@@ -749,6 +749,8 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
 
     # Calculate user taste vector
     user_taste_vec = user_profile_to_taste_vector(dummy_profile) if dummy_profile else [0.0] * 6
+    print(f"[DEBUG] Initial user_taste_vec from profile: {[round(x, 2) for x in user_taste_vec]}")
+    
     fav_text = ""
     if favorite_dishes:
         try:
@@ -759,8 +761,11 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
         except Exception:
             fav_text = ""
     
+    print(f"[DEBUG] Favorite dishes text for taste inference: '{fav_text}'")
     inferred_user = infer_taste_from_text_hybrid(fav_text, semantic=USE_SEMANTIC_INGREDIENT_TASTE)
+    print(f"[DEBUG] Inferred taste vector: {[round(x, 2) for x in inferred_user]}")
     user_taste_vec = combine_vectors(user_taste_vec, inferred_user, secondary_weight=0.35)
+    print(f"[DEBUG] Final combined user_taste_vec: {[round(x, 2) for x in user_taste_vec]}")
 
     # Handle location and pending queries
     is_first_turn = not request.chat_id
@@ -870,7 +875,7 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
             for item in menu_items[:20]:  # Limit to 20 items
                 recommended_dishes.append({
                     "name": item,
-                    "similarity": 0.5  # Neutral similarity since we're showing the full menu
+                    "similarity": 50.0  # Neutral similarity since we're showing the full menu (50%)
                 })
 
             return {
@@ -1030,22 +1035,35 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
                     # Get the matched dish
                     matched_dish = rest.get("dish", dish_query)
 
-                    # Get additional recommended dishes for this restaurant
+                    # Get all recommended dishes (including the matched one)
                     menu_items = rest["metadata"].get("menu_items", [])
-                    additional_dishes = dish_recommendations_for_restaurant(
+                    all_dishes = dish_recommendations_for_restaurant(
                         menu_items=menu_items,
                         user_taste_vec=user_taste_vec,
                         diet_type=diet_type,
-                        top_n=4  # Get 4 additional recommendations
+                        allergies=allergies,
+                        top_n=10  # Get more to ensure we have the matched dish
                     )
 
-                    # Put the matched dish first, then additional recommendations
-                    recommended_dishes = [
-                        {"name": matched_dish, "similarity": 1.0}  # Perfect match
-                    ]
-
-                    # Add additional dishes if they're different from the matched dish
-                    for dish in additional_dishes:
+                    # Find the matched dish in the recommendations (it will have proper similarity)
+                    recommended_dishes = []
+                    matched_dish_obj = None
+                    
+                    for dish in all_dishes:
+                        dish_name = dish.get("name") if isinstance(dish, dict) else dish
+                        if dish_name.lower() == matched_dish.lower():
+                            matched_dish_obj = dish
+                            break
+                    
+                    # Put matched dish first (with its calculated similarity)
+                    if matched_dish_obj:
+                        recommended_dishes.append(matched_dish_obj)
+                    else:
+                        # Fallback if not found in recommendations
+                        recommended_dishes.append({"name": matched_dish, "similarity": 50.0})
+                    
+                    # Add other dishes
+                    for dish in all_dishes:
                         dish_name = dish.get("name") if isinstance(dish, dict) else dish
                         if dish_name.lower() != matched_dish.lower():
                             recommended_dishes.append(dish)

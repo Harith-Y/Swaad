@@ -24,6 +24,9 @@ function RestaurantCard({ restaurant }) {
               <li key={idx} className="dish-item">
                 <span className="dish-number">{idx + 1}.</span>
                 <span className="dish-name">{dish.name}</span>
+                {dish.similarity !== undefined && (
+                  <span className="dish-similarity">({dish.similarity}% match)</span>
+                )}
               </li>
             ))}
           </ul>
