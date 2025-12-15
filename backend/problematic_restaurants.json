@@ -1,0 +1,1365 @@
+[
+  {
+    "id": "AH95PKaqfjhx79FfCEHCPQ",
+    "name": "Hwa Mi Won",
+    "menu_items": [
+      "Korean",
+      "Soup"
+    ],
+    "cuisine_types": [
+      "Korean",
+      "Soup"
+    ],
+    "problematic_items": [
+      "Korean",
+      "Soup"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "6YuJE0vjUpIzYckRMnzy0g",
+    "name": "Savor",
+    "menu_items": [
+      "Mediterranean",
+      "Vegetarian",
+      "Tapas/Small Plates"
+    ],
+    "cuisine_types": [
+      "Mediterranean",
+      "Vegetarian",
+      "Tapas/Small Plates"
+    ],
+    "problematic_items": [
+      "Mediterranean",
+      "Vegetarian",
+      "Tapas/Small Plates"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "GtKxIGU6LJu14UErdNulmQ",
+    "name": "Original Joe's",
+    "menu_items": [
+      "Italian",
+      "Steakhouses",
+      "Breakfast & Brunch"
+    ],
+    "cuisine_types": [
+      "Italian",
+      "Steakhouses",
+      "Breakfast & Brunch"
+    ],
+    "problematic_items": [
+      "Italian",
+      "Steakhouses",
+      "Breakfast & Brunch"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "yCCkP9EZXT06CYFMSYZcow",
+    "name": "Motek",
+    "menu_items": [
+      "Mediterranean",
+      "Lebanese",
+      "Kosher"
+    ],
+    "cuisine_types": [
+      "Mediterranean",
+      "Lebanese",
+      "Kosher"
+    ],
+    "problematic_items": [
+      "Mediterranean",
+      "Kosher"
+    ],
+    "valid_items": [
+      "Lebanese"
+    ]
+  },
+  {
+    "id": "pk89jzL1RsE9U0thf_z6tw",
+    "name": "Locanda Verde",
+    "menu_items": [
+      "Italian",
+      "Breakfast & Brunch",
+      "Desserts"
+    ],
+    "cuisine_types": [
+      "Italian",
+      "Breakfast & Brunch",
+      "Desserts"
+    ],
+    "problematic_items": [
+      "Italian",
+      "Breakfast & Brunch",
+      "Desserts"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "i2VhtC1JkV_sZOA4urd1ng",
+    "name": "Piccino Restaurant",
+    "menu_items": [
+      "Italian",
+      "Coffee & Tea",
+      "Cocktail Bars"
+    ],
+    "cuisine_types": [
+      "Italian",
+      "Coffee & Tea",
+      "Cocktail Bars"
+    ],
+    "problematic_items": [
+      "Italian",
+      "Coffee & Tea",
+      "Cocktail Bars"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "56qlj1cYlqNzmG0xllGg-w",
+    "name": "Westville Dumbo",
+    "menu_items": [
+      "Comfort Food",
+      "American",
+      "Salad"
+    ],
+    "cuisine_types": [
+      "Comfort Food",
+      "American",
+      "Salad"
+    ],
+    "problematic_items": [
+      "Comfort Food",
+      "American",
+      "Salad"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "QueFVMcMlT-6aZFv2M47mg",
+    "name": "Bottega",
+    "menu_items": [
+      "Italian",
+      "Pasta Shops",
+      "Pizza"
+    ],
+    "cuisine_types": [
+      "Italian",
+      "Pasta Shops",
+      "Pizza"
+    ],
+    "problematic_items": [
+      "Italian",
+      "Pasta Shops",
+      "Pizza"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "_Ahg6l14qXsAvSHDvS5g8Q",
+    "name": "CHADA",
+    "menu_items": [
+      "Thai"
+    ],
+    "cuisine_types": [
+      "Thai"
+    ],
+    "problematic_items": [
+      "Thai"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "1zHT73rRrkpw7MwgRs_liQ",
+    "name": "Bucatini",
+    "menu_items": [
+      "Italian",
+      "Pizza",
+      "Pasta Shops"
+    ],
+    "cuisine_types": [
+      "Italian",
+      "Pizza",
+      "Pasta Shops"
+    ],
+    "problematic_items": [
+      "Italian",
+      "Pizza",
+      "Pasta Shops"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "E2Ri3Uudb3ogKfWBJIIhRw",
+    "name": "Lokma",
+    "menu_items": [
+      "Mediterranean",
+      "Breakfast & Brunch",
+      "Vegetarian"
+    ],
+    "cuisine_types": [
+      "Mediterranean",
+      "Breakfast & Brunch",
+      "Vegetarian"
+    ],
+    "problematic_items": [
+      "Mediterranean",
+      "Breakfast & Brunch",
+      "Vegetarian"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "ykvr3ib1gHQHI4tznSn8iA",
+    "name": "Wayfare Tavern",
+    "menu_items": [
+      "American"
+    ],
+    "cuisine_types": [
+      "American"
+    ],
+    "problematic_items": [
+      "American"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "0T1Kc6tUWaG3cPnyiD40Hw",
+    "name": "Dalida",
+    "menu_items": [
+      "Mediterranean",
+      "Turkish",
+      "Bars"
+    ],
+    "cuisine_types": [
+      "Mediterranean",
+      "Turkish",
+      "Bars"
+    ],
+    "problematic_items": [
+      "Mediterranean"
+    ],
+    "valid_items": [
+      "Turkish",
+      "Bars"
+    ]
+  },
+  {
+    "id": "6mWHsXRGCAMLXRIIFeVCcg",
+    "name": "Kuker",
+    "menu_items": [
+      "Bulgarian",
+      "Food Trucks"
+    ],
+    "cuisine_types": [
+      "Bulgarian",
+      "Food Trucks"
+    ],
+    "problematic_items": [
+      "Food Trucks"
+    ],
+    "valid_items": [
+      "Bulgarian"
+    ]
+  },
+  {
+    "id": "XfOCJ841dL9fPBY_BAyayA",
+    "name": "SOBOKU",
+    "menu_items": [
+      "Japanese"
+    ],
+    "cuisine_types": [
+      "Japanese"
+    ],
+    "problematic_items": [
+      "Japanese"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "liZmIO0FqZwslLJfLDkfgw",
+    "name": "Wayla",
+    "menu_items": [
+      "Thai"
+    ],
+    "cuisine_types": [
+      "Thai"
+    ],
+    "problematic_items": [
+      "Thai"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "9adGsRBQkVSqq4digmh6sw",
+    "name": "Ganji",
+    "menu_items": [
+      "Japanese"
+    ],
+    "cuisine_types": [
+      "Japanese"
+    ],
+    "problematic_items": [
+      "Japanese"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "w3mpnxz64nU8VwHDLz3S6g",
+    "name": "Breadbelly",
+    "menu_items": [
+      "Bakeries",
+      "Cafes",
+      "Breakfast & Brunch"
+    ],
+    "cuisine_types": [
+      "Bakeries",
+      "Cafes",
+      "Breakfast & Brunch"
+    ],
+    "problematic_items": [
+      "Bakeries",
+      "Cafes",
+      "Breakfast & Brunch"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "8dUaybEPHsZMgr1iKgqgMQ",
+    "name": "Sotto Mare",
+    "menu_items": [
+      "Seafood",
+      "Italian",
+      "Bars"
+    ],
+    "cuisine_types": [
+      "Seafood",
+      "Italian",
+      "Bars"
+    ],
+    "problematic_items": [
+      "Seafood",
+      "Italian"
+    ],
+    "valid_items": [
+      "Bars"
+    ]
+  },
+  {
+    "id": "ZgQ_wSGG3qEUHRhDJqY9DQ",
+    "name": "Laughing Monk Brewing",
+    "menu_items": [
+      "Breweries",
+      "Salad",
+      "Gastropubs"
+    ],
+    "cuisine_types": [
+      "Breweries",
+      "Salad",
+      "Gastropubs"
+    ],
+    "problematic_items": [
+      "Salad",
+      "Gastropubs"
+    ],
+    "valid_items": [
+      "Breweries"
+    ]
+  },
+  {
+    "id": "gZz9A8k8ORC_xl0aHxtY4w",
+    "name": "Monkey Bar",
+    "menu_items": [
+      "American",
+      "Bars"
+    ],
+    "cuisine_types": [
+      "American",
+      "Bars"
+    ],
+    "problematic_items": [
+      "American"
+    ],
+    "valid_items": [
+      "Bars"
+    ]
+  },
+  {
+    "id": "cCesIqo-LQt0cRlZAnrAZQ",
+    "name": "Friedman's",
+    "menu_items": [
+      "New American",
+      "Gluten-Free",
+      "Breakfast & Brunch"
+    ],
+    "cuisine_types": [
+      "New American",
+      "Gluten-Free",
+      "Breakfast & Brunch"
+    ],
+    "problematic_items": [
+      "Gluten-Free",
+      "Breakfast & Brunch"
+    ],
+    "valid_items": [
+      "New American"
+    ]
+  },
+  {
+    "id": "sStsNz4BHQUcqpufL_RzUQ",
+    "name": "Theodora",
+    "menu_items": [
+      "Mediterranean",
+      "Cocktail Bars"
+    ],
+    "cuisine_types": [
+      "Mediterranean",
+      "Cocktail Bars"
+    ],
+    "problematic_items": [
+      "Mediterranean",
+      "Cocktail Bars"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "q1uIqB8PvyCCX8TajaRYBg",
+    "name": "Little Owl",
+    "menu_items": [
+      "Breakfast & Brunch",
+      "Mediterranean",
+      "American"
+    ],
+    "cuisine_types": [
+      "Breakfast & Brunch",
+      "Mediterranean",
+      "American"
+    ],
+    "problematic_items": [
+      "Breakfast & Brunch",
+      "Mediterranean",
+      "American"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "reXWH9Wo0ZTOuQsTMNOSxg",
+    "name": "Fable",
+    "menu_items": [
+      "New American",
+      "Wine Bars",
+      "Breakfast & Brunch"
+    ],
+    "cuisine_types": [
+      "New American",
+      "Wine Bars",
+      "Breakfast & Brunch"
+    ],
+    "problematic_items": [
+      "Wine Bars",
+      "Breakfast & Brunch"
+    ],
+    "valid_items": [
+      "New American"
+    ]
+  },
+  {
+    "id": "XQLmEdXoMzOpffwoFaBtaQ",
+    "name": "Kitchen Story",
+    "menu_items": [
+      "Breakfast & Brunch",
+      "Asian Fusion",
+      "New American"
+    ],
+    "cuisine_types": [
+      "Breakfast & Brunch",
+      "Asian Fusion",
+      "New American"
+    ],
+    "problematic_items": [
+      "Breakfast & Brunch",
+      "Asian Fusion"
+    ],
+    "valid_items": [
+      "New American"
+    ]
+  },
+  {
+    "id": "jAaVnUKLITkuhzwXIe0vLQ",
+    "name": "Cafe Mogador",
+    "menu_items": [
+      "Moroccan",
+      "Breakfast & Brunch",
+      "Mediterranean"
+    ],
+    "cuisine_types": [
+      "Moroccan",
+      "Breakfast & Brunch",
+      "Mediterranean"
+    ],
+    "problematic_items": [
+      "Breakfast & Brunch",
+      "Mediterranean"
+    ],
+    "valid_items": [
+      "Moroccan"
+    ]
+  },
+  {
+    "id": "Ih7DWOErYaIv6ZXzsHIiEw",
+    "name": "Elena's Mexican Restaurant",
+    "menu_items": [
+      "American",
+      "Mexican"
+    ],
+    "cuisine_types": [
+      "American",
+      "Mexican"
+    ],
+    "problematic_items": [
+      "American",
+      "Mexican"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "Z-QmxQZAJEy5GXqA82Bemw",
+    "name": "Da Toscano",
+    "menu_items": [
+      "Italian"
+    ],
+    "cuisine_types": [
+      "Italian"
+    ],
+    "problematic_items": [
+      "Italian"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "Z2Di9aL4YCfnUYr3VSzLgg",
+    "name": "Mermaid Oyster Bar",
+    "menu_items": [
+      "Seafood"
+    ],
+    "cuisine_types": [
+      "Seafood"
+    ],
+    "problematic_items": [
+      "Seafood"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "h0pRCiJDrCN7tm3VX5tILQ",
+    "name": "CHILI",
+    "menu_items": [
+      "Szechuan",
+      "Dim Sum",
+      "Cocktail Bars"
+    ],
+    "cuisine_types": [
+      "Szechuan",
+      "Dim Sum",
+      "Cocktail Bars"
+    ],
+    "problematic_items": [
+      "Dim Sum",
+      "Cocktail Bars"
+    ],
+    "valid_items": [
+      "Szechuan"
+    ]
+  },
+  {
+    "id": "SUdC4LIL3huirbbBkHrhfw",
+    "name": "The Laundromat",
+    "menu_items": [
+      "Pizza",
+      "Bagels",
+      "Beer Bar"
+    ],
+    "cuisine_types": [
+      "Pizza",
+      "Bagels",
+      "Beer Bar"
+    ],
+    "problematic_items": [
+      "Pizza",
+      "Bagels",
+      "Beer Bar"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "4efDL5Sbi_rmafTeD-RW9A",
+    "name": "Shoji",
+    "menu_items": [
+      "Cocktail Bars",
+      "Cafes",
+      "Japanese"
+    ],
+    "cuisine_types": [
+      "Cocktail Bars",
+      "Cafes",
+      "Japanese"
+    ],
+    "problematic_items": [
+      "Cocktail Bars",
+      "Cafes",
+      "Japanese"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "M0JTO3oyu6gxh1mfFjU-dA",
+    "name": "San Tung",
+    "menu_items": [
+      "Chinese",
+      "Chicken Wings",
+      "Noodles"
+    ],
+    "cuisine_types": [
+      "Chinese",
+      "Chicken Wings",
+      "Noodles"
+    ],
+    "problematic_items": [
+      "Chinese",
+      "Noodles"
+    ],
+    "valid_items": [
+      "Chicken Wings"
+    ]
+  },
+  {
+    "id": "HHtpR0RslupSQ99GIIwW5A",
+    "name": "Marufuku Ramen",
+    "menu_items": [
+      "Ramen",
+      "Noodles"
+    ],
+    "cuisine_types": [
+      "Ramen",
+      "Noodles"
+    ],
+    "problematic_items": [
+      "Ramen",
+      "Noodles"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "sRWRA4dcN_NR1JGpuRVouA",
+    "name": "Nan Xiang Soup Dumplings - Koreatown",
+    "menu_items": [
+      "Dim Sum",
+      "Desserts",
+      "Noodles"
+    ],
+    "cuisine_types": [
+      "Dim Sum",
+      "Desserts",
+      "Noodles"
+    ],
+    "problematic_items": [
+      "Dim Sum",
+      "Desserts",
+      "Noodles"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "1VTv1wBwzzcD9k7qxC7L2g",
+    "name": "The Parlour Room",
+    "menu_items": [
+      "Cocktail Bars",
+      "Seafood",
+      "Tapas/Small Plates"
+    ],
+    "cuisine_types": [
+      "Cocktail Bars",
+      "Seafood",
+      "Tapas/Small Plates"
+    ],
+    "problematic_items": [
+      "Cocktail Bars",
+      "Seafood",
+      "Tapas/Small Plates"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "5D--FJXQHdC3kZWYm2GREg",
+    "name": "Barcha",
+    "menu_items": [
+      "Mediterranean",
+      "Tapas/Small Plates",
+      "Cocktail Bars"
+    ],
+    "cuisine_types": [
+      "Mediterranean",
+      "Tapas/Small Plates",
+      "Cocktail Bars"
+    ],
+    "problematic_items": [
+      "Mediterranean",
+      "Tapas/Small Plates",
+      "Cocktail Bars"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "B09WOy0W83Od-Xw4xEXxog",
+    "name": "Roma Antica",
+    "menu_items": [
+      "Pizza",
+      "Italian",
+      "Pasta Shops"
+    ],
+    "cuisine_types": [
+      "Pizza",
+      "Italian",
+      "Pasta Shops"
+    ],
+    "problematic_items": [
+      "Pizza",
+      "Italian",
+      "Pasta Shops"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "4DInnPhOyvXFbYpUdO0SMQ",
+    "name": "Antidote",
+    "menu_items": [
+      "Cocktail Bars",
+      "Dim Sum",
+      "Szechuan"
+    ],
+    "cuisine_types": [
+      "Cocktail Bars",
+      "Dim Sum",
+      "Szechuan"
+    ],
+    "problematic_items": [
+      "Cocktail Bars",
+      "Dim Sum"
+    ],
+    "valid_items": [
+      "Szechuan"
+    ]
+  },
+  {
+    "id": "f8ipr8Wdy1_wHhw7JgNqPQ",
+    "name": "Da Claudio",
+    "menu_items": [
+      "Italian",
+      "Cocktail Bars",
+      "Seafood"
+    ],
+    "cuisine_types": [
+      "Italian",
+      "Cocktail Bars",
+      "Seafood"
+    ],
+    "problematic_items": [
+      "Italian",
+      "Cocktail Bars",
+      "Seafood"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "OFfZUS-nu6NDnsWe1B2bUQ",
+    "name": "Tonchin",
+    "menu_items": [
+      "Ramen",
+      "Cocktail Bars",
+      "Chicken Wings"
+    ],
+    "cuisine_types": [
+      "Ramen",
+      "Cocktail Bars",
+      "Chicken Wings"
+    ],
+    "problematic_items": [
+      "Ramen",
+      "Cocktail Bars"
+    ],
+    "valid_items": [
+      "Chicken Wings"
+    ]
+  },
+  {
+    "id": "0CjK3esfpFcxIopebzjFxA",
+    "name": "Joe's Shanghai",
+    "menu_items": [
+      "Shanghainese",
+      "Seafood",
+      "Noodles"
+    ],
+    "cuisine_types": [
+      "Shanghainese",
+      "Seafood",
+      "Noodles"
+    ],
+    "problematic_items": [
+      "Seafood",
+      "Noodles"
+    ],
+    "valid_items": [
+      "Shanghainese"
+    ]
+  },
+  {
+    "id": "BCmI-X4OCXzPgN0CSssGyQ",
+    "name": "Blackbird",
+    "menu_items": [
+      "American",
+      "Lounges"
+    ],
+    "cuisine_types": [
+      "American",
+      "Lounges"
+    ],
+    "problematic_items": [
+      "American"
+    ],
+    "valid_items": [
+      "Lounges"
+    ]
+  },
+  {
+    "id": "ZSzXw0NgJTyOzcHwKY5eMA",
+    "name": "Blind Butcher",
+    "menu_items": [
+      "New American",
+      "Wine Bars"
+    ],
+    "cuisine_types": [
+      "New American",
+      "Wine Bars"
+    ],
+    "problematic_items": [
+      "Wine Bars"
+    ],
+    "valid_items": [
+      "New American"
+    ]
+  },
+  {
+    "id": "4aF0F8w7yXX9o5_QFky_ig",
+    "name": "Celestine",
+    "menu_items": [
+      "Mediterranean",
+      "Diners",
+      "Cocktail Bars"
+    ],
+    "cuisine_types": [
+      "Mediterranean",
+      "Diners",
+      "Cocktail Bars"
+    ],
+    "problematic_items": [
+      "Mediterranean",
+      "Diners",
+      "Cocktail Bars"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "f-m7-hyFzkf0HSEeQ2s-9A",
+    "name": "Fog Harbor Fish House",
+    "menu_items": [
+      "Seafood",
+      "Wine Bars",
+      "Cocktail Bars"
+    ],
+    "cuisine_types": [
+      "Seafood",
+      "Wine Bars",
+      "Cocktail Bars"
+    ],
+    "problematic_items": [
+      "Seafood",
+      "Wine Bars",
+      "Cocktail Bars"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "ttarnopezxmp2ROB1N2PaA",
+    "name": "Nopa",
+    "menu_items": [
+      "New American",
+      "Desserts",
+      "Cocktail Bars"
+    ],
+    "cuisine_types": [
+      "New American",
+      "Desserts",
+      "Cocktail Bars"
+    ],
+    "problematic_items": [
+      "Desserts",
+      "Cocktail Bars"
+    ],
+    "valid_items": [
+      "New American"
+    ]
+  },
+  {
+    "id": "x24zCTZhA-LiVgYMWs6Wqw",
+    "name": "Ernest",
+    "menu_items": [
+      "New American",
+      "Seafood",
+      "Bars"
+    ],
+    "cuisine_types": [
+      "New American",
+      "Seafood",
+      "Bars"
+    ],
+    "problematic_items": [
+      "Seafood"
+    ],
+    "valid_items": [
+      "New American",
+      "Bars"
+    ]
+  },
+  {
+    "id": "lz7EgaxedlmKRq9hrFkulA",
+    "name": "Khao Tiew",
+    "menu_items": [
+      "Thai"
+    ],
+    "cuisine_types": [
+      "Thai"
+    ],
+    "problematic_items": [
+      "Thai"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "s2R3RUJ09eBFvHVIUS4Shg",
+    "name": "Kothai Republic",
+    "menu_items": [
+      "Wine Bars",
+      "Tapas/Small Plates",
+      "New American"
+    ],
+    "cuisine_types": [
+      "Wine Bars",
+      "Tapas/Small Plates",
+      "New American"
+    ],
+    "problematic_items": [
+      "Wine Bars",
+      "Tapas/Small Plates"
+    ],
+    "valid_items": [
+      "New American"
+    ]
+  },
+  {
+    "id": "PH3o6Te6QOA2VC2ZoYz6CQ",
+    "name": "Z & Y Peking Duck",
+    "menu_items": [
+      "Chinese",
+      "Seafood",
+      "Soup"
+    ],
+    "cuisine_types": [
+      "Chinese",
+      "Seafood",
+      "Soup"
+    ],
+    "problematic_items": [
+      "Chinese",
+      "Seafood",
+      "Soup"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "zRXMvxUX_rOliKZPpkWi_g",
+    "name": "Valerie",
+    "menu_items": [
+      "New American",
+      "Cocktail Bars"
+    ],
+    "cuisine_types": [
+      "New American",
+      "Cocktail Bars"
+    ],
+    "problematic_items": [
+      "Cocktail Bars"
+    ],
+    "valid_items": [
+      "New American"
+    ]
+  },
+  {
+    "id": "dMlsQsPU8Y_oiPYC5hHi2A",
+    "name": "Frances",
+    "menu_items": [
+      "New American",
+      "Wine Bars"
+    ],
+    "cuisine_types": [
+      "New American",
+      "Wine Bars"
+    ],
+    "problematic_items": [
+      "Wine Bars"
+    ],
+    "valid_items": [
+      "New American"
+    ]
+  },
+  {
+    "id": "kqk5BoCJU59MC9fH0IB4wQ",
+    "name": "Kin Khao",
+    "menu_items": [
+      "Thai"
+    ],
+    "cuisine_types": [
+      "Thai"
+    ],
+    "problematic_items": [
+      "Thai"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "eIToNjJ97m5-QMMVr1ZfnA",
+    "name": "Banh Anh Em",
+    "menu_items": [
+      "Vietnamese"
+    ],
+    "cuisine_types": [
+      "Vietnamese"
+    ],
+    "problematic_items": [
+      "Vietnamese"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "xuYMFNhmafQIxZAT1YL8BA",
+    "name": "Frita Batidos Brooklyn",
+    "menu_items": [
+      "Burgers"
+    ],
+    "cuisine_types": [
+      "Burgers"
+    ],
+    "problematic_items": [
+      "Burgers"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "Xg-FyjVKAN70LO4u4Z1ozg",
+    "name": "Hog Island Oyster",
+    "menu_items": [
+      "Seafood",
+      "Seafood Markets",
+      "Cocktail Bars"
+    ],
+    "cuisine_types": [
+      "Seafood",
+      "Seafood Markets",
+      "Cocktail Bars"
+    ],
+    "problematic_items": [
+      "Seafood",
+      "Cocktail Bars"
+    ],
+    "valid_items": [
+      "Seafood Markets"
+    ]
+  },
+  {
+    "id": "PsY5DMHxa5iNX_nX0T-qPA",
+    "name": "Kokkari Estiatorio",
+    "menu_items": [
+      "Greek",
+      "Mediterranean"
+    ],
+    "cuisine_types": [
+      "Greek",
+      "Mediterranean"
+    ],
+    "problematic_items": [
+      "Greek",
+      "Mediterranean"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "XRjeE9yFANgsG12FWUOoXg",
+    "name": "Gair",
+    "menu_items": [
+      "Cocktail Bars",
+      "Burgers",
+      "American"
+    ],
+    "cuisine_types": [
+      "Cocktail Bars",
+      "Burgers",
+      "American"
+    ],
+    "problematic_items": [
+      "Cocktail Bars",
+      "Burgers",
+      "American"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "DGhWO1sUWydVeR5j5ZZaMw",
+    "name": "La Grande Boucherie",
+    "menu_items": [
+      "French",
+      "Steakhouses",
+      "Cocktail Bars"
+    ],
+    "cuisine_types": [
+      "French",
+      "Steakhouses",
+      "Cocktail Bars"
+    ],
+    "problematic_items": [
+      "French",
+      "Steakhouses",
+      "Cocktail Bars"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "T6krutcCsZ317NS_EGbUZQ",
+    "name": "Four Kings 四大天王",
+    "menu_items": [
+      "Cantonese",
+      "Wine Bars",
+      "Asian Fusion"
+    ],
+    "cuisine_types": [
+      "Cantonese",
+      "Wine Bars",
+      "Asian Fusion"
+    ],
+    "problematic_items": [
+      "Wine Bars",
+      "Asian Fusion"
+    ],
+    "valid_items": [
+      "Cantonese"
+    ]
+  },
+  {
+    "id": "jqEpBbf_qNfWuz_GBkwCjw",
+    "name": "Scoma's Restaurant",
+    "menu_items": [
+      "Seafood",
+      "Cocktail Bars",
+      "Desserts"
+    ],
+    "cuisine_types": [
+      "Seafood",
+      "Cocktail Bars",
+      "Desserts"
+    ],
+    "problematic_items": [
+      "Seafood",
+      "Cocktail Bars",
+      "Desserts"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "RjPKqHk_FiegJVCekbJ4Mw",
+    "name": "606",
+    "menu_items": [
+      "Hong Kong Style Cafe",
+      "Cantonese",
+      "Coffee & Tea"
+    ],
+    "cuisine_types": [
+      "Hong Kong Style Cafe",
+      "Cantonese",
+      "Coffee & Tea"
+    ],
+    "problematic_items": [
+      "Coffee & Tea"
+    ],
+    "valid_items": [
+      "Hong Kong Style Cafe",
+      "Cantonese"
+    ]
+  },
+  {
+    "id": "4XX-zF8h5Lvrr22_tqU6-Q",
+    "name": "The River Café",
+    "menu_items": [
+      "New American",
+      "Wine Bars",
+      "Venues & Event Spaces"
+    ],
+    "cuisine_types": [
+      "New American",
+      "Wine Bars",
+      "Venues & Event Spaces"
+    ],
+    "problematic_items": [
+      "Wine Bars"
+    ],
+    "valid_items": [
+      "New American",
+      "Venues & Event Spaces"
+    ]
+  },
+  {
+    "id": "H-GCfdIpY8qdoKwQ9C69hw",
+    "name": "Mēdüzā Mediterrania New York",
+    "menu_items": [
+      "Mediterranean"
+    ],
+    "cuisine_types": [
+      "Mediterranean"
+    ],
+    "problematic_items": [
+      "Mediterranean"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "WavvLdfdP6g8aZTtbBQHTw",
+    "name": "Gary Danko",
+    "menu_items": [
+      "New American",
+      "French",
+      "Cocktail Bars"
+    ],
+    "cuisine_types": [
+      "New American",
+      "French",
+      "Cocktail Bars"
+    ],
+    "problematic_items": [
+      "French",
+      "Cocktail Bars"
+    ],
+    "valid_items": [
+      "New American"
+    ]
+  },
+  {
+    "id": "gNGxh97n0NZgYG1Q_no9Kg",
+    "name": "Potluck Club 佰樂",
+    "menu_items": [
+      "Cantonese",
+      "Asian Fusion"
+    ],
+    "cuisine_types": [
+      "Cantonese",
+      "Asian Fusion"
+    ],
+    "problematic_items": [
+      "Asian Fusion"
+    ],
+    "valid_items": [
+      "Cantonese"
+    ]
+  },
+  {
+    "id": "uLWFI7kseoU98qHiGWVgsg",
+    "name": "Tara Mór",
+    "menu_items": [
+      "Cocktail Bars",
+      "New American",
+      "Irish"
+    ],
+    "cuisine_types": [
+      "Cocktail Bars",
+      "New American",
+      "Irish"
+    ],
+    "problematic_items": [
+      "Cocktail Bars"
+    ],
+    "valid_items": [
+      "New American",
+      "Irish"
+    ]
+  },
+  {
+    "id": "0mNzmmh1mrdh5Cpg2QUBiw",
+    "name": "Lapisara Eatery",
+    "menu_items": [
+      "Breakfast & Brunch",
+      "Burgers",
+      "Thai"
+    ],
+    "cuisine_types": [
+      "Breakfast & Brunch",
+      "Burgers",
+      "Thai"
+    ],
+    "problematic_items": [
+      "Breakfast & Brunch",
+      "Burgers",
+      "Thai"
+    ],
+    "valid_items": []
+  },
+  {
+    "id": "KkAVX3Wb7E3lP5F_f_8pXg",
+    "name": "Liholiho Yacht Club",
+    "menu_items": [
+      "Bars",
+      "New American",
+      "Seafood"
+    ],
+    "cuisine_types": [
+      "Bars",
+      "New American",
+      "Seafood"
+    ],
+    "problematic_items": [
+      "Seafood"
+    ],
+    "valid_items": [
+      "Bars",
+      "New American"
+    ]
+  },
+  {
+    "id": "__EvomQ2tE1NtkWn32WEXg",
+    "name": "Au Cheval",
+    "menu_items": [
+      "Burgers",
+      "New American",
+      "Cocktail Bars"
+    ],
+    "cuisine_types": [
+      "Burgers",
+      "New American",
+      "Cocktail Bars"
+    ],
+    "problematic_items": [
+      "Burgers",
+      "Cocktail Bars"
+    ],
+    "valid_items": [
+      "New American"
+    ]
+  }
+]

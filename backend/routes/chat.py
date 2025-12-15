@@ -990,6 +990,39 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
                 # Dish found - return restaurants that have it
                 print(f"[DEBUG] Found '{dish_query}' at {len(restaurants_with_dish)} restaurants")
 
+                # Apply location filtering
+                from dish_processing import check_location_match
+                if fallback_location:
+                    print(f"[DEBUG] Applying location filter to dish results: {fallback_location}")
+                    filtered_restaurants = []
+                    for rest in restaurants_with_dish:
+                        loc_json = rest["metadata"].get("location_json", "{}")
+                        try:
+                            import json
+                            location = json.loads(loc_json) if isinstance(loc_json, str) else loc_json
+                            loc_str = location
+                            if isinstance(location, dict):
+                                parts = []
+                                for key in ["address", "city", "state", "zip_code", "country"]:
+                                    if key in location and location[key]:
+                                        parts.append(str(location[key]))
+                                if parts:
+                                    loc_str = ", ".join(parts)
+                                else:
+                                    loc_str = ", ".join([str(v) for v in location.values() if isinstance(v, (str, int))])
+                            
+                            if check_location_match(fallback_location, str(loc_str)):
+                                print(f"[DEBUG] Location match: {rest['name']} in {loc_str}")
+                                filtered_restaurants.append(rest)
+                            else:
+                                print(f"[DEBUG] Filtered out {rest['name']} - wrong location: {loc_str}")
+                        except Exception as e:
+                            print(f"[DEBUG] Error checking location for {rest['name']}: {e}")
+                            continue
+                    
+                    restaurants_with_dish = filtered_restaurants
+                    print(f"[DEBUG] After location filter: {len(restaurants_with_dish)} restaurants")
+
                 # Rank by rating and taste similarity
                 from recommendations import dish_recommendations_for_restaurant
                 ranked_restaurants = []

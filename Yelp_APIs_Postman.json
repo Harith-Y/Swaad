@@ -1,0 +1,996 @@
+{
+  "info": {
+    "_postman_id": "yelp-api-collection",
+    "name": "Yelp APIs Collection",
+    "description": "Comprehensive Postman collection for all Yelp APIs including Business Search, Details, Reviews, Autocomplete, Phone Search, Service Offerings, and AI API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Business Endpoints",
+      "item": [
+        {
+          "name": "Search Businesses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{YELP_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "https://api.yelp.com/v3/businesses/search?term=restaurants&location=San Francisco&limit=20&offset=0&sort_by=best_match",
+              "protocol": "https",
+              "host": [
+                "api",
+                "yelp",
+                "com"
+              ],
+              "path": [
+                "v3",
+                "businesses",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "term",
+                  "value": "restaurants",
+                  "description": "Search term"
+                },
+                {
+                  "key": "location",
+                  "value": "San Francisco",
+                  "description": "Geographic area"
+                },
+                {
+                  "key": "latitude",
+                  "value": "",
+                  "description": "Latitude (alternative to location)",
+                  "disabled": true
+                },
+                {
+                  "key": "longitude",
+                  "value": "",
+                  "description": "Longitude (alternative to location)",
+                  "disabled": true
+                },
+                {
+                  "key": "radius",
+                  "value": "40000",
+                  "description": "Search radius in meters",
+                  "disabled": true
+                },
+                {
+                  "key": "categories",
+                  "value": "",
+                  "description": "Comma-delimited categories",
+                  "disabled": true
+                },
+                {
+                  "key": "locale",
+                  "value": "en_US",
+                  "description": "Locale code",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Number of results (max 50)"
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Pagination offset"
+                },
+                {
+                  "key": "sort_by",
+                  "value": "best_match",
+                  "description": "Sort by: best_match, rating, review_count, distance"
+                },
+                {
+                  "key": "price",
+                  "value": "",
+                  "description": "Comma-delimited price levels: 1,2,3,4",
+                  "disabled": true
+                },
+                {
+                  "key": "open_now",
+                  "value": "true",
+                  "description": "Filter by open now status",
+                  "disabled": true
+                },
+                {
+                  "key": "open_at",
+                  "value": "",
+                  "description": "Unix timestamp for open status check",
+                  "disabled": true
+                },
+                {
+                  "key": "attributes",
+                  "value": "",
+                  "description": "Comma-delimited attributes",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Search for businesses based on search term, location, and various filters"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Business Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{YELP_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "https://api.yelp.com/v3/businesses/:id?locale=en_US",
+              "protocol": "https",
+              "host": [
+                "api",
+                "yelp",
+                "com"
+              ],
+              "path": [
+                "v3",
+                "businesses",
+                ":id"
+              ],
+              "query": [
+                {
+                  "key": "locale",
+                  "value": "en_US",
+                  "description": "Locale code"
+                },
+                {
+                  "key": "device_platform",
+                  "value": "ios",
+                  "description": "Device platform for mobile_link",
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Business ID or alias"
+                }
+              ]
+            },
+            "description": "Get comprehensive details about a specific business"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Business Reviews",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{YELP_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "https://api.yelp.com/v3/businesses/:id/reviews?locale=en_US",
+              "protocol": "https",
+              "host": [
+                "api",
+                "yelp",
+                "com"
+              ],
+              "path": [
+                "v3",
+                "businesses",
+                ":id",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "locale",
+                  "value": "en_US",
+                  "description": "Locale code"
+                },
+                {
+                  "key": "sort",
+                  "value": "newest",
+                  "description": "Sort by: newest, yelp_sort",
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Business ID"
+                }
+              ]
+            },
+            "description": "Get up to 3 review excerpts for a business (most recent)"
+          },
+          "response": []
+        },
+        {
+          "name": "Search by Phone",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{YELP_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "https://api.yelp.com/v3/businesses/search/phone?phone=+14155552671",
+              "protocol": "https",
+              "host": [
+                "api",
+                "yelp",
+                "com"
+              ],
+              "path": [
+                "v3",
+                "businesses",
+                "search",
+                "phone"
+              ],
+              "query": [
+                {
+                  "key": "phone",
+                  "value": "+14155552671",
+                  "description": "Phone number in E.164 format"
+                }
+              ]
+            },
+            "description": "Search for a business by phone number"
+          },
+          "response": []
+        },
+        {
+          "name": "Match Business Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{YELP_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "https://api.yelp.com/v3/businesses/matches?name=Garitas&address1=473 Broadway&city=San Francisco&state=CA&country=US",
+              "protocol": "https",
+              "host": [
+                "api",
+                "yelp",
+                "com"
+              ],
+              "path": [
+                "v3",
+                "businesses",
+                "matches"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "Garitas",
+                  "description": "Business name"
+                },
+                {
+                  "key": "address1",
+                  "value": "473 Broadway",
+                  "description": "Street address"
+                },
+                {
+                  "key": "address2",
+                  "value": "",
+                  "description": "Second address line",
+                  "disabled": true
+                },
+                {
+                  "key": "address3",
+                  "value": "",
+                  "description": "Third address line",
+                  "disabled": true
+                },
+                {
+                  "key": "city",
+                  "value": "San Francisco",
+                  "description": "City"
+                },
+                {
+                  "key": "state",
+                  "value": "CA",
+                  "description": "State code"
+                },
+                {
+                  "key": "zip_code",
+                  "value": "",
+                  "description": "ZIP code",
+                  "disabled": true
+                },
+                {
+                  "key": "country",
+                  "value": "US",
+                  "description": "Country code"
+                },
+                {
+                  "key": "phone",
+                  "value": "",
+                  "description": "Phone number",
+                  "disabled": true
+                },
+                {
+                  "key": "yelp_business_id",
+                  "value": "",
+                  "description": "Yelp business ID for validation",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "3",
+                  "description": "Max results to return",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Match business data from other sources against Yelp businesses"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Transaction Endpoints",
+      "item": [
+        {
+          "name": "Delivery Search",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{YELP_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "https://api.yelp.com/v3/transactions/delivery/search?location=San Francisco&limit=20",
+              "protocol": "https",
+              "host": [
+                "api",
+                "yelp",
+                "com"
+              ],
+              "path": [
+                "v3",
+                "transactions",
+                "delivery",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "location",
+                  "value": "San Francisco",
+                  "description": "Geographic area"
+                },
+                {
+                  "key": "latitude",
+                  "value": "",
+                  "description": "Latitude",
+                  "disabled": true
+                },
+                {
+                  "key": "longitude",
+                  "value": "",
+                  "description": "Longitude",
+                  "disabled": true
+                },
+                {
+                  "key": "term",
+                  "value": "",
+                  "description": "Search term",
+                  "disabled": true
+                },
+                {
+                  "key": "categories",
+                  "value": "",
+                  "description": "Categories",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Results limit"
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Pagination offset",
+                  "disabled": true
+                },
+                {
+                  "key": "sort_by",
+                  "value": "best_match",
+                  "description": "Sort method",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Search for businesses that support delivery transactions"
+          },
+          "response": []
+        },
+        {
+          "name": "Pickup Search",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{YELP_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "https://api.yelp.com/v3/transactions/pickup/search?location=San Francisco&limit=20",
+              "protocol": "https",
+              "host": [
+                "api",
+                "yelp",
+                "com"
+              ],
+              "path": [
+                "v3",
+                "transactions",
+                "pickup",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "location",
+                  "value": "San Francisco",
+                  "description": "Geographic area"
+                },
+                {
+                  "key": "latitude",
+                  "value": "",
+                  "description": "Latitude",
+                  "disabled": true
+                },
+                {
+                  "key": "longitude",
+                  "value": "",
+                  "description": "Longitude",
+                  "disabled": true
+                },
+                {
+                  "key": "term",
+                  "value": "",
+                  "description": "Search term",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Results limit"
+                }
+              ]
+            },
+            "description": "Search for businesses that support pickup transactions"
+          },
+          "response": []
+        },
+        {
+          "name": "Restaurant Reservations Search",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{YELP_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "https://api.yelp.com/v3/transactions/restaurant_reservations/search?location=San Francisco&limit=20",
+              "protocol": "https",
+              "host": [
+                "api",
+                "yelp",
+                "com"
+              ],
+              "path": [
+                "v3",
+                "transactions",
+                "restaurant_reservations",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "location",
+                  "value": "San Francisco",
+                  "description": "Geographic area"
+                },
+                {
+                  "key": "latitude",
+                  "value": "",
+                  "description": "Latitude",
+                  "disabled": true
+                },
+                {
+                  "key": "longitude",
+                  "value": "",
+                  "description": "Longitude",
+                  "disabled": true
+                },
+                {
+                  "key": "term",
+                  "value": "",
+                  "description": "Search term",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Results limit"
+                }
+              ]
+            },
+            "description": "Search for businesses that support restaurant reservations"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Autocomplete Endpoints",
+      "item": [
+        {
+          "name": "Autocomplete",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{YELP_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "https://api.yelp.com/v3/autocomplete?text=pizza&latitude=37.786882&longitude=-122.399972",
+              "protocol": "https",
+              "host": [
+                "api",
+                "yelp",
+                "com"
+              ],
+              "path": [
+                "v3",
+                "autocomplete"
+              ],
+              "query": [
+                {
+                  "key": "text",
+                  "value": "pizza",
+                  "description": "Search text for autocomplete"
+                },
+                {
+                  "key": "latitude",
+                  "value": "37.786882",
+                  "description": "Latitude for location-based suggestions"
+                },
+                {
+                  "key": "longitude",
+                  "value": "-122.399972",
+                  "description": "Longitude for location-based suggestions"
+                },
+                {
+                  "key": "locale",
+                  "value": "en_US",
+                  "description": "Locale code",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get autocomplete suggestions for keywords, businesses, and categories"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Event Endpoints",
+      "item": [
+        {
+          "name": "Search Events",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{YELP_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "https://api.yelp.com/v3/events?location=San Francisco&limit=20",
+              "protocol": "https",
+              "host": [
+                "api",
+                "yelp",
+                "com"
+              ],
+              "path": [
+                "v3",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "location",
+                  "value": "San Francisco",
+                  "description": "Geographic area"
+                },
+                {
+                  "key": "latitude",
+                  "value": "",
+                  "description": "Latitude",
+                  "disabled": true
+                },
+                {
+                  "key": "longitude",
+                  "value": "",
+                  "description": "Longitude",
+                  "disabled": true
+                },
+                {
+                  "key": "radius",
+                  "value": "",
+                  "description": "Search radius in meters",
+                  "disabled": true
+                },
+                {
+                  "key": "categories",
+                  "value": "",
+                  "description": "Event categories",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Results limit"
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Pagination offset",
+                  "disabled": true
+                },
+                {
+                  "key": "sort_by",
+                  "value": "popularity",
+                  "description": "Sort by: popularity or time_start",
+                  "disabled": true
+                },
+                {
+                  "key": "sort_on",
+                  "value": "desc",
+                  "description": "Sort order: asc or desc",
+                  "disabled": true
+                },
+                {
+                  "key": "start_date",
+                  "value": "",
+                  "description": "Start date (YYYYMMDD)",
+                  "disabled": true
+                },
+                {
+                  "key": "end_date",
+                  "value": "",
+                  "description": "End date (YYYYMMDD)",
+                  "disabled": true
+                },
+                {
+                  "key": "is_free",
+                  "value": "",
+                  "description": "Filter for free events",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Search for events in a specific location"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Event Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{YELP_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "https://api.yelp.com/v3/events/:id?locale=en_US",
+              "protocol": "https",
+              "host": [
+                "api",
+                "yelp",
+                "com"
+              ],
+              "path": [
+                "v3",
+                "events",
+                ":id"
+              ],
+              "query": [
+                {
+                  "key": "locale",
+                  "value": "en_US",
+                  "description": "Locale code"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Event ID"
+                }
+              ]
+            },
+            "description": "Get detailed information about a specific event"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Category Endpoints",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{YELP_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "https://api.yelp.com/v3/categories?locale=en_US",
+              "protocol": "https",
+              "host": [
+                "api",
+                "yelp",
+                "com"
+              ],
+              "path": [
+                "v3",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "locale",
+                  "value": "en_US",
+                  "description": "Locale code"
+                }
+              ]
+            },
+            "description": "Get list of all supported categories and their aliases"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Service Offerings Endpoints",
+      "item": [
+        {
+          "name": "Search Service Offerings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{YELP_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "https://api.yelp.com/v3/businesses/service_offerings?location=San Francisco&category=automotive&limit=20",
+              "protocol": "https",
+              "host": [
+                "api",
+                "yelp",
+                "com"
+              ],
+              "path": [
+                "v3",
+                "businesses",
+                "service_offerings"
+              ],
+              "query": [
+                {
+                  "key": "location",
+                  "value": "San Francisco",
+                  "description": "Geographic area"
+                },
+                {
+                  "key": "latitude",
+                  "value": "",
+                  "description": "Latitude",
+                  "disabled": true
+                },
+                {
+                  "key": "longitude",
+                  "value": "",
+                  "description": "Longitude",
+                  "disabled": true
+                },
+                {
+                  "key": "category",
+                  "value": "automotive",
+                  "description": "Business category"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Results limit"
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Pagination offset",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Search for businesses and their service offerings by category"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "AI API Endpoints",
+      "item": [
+        {
+          "name": "AI Search",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{YELP_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Find me the best Italian restaurants in San Francisco with good reviews\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "https://api.yelp.com/v3/ai/chat",
+              "protocol": "https",
+              "host": [
+                "api",
+                "yelp",
+                "com"
+              ],
+              "path": [
+                "v3",
+                "ai",
+                "chat"
+              ]
+            },
+            "description": "Yelp AI API - Chat-based search using natural language queries. Powered by conversational AI to understand complex business search queries."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "YELP_API_KEY",
+      "value": "",
+      "type": "string",
+      "description": "Your Yelp Fusion API Key - Get it from https://www.yelp.com/developers/v3/manage_app"
+    },
+    {
+      "key": "base_url",
+      "value": "https://api.yelp.com/v3",
+      "type": "string",
+      "description": "Yelp API base URL"
+    }
+  ]
+}

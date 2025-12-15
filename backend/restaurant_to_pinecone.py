@@ -209,7 +209,6 @@ def create_pinecone_vector(restaurant: Dict[str, Any]) -> Dict[str, Any]:
     metadata = {
         "name": restaurant.get("name"),
         "avg_rating": float(restaurant.get("avg_rating", 0.0)),
-        "price_range": restaurant.get("price_range"),
         "cuisine_types": restaurant.get("cuisine_types", []),
         "location_json": json.dumps(location),
         "coordinates_json": json.dumps({
@@ -225,6 +224,10 @@ def create_pinecone_vector(restaurant: Dict[str, Any]) -> Dict[str, Any]:
         "taste_4": float(taste_vector[4]),
         "taste_5": float(taste_vector[5]),
     }
+    
+    # Add price_range only if it's not None (Pinecone doesn't accept null values)
+    if restaurant.get("price_range") is not None:
+        metadata["price_range"] = restaurant.get("price_range")
 
     vector_entry = {
         "id": f"restaurant:{restaurant['id']}",
@@ -265,10 +268,10 @@ def upload_to_pinecone(vectors: List[Dict[str, Any]], batch_size: int = 100):
     total = len(vectors)
     for i in range(0, total, batch_size):
         batch = vectors[i:i + batch_size]
-        index.upsert(vectors=batch)
+        index.upsert(vectors=batch, namespace="restaurants")  # Always use restaurants namespace
         print(f"Uploaded batch {i // batch_size + 1}/{(total + batch_size - 1) // batch_size} ({len(batch)} vectors)")
 
-    print(f"Successfully uploaded {total} vectors to Pinecone")
+    print(f"Successfully uploaded {total} vectors to Pinecone (namespace: restaurants)")
     return index
 
 

@@ -1,0 +1,1791 @@
+[
+  {
+    "id": "boE4Ahsssqic7o5wQLI04w",
+    "name": "The Purple Pig",
+    "menu_url": "https://thepurplepigchicago.com/eat",
+    "location": {
+      "address": "444 N Michigan Ave, Chicago, IL 60611",
+      "city": "Chicago",
+      "lat": 41.890694,
+      "lng": -87.624782
+    },
+    "cuisine_types": [
+      "Tapas/Small Plates",
+      "Mediterranean",
+      "New American"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.3,
+    "phone": "+13124641744",
+    "url": "https://www.yelp.com/biz/the-purple-pig-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "riT822EnU7y_5eCuJsd9sA",
+    "name": "Cindy's Rooftop",
+    "menu_url": "https://www.cindysrooftop.com/lunch-menu",
+    "location": {
+      "address": "12 S Michigan Ave, Chicago, IL 60603",
+      "city": "Chicago",
+      "lat": 41.8816894031196,
+      "lng": -87.6250061730162
+    },
+    "cuisine_types": [
+      "New American",
+      "Seafood",
+      "Breakfast & Brunch"
+    ],
+    "price": "$$",
+    "avg_rating": 4.1,
+    "phone": "+13127923502",
+    "url": "https://www.yelp.com/biz/cindys-rooftop-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "There are no dish names in the provided menu text."
+    ],
+    "popular_dishes": [
+      "There are no dish names in the provided menu text."
+    ]
+  },
+  {
+    "id": "qjnpkS8yZO8xcyEIy5OU9A",
+    "name": "Girl & The Goat",
+    "menu_url": "https://www.girlandthegoat.com/chicago/menu",
+    "location": {
+      "address": "809 W Randolph, Chicago, IL 60607",
+      "city": "Chicago",
+      "lat": 41.88419277030351,
+      "lng": -87.64794613195826
+    },
+    "cuisine_types": [
+      "New American",
+      "Bars",
+      "Bakeries"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.4,
+    "phone": "+13124926262",
+    "url": "https://www.yelp.com/biz/girl-and-the-goat-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "explore our menu",
+      "make a reservation",
+      "Wood-Fired Oysters",
+      "Grilled Octopus",
+      "Pan-Seared Scallops",
+      "Roasted Bone Marrow",
+      "Wood-Fired Lamb Ribs",
+      "Grilled Pork Chops",
+      "Pan-Seared Fish",
+      "Wood-Fired Steak",
+      "Saffron Crème Brûlée",
+      "Chocolate Mousse",
+      "Cheesecake",
+      "Tiramisu",
+      "Note: Since the provided text does not contain actual dish names",
+      "so the answer is:) \n\nNo dish names are found in the provided text."
+    ],
+    "popular_dishes": [
+      "explore our menu",
+      "make a reservation",
+      "Wood-Fired Oysters",
+      "Grilled Octopus",
+      "Pan-Seared Scallops"
+    ]
+  },
+  {
+    "id": "PZe0q_153VHUnaR-8dOTJg",
+    "name": "The Dearborn",
+    "menu_url": "http://www.thedearborntavern.com/menu/",
+    "location": {
+      "address": "145 N Dearborn St, Chicago, IL 60602",
+      "city": "Chicago",
+      "lat": 41.8842528,
+      "lng": -87.6293151
+    },
+    "cuisine_types": [
+      "New American",
+      "Breakfast & Brunch",
+      "Beer, Wine & Spirits"
+    ],
+    "price": "$$",
+    "avg_rating": 4.4,
+    "phone": "+13123841242",
+    "url": "https://www.yelp.com/biz/the-dearborn-chicago-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Atelier",
+      "First Course",
+      "Salads & Soup",
+      "Between Bread",
+      "Dearborn \"Tavern\" Pizza",
+      "Enhancements",
+      "Rising Costs",
+      "Email Signup",
+      "Reservations"
+    ],
+    "popular_dishes": [
+      "Atelier",
+      "First Course",
+      "Salads & Soup",
+      "Between Bread",
+      "Dearborn \"Tavern\" Pizza"
+    ]
+  },
+  {
+    "id": "tuJraaFffIS_JNK_4ZqGTA",
+    "name": "Ema",
+    "menu_url": "https://www.emarestaurants.com/chicago/menus",
+    "location": {
+      "address": "74 W Illinois St, Chicago, IL 60654",
+      "city": "Chicago",
+      "lat": 41.890964390624795,
+      "lng": -87.63090253497006
+    },
+    "cuisine_types": [
+      "Mediterranean",
+      "Tapas/Small Plates",
+      "Salad"
+    ],
+    "price": "$$",
+    "avg_rating": 4.3,
+    "phone": "+13125275586",
+    "url": "https://www.yelp.com/biz/ema-chicago-6?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Hummus",
+      "Spreads",
+      "Raw",
+      "Vegetables",
+      "Hot Mezze",
+      "Sandwiches & Bowls",
+      "Kebabs",
+      "Surcharge"
+    ],
+    "popular_dishes": [
+      "Hummus",
+      "Spreads",
+      "Raw",
+      "Vegetables",
+      "Hot Mezze"
+    ]
+  },
+  {
+    "id": "gzhkdb6YoiFm5s3vriG1AA",
+    "name": "Gretel",
+    "menu_url": "https://gretelchicago.com/wp-content/uploads/20_0827_Gretel_Menu_Window_44x22.pdf",
+    "location": {
+      "address": "2833 W Armitage Ave, Chicago, IL 60647",
+      "city": "Chicago",
+      "lat": 41.917275,
+      "lng": -87.698577
+    },
+    "cuisine_types": [
+      "Cocktail Bars",
+      "New American",
+      "Speakeasies"
+    ],
+    "price": "$$",
+    "avg_rating": 4.5,
+    "phone": "+17737703427",
+    "url": "https://www.yelp.com/biz/gretel-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "8N3GMu-AhVvJMzQifkNemg",
+    "name": "Crying Tiger",
+    "menu_url": "https://cryingtiger.com/menu",
+    "location": {
+      "address": "51 W Hubbard St, Chicago, IL 60654",
+      "city": "Chicago",
+      "lat": 41.88990307515616,
+      "lng": -87.6298989
+    },
+    "cuisine_types": [
+      "Thai"
+    ],
+    "price": null,
+    "avg_rating": 4.4,
+    "phone": "+13127360183",
+    "url": "https://www.yelp.com/biz/crying-tiger-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Prawn Toast",
+      "vegetable spring roll",
+      "Sugarcane Beef",
+      "Chicken Laarb",
+      "Wagyu Beef",
+      "Chicken Satay",
+      "Pork Belly",
+      "Hamachi",
+      "tuna tartare",
+      "Poached Chicken",
+      "Banana Blossom and Coconut",
+      "green papaya",
+      "Stir Fry, Rice & Noodles",
+      "basil chicken",
+      "Cumin Lamb",
+      "crab fried rice",
+      "rice noodles",
+      "glass noodles",
+      "Clay Pot Lobster Pad Thai",
+      "black cod",
+      "barbecue chicken",
+      "branzino",
+      "45 day dry-aged ribeye"
+    ],
+    "popular_dishes": [
+      "Prawn Toast",
+      "vegetable spring roll",
+      "Sugarcane Beef",
+      "Chicken Laarb",
+      "Wagyu Beef"
+    ]
+  },
+  {
+    "id": "cgIuo3geaxw1Sfhbqm5qTA",
+    "name": "Alla Vita",
+    "menu_url": "https://www.allavitachicago.com/menu",
+    "location": {
+      "address": "564 W Randolph St, Chicago, IL 60661",
+      "city": "Chicago",
+      "lat": 41.88468,
+      "lng": -87.642322
+    },
+    "cuisine_types": [
+      "Italian"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.4,
+    "phone": "+13126670104",
+    "url": "https://www.yelp.com/biz/alla-vita-chicago-4?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "chicken parmigiana",
+      "Our Menu",
+      "Signature Dishes"
+    ],
+    "popular_dishes": [
+      "chicken parmigiana",
+      "Our Menu",
+      "Signature Dishes"
+    ]
+  },
+  {
+    "id": "okaqMJEoHfHblpKz9Q-CMA",
+    "name": "The Perch",
+    "menu_url": "https://www.perchchicago.com/menus/",
+    "location": {
+      "address": "1932 W Division, Chicago, IL 60622",
+      "city": "Chicago",
+      "lat": 41.90348,
+      "lng": -87.676221
+    },
+    "cuisine_types": [
+      "Breweries",
+      "New American"
+    ],
+    "price": "$$",
+    "avg_rating": 4.4,
+    "phone": "+17734862739",
+    "url": "https://www.yelp.com/biz/the-perch-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Taster",
+      "12 oz.",
+      "16 oz.",
+      "2025 World Beer Championships:"
+    ],
+    "popular_dishes": [
+      "Taster",
+      "12 oz.",
+      "16 oz.",
+      "2025 World Beer Championships:"
+    ]
+  },
+  {
+    "id": "GZsrGq6H8CQ4YlGtE_Bm0Q",
+    "name": "Ciccio Mio",
+    "menu_url": "https://www.cicciomio.com/menus",
+    "location": {
+      "address": "226 W Kinzie St, Chicago, IL 60654",
+      "city": "Chicago",
+      "lat": 41.8892649696079,
+      "lng": -87.63521477367367
+    },
+    "cuisine_types": [
+      "Italian"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.7,
+    "phone": "+13127963316",
+    "url": "https://www.yelp.com/biz/ciccio-mio-chicago-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Open Menu",
+      "AntiPasti",
+      "FOCACCIA",
+      "MEATBALLS •",
+      "la tur •",
+      "TRUFFLE MOZZARELLA STICKS",
+      "STEAK & ANCHOVY TARTARE**•",
+      "CAESAR SALAD •",
+      "HOUSE SALAD •",
+      "AntiPasti Platter",
+      "Primi",
+      "ORECCHIETTE PUGLIESE •",
+      "RIGATONI vodka •",
+      "LASAGNA BOLOGNESE ROTOLO",
+      "RICOTTA GNOCCHI",
+      "TRUFFLE MAFALDINE",
+      "penne BOLOGNESE•",
+      "tagliatelle carbonara •",
+      "BUCATINI AMATRICIANA •",
+      "Di Mare",
+      "SALMON CRUDO*•",
+      "KING SALMON AGRODOLCE*•",
+      "WHOLE BRANZINO •",
+      "GIANT PRAWN SCAMPI •",
+      "Secondi",
+      "BRAISED BEEF SHORT RIB •",
+      "COAL FIRED RIBEYE *•",
+      "CHICKEN VESUVIO •",
+      "To Share",
+      "SOFT POLENTA •"
+    ],
+    "popular_dishes": [
+      "Open Menu",
+      "AntiPasti",
+      "FOCACCIA",
+      "MEATBALLS •",
+      "la tur •"
+    ]
+  },
+  {
+    "id": "xoi7Cw7FoknAx5p880RtWQ",
+    "name": "Au Cheval",
+    "menu_url": "https://www.auchevaldiner.com/chicago/menus",
+    "location": {
+      "address": "800 W Randolph St, Chicago, IL 60607",
+      "city": "Chicago",
+      "lat": 41.88466,
+      "lng": -87.647668
+    },
+    "cuisine_types": [
+      "Bars",
+      "Burgers",
+      "American"
+    ],
+    "price": "$$",
+    "avg_rating": 4.4,
+    "phone": "+13129294580",
+    "url": "https://www.yelp.com/biz/au-cheval-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Open Menu",
+      "All Day Menu",
+      "Green Salad •",
+      "Chopped Salad •",
+      "Kale Caesar •",
+      "~add chicken breast - 8.99|  add avocado 2.99~",
+      "Chopped Chicken Liver *•",
+      "Now Serving",
+      "General Jane’s Honey-Fried Chicken",
+      "Roasted Marrow Bones •",
+      "Matzah Ball Soup *•",
+      "Blueberry Muffin(weekends only)",
+      "Traditional Sandwiches",
+      "single cheeseburger *•",
+      "double cheeseburger *•",
+      "fried bologna sandwich •",
+      "crispy fries *•",
+      "crispy potato hash*",
+      "chilaquiles *•",
+      "foie gras *•",
+      "omelette *•",
+      "with eggs",
+      "thick cut peppered bacon •",
+      "bread & butter pickles •",
+      "french fries •",
+      "fried farm egg *•",
+      "hash browns •",
+      "On the Side",
+      "Strong Drinks",
+      "bee’s knees"
+    ],
+    "popular_dishes": [
+      "Open Menu",
+      "All Day Menu",
+      "Green Salad •",
+      "Chopped Salad •",
+      "Kale Caesar •"
+    ]
+  },
+  {
+    "id": "T_egMuf7xJHLdldzPqOaSQ",
+    "name": "Qing Xiang Yuan Dumplings",
+    "menu_url": "https://qxydumpling.com/menu/",
+    "location": {
+      "address": "2002 S Wentworth Ave, Ste 103, Chicago, IL 60616",
+      "city": "Chicago",
+      "lat": 41.85505,
+      "lng": -87.63219
+    },
+    "cuisine_types": [
+      "Barbeque",
+      "Dim Sum",
+      "Coffee & Tea"
+    ],
+    "price": "$$",
+    "avg_rating": 4.4,
+    "phone": "+13127991118",
+    "url": "https://www.yelp.com/biz/qing-xiang-yuan-dumplings-chicago-3?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "B:Boiled S:Steamed F:Pan-fried 12PCS",
+      "order at store.qxydumpling.com",
+      "Kurobuta Pork and Cabbage",
+      "Chef Selection",
+      "Spanish Mackerel, Kurobuta Pork and Coriander/Leek",
+      "Shredded Potato Salad",
+      "Fish and Peanuts Salad",
+      "Grilled Beef Kebab (6)",
+      "Grilled Chicken Wings (4)",
+      "Tippy (Green Tea)",
+      "Ice Tea"
+    ],
+    "popular_dishes": [
+      "B:Boiled S:Steamed F:Pan-fried 12PCS",
+      "order at store.qxydumpling.com",
+      "Kurobuta Pork and Cabbage",
+      "Chef Selection",
+      "Spanish Mackerel, Kurobuta Pork and Coriander/Leek"
+    ]
+  },
+  {
+    "id": "1BHgaf25FpVSOXFpZF0pYw",
+    "name": "Trivoli Tavern",
+    "menu_url": "https://www.trivolitavern.com/menus",
+    "location": {
+      "address": "114 N Green St, Chicago, IL 60607",
+      "city": "Chicago",
+      "lat": 41.8837221888722,
+      "lng": -87.64903867652058
+    },
+    "cuisine_types": [
+      "American"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.5,
+    "phone": "+13123662646",
+    "url": "https://www.yelp.com/biz/trivoli-tavern-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Open Menu",
+      "Snacks",
+      "Lobster Mac & Cheese",
+      "New England Style Lobster Roll",
+      "Salmon Crudo *•",
+      "Smoked Whitefish Dip •",
+      "Sushi Rolls",
+      "Crispy Shrimp Roll *",
+      "Big Eye Tuna Roll *•",
+      "King Crab California Roll *•",
+      "Lobster Maki Roll *•",
+      "King Salmon Roll *•",
+      "Spicy Tuna Roll *•",
+      "House Breads",
+      "Warm Parkerhouse Rolls",
+      "Skillet Cornbread •",
+      "Pigs In A Blanket",
+      "Slow Roasted Meatballs •",
+      "Coconut Shrimp",
+      "Crab Rangoon",
+      "Baby Artichoke Gratin •",
+      "Fried Chicken Sliders",
+      "— Chilled Seafood—",
+      "Selection of East Coast Oysters*•25.50 1/2 dx",
+      "Hokkaido King Crab•3/4 lb 124.99| 1 1/2 lb 244.99",
+      "Shrimp Cocktail • 28.99",
+      "Shellfish and Seafood",
+      "Sizzling Shrimp Scampi •",
+      "Whole Branzino •",
+      "Cedar Planked King Salmon *•"
+    ],
+    "popular_dishes": [
+      "Open Menu",
+      "Snacks",
+      "Lobster Mac & Cheese",
+      "New England Style Lobster Roll",
+      "Salmon Crudo *•"
+    ]
+  },
+  {
+    "id": "VPJk-SEWSWS_nGoQvM-COw",
+    "name": "Penumbra",
+    "menu_url": null,
+    "location": {
+      "address": "3309 W Fullerton Ave, Chicago, IL 60647",
+      "city": "Chicago",
+      "lat": 41.924459,
+      "lng": -87.710898
+    },
+    "cuisine_types": [
+      "Wine Bars",
+      "Seafood",
+      "Steakhouses"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.8,
+    "phone": "+17737722343",
+    "url": "https://www.yelp.com/biz/penumbra-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "7vsOVA4wrHP6f3DMQdD8og",
+    "name": "Volare Ristorante Italiano",
+    "menu_url": null,
+    "location": {
+      "address": "201 E Grand Ave, Chicago, IL 60611",
+      "city": "Chicago",
+      "lat": 41.8915901798304,
+      "lng": -87.6225186472213
+    },
+    "cuisine_types": [
+      "Italian"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.3,
+    "phone": "+13124109900",
+    "url": "https://www.yelp.com/biz/volare-ristorante-italiano-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "apyIymDFbUK7u-Y3V5kmkA",
+    "name": "Bavette's Bar & Boeuf",
+    "menu_url": "https://www.bavettessteakhouse.com/chicago/menus",
+    "location": {
+      "address": "218 W Kinzie, Chicago, IL 60654",
+      "city": "Chicago",
+      "lat": 41.889295011779424,
+      "lng": -87.63489302317039
+    },
+    "cuisine_types": [
+      "Steakhouses",
+      "Seafood",
+      "Bars"
+    ],
+    "price": "$$$$",
+    "avg_rating": 4.5,
+    "phone": "+13126248154",
+    "url": "https://www.yelp.com/biz/bavettes-bar-and-boeuf-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Open Menu",
+      "Hors d’oeuvres",
+      "Baked Goat Cheese (Circa 1992)•",
+      "Sizzling Shrimp Scampi •",
+      "Baked Crab Cake",
+      "Tenderloin Steak Tartare *•",
+      "Shrimp Cocktail •",
+      "Chopped Chicken Liver *",
+      "CHILLED SEAFOOD",
+      "Fresh Oysters *•",
+      "Salmon Crudo •",
+      "Grand Seafood Tower *•",
+      "Grand Shellfish Tower *•",
+      "Maude’s Seafood Tower *•",
+      "Hokkaido King Crab *•",
+      "Maine Lobster •",
+      "Hand-Made Sourdough",
+      "Mixed Greens & Apple Salad • ‡",
+      "Bacon Roasted Tomato •",
+      "Wedge Salad •",
+      "Lyonnaise Salad •",
+      "Crab Stuffed Avocado •",
+      "Smoked Salmon Caesar *•",
+      "10oz Double Wagyu Cheeseburger*",
+      "Butchers Cut’s",
+      "Roasted Bone Marrow •",
+      "Ribeye Steak Frites *•",
+      "Le Boeuf",
+      "Filet Mignon - Petite Duchess Cut *•",
+      "Traditional Filet Mignon *•"
+    ],
+    "popular_dishes": [
+      "Open Menu",
+      "Hors d’oeuvres",
+      "Baked Goat Cheese (Circa 1992)•",
+      "Sizzling Shrimp Scampi •",
+      "Baked Crab Cake"
+    ]
+  },
+  {
+    "id": "Z8K7SVH-B7ZVAVD9aFIK8w",
+    "name": "Bar Mar",
+    "menu_url": "https://www.thebazaar.com/location/bar-mar-chicago/#menus",
+    "location": {
+      "address": "120 N Wacker Dr, Chicago, IL 60606",
+      "city": "Chicago",
+      "lat": 41.883835,
+      "lng": -87.6372458
+    },
+    "cuisine_types": [
+      "Seafood",
+      "Cocktail Bars"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.3,
+    "phone": "+13128206602",
+    "url": "https://www.yelp.com/biz/bar-mar-by-jos%C3%A9-andr%C3%A9s-chicago-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "each$8",
+      "each$16",
+      "half",
+      "— DRAFT —",
+      "— CANS —",
+      "— SHERRY (2.5 oz) —",
+      "— SAKE —",
+      "— SPARKLING —",
+      "— WHITE —",
+      "— STILL ROSÉ —",
+      "— RED —",
+      "— DESSERT —"
+    ],
+    "popular_dishes": [
+      "each$8",
+      "each$16",
+      "half",
+      "— DRAFT —",
+      "— CANS —"
+    ]
+  },
+  {
+    "id": "9nUrDQ_REhU6sgcgXFAyfA",
+    "name": "Aba",
+    "menu_url": "https://www.abarestaurants.com/chicago/menu/",
+    "location": {
+      "address": "302 N Green St, Fl 3, Chicago, IL 60607",
+      "city": "Chicago",
+      "lat": 41.8869441,
+      "lng": -87.6487949
+    },
+    "cuisine_types": [
+      "Mediterranean",
+      "Tapas/Small Plates"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.5,
+    "phone": "+17736451400",
+    "url": "https://www.yelp.com/biz/aba-chicago-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Olive Oil, Sea Salt/9.95",
+      "Where are you Dining?",
+      "Hummus",
+      "Spreads",
+      "Cold Mezze",
+      "Raw",
+      "Mediterranean Butcher",
+      "Hot Mezze",
+      "Kebabs",
+      "Surcharge",
+      "Happenings + More",
+      "Holiday Roast Kits",
+      "Holiday Spritz Tower",
+      "Hanukkah Specials",
+      "Location",
+      "Hours",
+      "Holiday"
+    ],
+    "popular_dishes": [
+      "Olive Oil, Sea Salt/9.95",
+      "Where are you Dining?",
+      "Hummus",
+      "Spreads",
+      "Cold Mezze"
+    ]
+  },
+  {
+    "id": "zFbAbx4GJfu1GByUG6rDOw",
+    "name": "La Grande Boucherie",
+    "menu_url": "https://www.boucherieus.com/chicago-la-grande-boucherie/",
+    "location": {
+      "address": "431 N Dearborn St, Chicago, IL 60654",
+      "city": "Chicago",
+      "lat": 41.89029,
+      "lng": -87.62935
+    },
+    "cuisine_types": [
+      "Steakhouses",
+      "French",
+      "Cocktail Bars"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.4,
+    "phone": "+13126243014",
+    "url": "https://www.yelp.com/biz/la-grande-boucherie-chicago-3?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Le Petit 2-3pp",
+      "Maitre D'Butter",
+      "Supplement Bellini /each",
+      "Brut Lallier, R.019, NV",
+      "Mimosa",
+      "Glass",
+      "$25 pp*",
+      "Sunday - Thursday 4pm - 11pm",
+      "Monday - Friday 12pm - 4pm",
+      "MONDAY - SUNDAY"
+    ],
+    "popular_dishes": [
+      "Le Petit 2-3pp",
+      "Maitre D'Butter",
+      "Supplement Bellini /each",
+      "Brut Lallier, R.019, NV",
+      "Mimosa"
+    ]
+  },
+  {
+    "id": "--Yw337vTC4fLKRCaw-PLQ",
+    "name": "XOchimilco Mexican Restaurant",
+    "menu_url": "https://www.xochimilcochicago.net/menus",
+    "location": {
+      "address": "2030-32 W Montrose Ave, Chicago, IL 60618",
+      "city": "Chicago",
+      "lat": 41.9616665,
+      "lng": -87.6802497
+    },
+    "cuisine_types": [
+      "Mexican"
+    ],
+    "price": "$$",
+    "avg_rating": 4.8,
+    "phone": "+17736611534",
+    "url": "https://www.yelp.com/biz/xochimilco-mexican-restaurant-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Guac",
+      "Queso Azteca",
+      "Veggie Quesadillas",
+      "Ceviche",
+      "Panuchos",
+      "Panela XO",
+      "Taquitos",
+      "Marelyn Salad",
+      "XOchi Salad",
+      "Caldo de Pollo",
+      "Caldo de Camaron",
+      "Chipotle Tortilla Soup",
+      "Lamb Shank",
+      "Carne XO",
+      "Mild Carne Asada",
+      "Tampiquena",
+      "Bistec Ranchero",
+      "Chile Relleno",
+      "Habanero BBQ Ribs",
+      "Pollo en Mole",
+      "ATLANTIC SALMON",
+      "CAMARONES AL MOJO",
+      "CAMARONES A LA VERACRUZANA",
+      "CAMARONES A LA DIABLA",
+      "Pescado el Garache"
+    ],
+    "popular_dishes": [
+      "Guac",
+      "Queso Azteca",
+      "Veggie Quesadillas",
+      "Ceviche",
+      "Panuchos"
+    ]
+  },
+  {
+    "id": "ATbuE6MdSeYLIxcfB8MYCA",
+    "name": "Cabra",
+    "menu_url": "https://www.cabrachicago.com/dinner-menu",
+    "location": {
+      "address": "200 N Green St, Chicago, IL 60607",
+      "city": "Chicago",
+      "lat": 41.885851,
+      "lng": -87.649086
+    },
+    "cuisine_types": [
+      "Peruvian"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.2,
+    "phone": "+13127611717",
+    "url": "https://www.yelp.com/biz/cabra-chicago-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Menus",
+      "There are no specific dish names in the provided menu text. \n\nDish names:"
+    ],
+    "popular_dishes": [
+      "Menus",
+      "There are no specific dish names in the provided menu text. \n\nDish names:"
+    ]
+  },
+  {
+    "id": "1Q7RL7Hc63wKa2A9ec3zXw",
+    "name": "Il Porcellino",
+    "menu_url": "https://www.ilporcellinochicago.com/menu/",
+    "location": {
+      "address": "59 W Hubbard St, Chicago, IL 60654",
+      "city": "Chicago",
+      "lat": 41.88996108569464,
+      "lng": -87.63029733223148
+    },
+    "cuisine_types": [
+      "Italian",
+      "Bars",
+      "Salad"
+    ],
+    "price": "$$",
+    "avg_rating": 4.3,
+    "phone": "+13125950800",
+    "url": "https://www.yelp.com/biz/il-porcellino-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Whole Loaf Garlic Bread9.95",
+      "Tuscan Cheese Bread9.95",
+      "Burrata & Pears17.95",
+      "Classic Meatballs16.95",
+      "Sausage & Peppers15.95",
+      "Crispy Brussels Sprouts12.95",
+      "Stuffed Mushrooms13.95",
+      "Grilled Calamari18.95",
+      "Fried Calamari19.95",
+      "Chef's Antipasti Plate13.95",
+      "Mozzarella Sticks14.95",
+      "Gnocchi alla Sorrentina17.95",
+      "Caesar Salad10.9516.95",
+      "Chopped Kale14.9519.95",
+      "Il Porcellino Italian Salad14.9519.95",
+      "Oven Roasted Tomato Caprese16.95",
+      "Lobster & Crab Stuffed Shells26.95",
+      "Handmade Cheese Ravioli20.95",
+      "Rigatoni alla Vodka20.95",
+      "Roasted Chicken Penne21.95",
+      "Spaghetti & Meatballs21.95",
+      "Spicy Scampi Spaghetti22.95",
+      "Orecchiette21.95",
+      "Fresh Herb Fettuccine Alfredo20.95",
+      "Gnocchi Bolognese21.95",
+      "Handmade Ravioli Al Forno20.95",
+      "Pappardelle alla Porcellino21.95",
+      "Fusilli Pesto Genovese22.95",
+      "Baked Burrata Lasagna25.95",
+      "Eggplant Parmesan21.95"
+    ],
+    "popular_dishes": [
+      "Whole Loaf Garlic Bread9.95",
+      "Tuscan Cheese Bread9.95",
+      "Burrata & Pears17.95",
+      "Classic Meatballs16.95",
+      "Sausage & Peppers15.95"
+    ]
+  },
+  {
+    "id": "Rn3o8GcYBPFJX5MWJn0r1Q",
+    "name": "Robert's Pizza and Dough",
+    "menu_url": "https://robertspizzacompany.com/menu",
+    "location": {
+      "address": "465 N McClurg Ct, Chicago, IL 60611",
+      "city": "Chicago",
+      "lat": 41.89056989999944,
+      "lng": -87.61645117256026
+    },
+    "cuisine_types": [
+      "Pizza"
+    ],
+    "price": "$$",
+    "avg_rating": 4.4,
+    "phone": "+13122651328",
+    "url": "https://www.yelp.com/biz/roberts-pizza-and-dough-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Our Story",
+      "Private Events",
+      "Seasonal Events",
+      "Reservations",
+      "Order Now",
+      "Contact",
+      "FAQ",
+      "E-GIFTCARDS",
+      "Marinated olives",
+      "Meatballs",
+      "Arancini",
+      "Mussels",
+      "Fried calamari",
+      "Charcuterie",
+      "Burrata",
+      "Chicken wings $15 /",
+      "Meatball Parmesan sandwich",
+      "Prosciutto & Arugula",
+      "Chicken parm",
+      "Burger",
+      "Chicken soup",
+      "Escarole white bean soup",
+      "Beet & Kale",
+      "Wedge",
+      "Caesar",
+      "Apple hazelnut salad",
+      "Simple salad",
+      "Gnocchi",
+      "Lil Bell & Meatballs",
+      "Half za loaf"
+    ],
+    "popular_dishes": [
+      "Our Story",
+      "Private Events",
+      "Seasonal Events",
+      "Reservations",
+      "Order Now"
+    ]
+  },
+  {
+    "id": "UK5Xb8xqUOUBi5vQu0bQXQ",
+    "name": "Maple & Ash",
+    "menu_url": "https://www.mapleandash.com/menu/",
+    "location": {
+      "address": "8 W Maple St, Chicago, IL 60610",
+      "city": "Chicago",
+      "lat": 41.9021130633339,
+      "lng": -87.6286945502972
+    },
+    "cuisine_types": [
+      "Steakhouses",
+      "Seafood",
+      "Breakfast & Brunch"
+    ],
+    "price": "$$$$",
+    "avg_rating": 4.2,
+    "phone": "+13129448888",
+    "url": "https://www.yelp.com/biz/maple-and-ash-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Our Approach to Accessibility",
+      "Accessibility Features",
+      "Feedback and Contact"
+    ],
+    "popular_dishes": [
+      "Our Approach to Accessibility",
+      "Accessibility Features",
+      "Feedback and Contact"
+    ]
+  },
+  {
+    "id": "0EcR5_zMAdyWf96owSBYbw",
+    "name": "Wolf & Company",
+    "menu_url": null,
+    "location": {
+      "address": "1752 N Western Ave, Chicago, IL 60647",
+      "city": "Chicago",
+      "lat": 41.91380989193472,
+      "lng": -87.68777157055223
+    },
+    "cuisine_types": [
+      "Cocktail Bars",
+      "Burgers",
+      "Delis"
+    ],
+    "price": null,
+    "avg_rating": 4.3,
+    "phone": "+13126279653",
+    "url": "https://www.yelp.com/biz/wolf-and-company-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "m5gfWEQI7BYTKWMYF-X-Ug",
+    "name": "No Vacancy",
+    "menu_url": "https://www.dontnvus.com/menus/",
+    "location": {
+      "address": "509 N Wells St, Chicago, IL 60654",
+      "city": "Chicago",
+      "lat": 41.89115,
+      "lng": -87.63375
+    },
+    "cuisine_types": [
+      "New American",
+      "Wine Bars",
+      "Venues & Event Spaces"
+    ],
+    "price": "$$",
+    "avg_rating": 4.6,
+    "phone": "+13125006666",
+    "url": "https://www.yelp.com/biz/no-vacancy-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Check In",
+      "Greenery",
+      "Sandwiches & Wraps",
+      "My Significant Other Is Not Hungry",
+      "Specialty Cocktails",
+      "Trendy",
+      "Juice",
+      "Canned & Bottled Suds",
+      "Drafts",
+      "Bougie",
+      "Early Check-In",
+      "Snacks",
+      "Email Signup"
+    ],
+    "popular_dishes": [
+      "Check In",
+      "Greenery",
+      "Sandwiches & Wraps",
+      "My Significant Other Is Not Hungry",
+      "Specialty Cocktails"
+    ]
+  },
+  {
+    "id": "cKZNbMvoqJaUe7n6lf6i7w",
+    "name": "Wildberry Pancakes and Cafe",
+    "menu_url": "https://wildberrycafe.com/locations/chicago-prudential-plaza/menu/food",
+    "location": {
+      "address": "130 E Randolph St, Chicago, IL 60601",
+      "city": "Chicago",
+      "lat": 41.884721645455315,
+      "lng": -87.62286169231928
+    },
+    "cuisine_types": [
+      "Pancakes",
+      "Waffles",
+      "Cafes"
+    ],
+    "price": "$$",
+    "avg_rating": 4.4,
+    "phone": "+13129389777",
+    "url": "https://www.yelp.com/biz/wildberry-pancakes-and-cafe-chicago-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Find location",
+      "Menus",
+      "Seasonal Specials",
+      "Specialty Pancakes",
+      "All-Natural Grade AA Eggs",
+      "Specialty Benedicts",
+      "Eggs-quisite Omelettes",
+      "Sizzlin’ Skillets",
+      "Belgian Waffles",
+      "French Toast Creations",
+      "Wild Pan Crepes",
+      "Signature Sandwiches",
+      "Paninis & Wraps",
+      "Refreshing Salads",
+      "Oatmeal & Yogurt",
+      "Succulent Fruits",
+      "Sizzlin' Sides",
+      "Extras",
+      "Little Berries",
+      "Baked Snacks",
+      "Locations",
+      "Oak Brook",
+      "Chicago (Prudential Plaza)",
+      "Chicago (Water Tower Place)",
+      "Libertyville",
+      "Schaumburg",
+      "Visit our sister locations"
+    ],
+    "popular_dishes": [
+      "Find location",
+      "Menus",
+      "Seasonal Specials",
+      "Specialty Pancakes",
+      "All-Natural Grade AA Eggs"
+    ]
+  },
+  {
+    "id": "XOLX_XVqY776i6PyIHp_6Q",
+    "name": "The Warbler",
+    "menu_url": null,
+    "location": {
+      "address": "4535 N Lincoln Ave, Chicago, IL 60625",
+      "city": "Chicago",
+      "lat": 41.9642255519757,
+      "lng": -87.6854829048272
+    },
+    "cuisine_types": [
+      "Pasta Shops",
+      "Chicken Wings",
+      "Sandwiches"
+    ],
+    "price": "$$",
+    "avg_rating": 4.4,
+    "phone": "+17736810950",
+    "url": "https://www.yelp.com/biz/the-warbler-chicago-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "FzYi3AVHoYZnWXe1BQrQEw",
+    "name": "Mott St",
+    "menu_url": "https://www.mottstreetchicago.com/menu",
+    "location": {
+      "address": "1401 N Ashland Ave, Chicago, IL 60622",
+      "city": "Chicago",
+      "lat": 41.9071254164458,
+      "lng": -87.6673834605751
+    },
+    "cuisine_types": [
+      "Asian Fusion",
+      "Bars"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.0,
+    "phone": "+17736879977",
+    "url": "https://www.yelp.com/biz/mott-st-chicago-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Crispy Chili Cauliflower",
+      "Wok-Smoked Gai Lan",
+      "Thai Style Papaya Salad",
+      "Brussel Sprouts",
+      "Deji Delight",
+      "Charred Cabbage",
+      "Oyster Mushrooms",
+      "Roasted Sweet Potato",
+      "Crispy Tofu",
+      "Garlic Rice",
+      "Imperial Rolls",
+      "Everything Wings",
+      "Char Siu Pork Belly",
+      "Short Rib",
+      "Steak Kalbi*",
+      "Fire Chicken",
+      "Torikatsu",
+      "Stuffed Cabbage",
+      "Mott Burger (available until 7:00 PM)*",
+      "Hamachi Crudo*",
+      "Mentaiko Kimchi Udon",
+      "Everything Garlic Shrimp & Noodles",
+      "Misoyaki Butterfish",
+      "Tuna Crudo*",
+      "Whole Fish",
+      "Miso Caramel Budino",
+      "Strawberry Daifuku Sticky Rice",
+      "Apple Cider Donuts",
+      "KBBQ Jackfruit Skillet*",
+      "Coconut Pancakes (gluten free!)"
+    ],
+    "popular_dishes": [
+      "Crispy Chili Cauliflower",
+      "Wok-Smoked Gai Lan",
+      "Thai Style Papaya Salad",
+      "Brussel Sprouts",
+      "Deji Delight"
+    ]
+  },
+  {
+    "id": "db7p4tMxC_pptYho8RUhzQ",
+    "name": "Aloha Wagon",
+    "menu_url": "https://www.alohawagon.com/menu",
+    "location": {
+      "address": "2023 S Western Ave, Chicago, IL 60608",
+      "city": "Chicago",
+      "lat": 41.85405076353342,
+      "lng": -87.68549001270712
+    },
+    "cuisine_types": [
+      "Filipino",
+      "Mexican",
+      "Hawaiian"
+    ],
+    "price": "$$",
+    "avg_rating": 4.8,
+    "phone": "+13128889613",
+    "url": "https://www.yelp.com/biz/aloha-wagon-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "No dish names provided in the menu text."
+    ],
+    "popular_dishes": [
+      "No dish names provided in the menu text."
+    ]
+  },
+  {
+    "id": "Xwnu5KDr3_PGfSQ8binvrQ",
+    "name": "Creepies",
+    "menu_url": null,
+    "location": {
+      "address": "1360 W Randolph St, Chicago, IL 60607",
+      "city": "Chicago",
+      "lat": 41.884474,
+      "lng": -87.661187
+    },
+    "cuisine_types": [
+      "Restaurants"
+    ],
+    "price": null,
+    "avg_rating": 4.7,
+    "phone": "+13125792727",
+    "url": "https://www.yelp.com/biz/creepies-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "ak3FYZOsEWeiP6Pdp74YkQ",
+    "name": "Miru",
+    "menu_url": "https://www.mirurestaurant.com/menus/",
+    "location": {
+      "address": "401 E Wacker Dr, Fl 11, Chicago, IL 60601",
+      "city": "Chicago",
+      "lat": 41.8874426163459,
+      "lng": -87.6176301019272
+    },
+    "cuisine_types": [
+      "Japanese"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.3,
+    "phone": "+13127257811",
+    "url": "https://www.yelp.com/biz/miru-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "7:00AM",
+      "11:30AM",
+      "5:00PM",
+      "2:00PM",
+      "Vegetables",
+      "Signature Nigiri",
+      "Signature Raw",
+      "Crispy Rice",
+      "Luxury",
+      "Crunchy",
+      "Robata Skewers",
+      "Rice & Noodles",
+      "Prime Beef & Wagyu",
+      "Hosomaki",
+      "Signature Maki",
+      "Oke Mori",
+      "Nigiri / Sashimi",
+      "Billecart-Salmon Holiday Feature",
+      "Featured Wine by the Glass",
+      "Sparkling & Champagne",
+      "White",
+      "Rosé",
+      "Red",
+      "Dessert",
+      "Featured Half Bottle",
+      "Champagne Half Bottles",
+      "White Wine Half Bottles",
+      "Red Wine Half Bottles",
+      "Featured Brut Champagne",
+      "Non-Vintage Champagne"
+    ],
+    "popular_dishes": [
+      "7:00AM",
+      "11:30AM",
+      "5:00PM",
+      "2:00PM",
+      "Vegetables"
+    ]
+  },
+  {
+    "id": "n5jRD0dlY6Dl672THS7yFA",
+    "name": "Mister Tiger",
+    "menu_url": null,
+    "location": {
+      "address": "1132 W Grand Ave, Chicago, IL 60642",
+      "city": "Chicago",
+      "lat": 41.89129,
+      "lng": -87.65596
+    },
+    "cuisine_types": [
+      "Korean"
+    ],
+    "price": null,
+    "avg_rating": 4.6,
+    "phone": "+13122195211",
+    "url": "https://www.yelp.com/biz/mister-tiger-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "NmynDaHorWl1uO2ppOouUA",
+    "name": "La Sandwichera",
+    "menu_url": null,
+    "location": {
+      "address": "2721 W Division St, Chicago, IL 60622",
+      "city": "Chicago",
+      "lat": 41.902763142599,
+      "lng": -87.6953441678981
+    },
+    "cuisine_types": [
+      "Sandwiches"
+    ],
+    "price": null,
+    "avg_rating": 4.9,
+    "phone": "+17736977477",
+    "url": "https://www.yelp.com/biz/la-sandwichera-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "kUpqpEqkBjZguS1uA6NQYA",
+    "name": "En Hakkore 2.0",
+    "menu_url": "https://www.enhakkore2.com/menu",
+    "location": {
+      "address": "1467 N Milwaukee Ave, Chicago, IL 60622",
+      "city": "Chicago",
+      "lat": 41.90859268098761,
+      "lng": -87.67442096514347
+    },
+    "cuisine_types": [
+      "Asian Fusion",
+      "Poke",
+      "Sushi Bars"
+    ],
+    "price": "$$",
+    "avg_rating": 4.6,
+    "phone": "+17732785959",
+    "url": "https://www.yelp.com/biz/en-hakkore-2-0-chicago-15?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Poke Bowl",
+      "Fire Tuna",
+      "Lava Lava Salad",
+      "Savory Tuna & Salmon",
+      "Crunch & Fire",
+      "Salmon Wafu",
+      "Shrimp Tempura",
+      "Kimchi Salmon",
+      "Inari",
+      "Shoyu Ahi Tuna",
+      "Bibimbap",
+      "Sushi Burrito",
+      "Unagi Lover",
+      "Bibimbap Burrioto",
+      "Soft shell Crab",
+      "Sushi Taco",
+      "Spider Man"
+    ],
+    "popular_dishes": [
+      "Poke Bowl",
+      "Fire Tuna",
+      "Lava Lava Salad",
+      "Savory Tuna & Salmon",
+      "Crunch & Fire"
+    ]
+  },
+  {
+    "id": "r2ocvnnPzntoJ2Fy7eNsdw",
+    "name": "Lincoln Park Corner Kitchen",
+    "menu_url": "https://www.lpcornerkitchen.com/menu",
+    "location": {
+      "address": "2200 N Clybourn Ave, Chicago, IL 60614",
+      "city": "Chicago",
+      "lat": 41.921746,
+      "lng": -87.664725
+    },
+    "cuisine_types": [
+      "American",
+      "Breakfast & Brunch",
+      "Comfort Food"
+    ],
+    "price": null,
+    "avg_rating": 4.5,
+    "phone": "+17732706991",
+    "url": "https://www.yelp.com/biz/lincoln-park-corner-kitchen-chicago-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "EYjyi_lytYaM1Ty7-kNKSg",
+    "name": "Phodega",
+    "menu_url": "https://phodega.com/regular-menu",
+    "location": {
+      "address": "1924 W Division St, Chicago, IL 60622",
+      "city": "Chicago",
+      "lat": 41.90334127310094,
+      "lng": -87.6758734
+    },
+    "cuisine_types": [
+      "Vietnamese",
+      "Hainan",
+      "Noodles"
+    ],
+    "price": "$$",
+    "avg_rating": 4.3,
+    "phone": "+17736878187",
+    "url": "https://www.yelp.com/biz/phodega-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "l_602ggEZES7dW_WeOmKYA",
+    "name": "Elia",
+    "menu_url": "https://eliachicago.com/our-menus/",
+    "location": {
+      "address": "1938 W Division St, Chicago, IL 60622",
+      "city": "Chicago",
+      "lat": 41.903503,
+      "lng": -87.676424
+    },
+    "cuisine_types": [
+      "Turkish",
+      "Mediterranean",
+      "Halal"
+    ],
+    "price": null,
+    "avg_rating": 4.0,
+    "phone": "+17737703658",
+    "url": "https://www.yelp.com/biz/elia-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Go to top",
+      "There are no dish names in the provided menu text."
+    ],
+    "popular_dishes": [
+      "Go to top",
+      "There are no dish names in the provided menu text."
+    ]
+  },
+  {
+    "id": "mvFimrcREBIDo-pLAhMfNg",
+    "name": "Avec - Chicago",
+    "menu_url": null,
+    "location": {
+      "address": "615 W Randolph St, Chicago, IL 60661",
+      "city": "Chicago",
+      "lat": 41.884290441849,
+      "lng": -87.6433979433133
+    },
+    "cuisine_types": [
+      "Mediterranean"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.3,
+    "phone": "+13123772002",
+    "url": "https://www.yelp.com/biz/avec-chicago-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "dro6ttzG0H2PlES0gI8LIg",
+    "name": "Tortello",
+    "menu_url": null,
+    "location": {
+      "address": "1746 W Division St, Chicago, IL 60622",
+      "city": "Chicago",
+      "lat": 41.90343739642855,
+      "lng": -87.67186413269891
+    },
+    "cuisine_types": [
+      "Pasta Shops",
+      "Italian",
+      "Salad"
+    ],
+    "price": "$$",
+    "avg_rating": 4.3,
+    "phone": "+17733601293",
+    "url": "https://www.yelp.com/biz/tortello-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "faOpq9ORL0FlsMrou2NYug",
+    "name": "Amaru",
+    "menu_url": "https://amaruchicago.com/food-menu.html",
+    "location": {
+      "address": "1904 W North Ave, Chicago, IL 60622",
+      "city": "Chicago",
+      "lat": 41.91071,
+      "lng": -87.67536
+    },
+    "cuisine_types": [
+      "Latin American",
+      "Caribbean",
+      "Cocktail Bars"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.7,
+    "phone": "+17736879790",
+    "url": "https://www.yelp.com/biz/amaru-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Facebook page",
+      "Food",
+      "Yuca Frita",
+      "Guatemalan Ribs",
+      "Frita Cubana",
+      "Lomo Steak",
+      "Guava Cheesecake",
+      "Sweet Plantains",
+      "Piononos",
+      "Coconut Fried Rice",
+      "Shrimp Chicharron",
+      "Crawfish Empanadas",
+      "Requeson",
+      "Andean Carrot Salad",
+      "Solterito",
+      "Ceviche",
+      "Pollo Yucateco",
+      "Pulpo Gallego",
+      "Mole y Leon",
+      "Branzino a la Vizcaina",
+      "Cuban Oxtail",
+      "Pernil",
+      "*Ojo de Bife",
+      "Pastel De Elote",
+      "Chocolate Tres Leches",
+      "Beers for the Kitchen!!"
+    ],
+    "popular_dishes": [
+      "Facebook page",
+      "Food",
+      "Yuca Frita",
+      "Guatemalan Ribs",
+      "Frita Cubana"
+    ]
+  },
+  {
+    "id": "Enf_3DXmppx19hFGs0UDKw",
+    "name": "La Nonna",
+    "menu_url": null,
+    "location": {
+      "address": "3400 N Lawndale Ave, Chicago, IL 60618",
+      "city": "Chicago",
+      "lat": 41.9429574,
+      "lng": -87.7203016
+    },
+    "cuisine_types": [
+      "Argentine",
+      "Italian"
+    ],
+    "price": "$$",
+    "avg_rating": 4.7,
+    "phone": "+17732534741",
+    "url": "https://www.yelp.com/biz/la-nonna-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "pbEiXam9YJL3neCYHGwLUA",
+    "name": "Alinea",
+    "menu_url": null,
+    "location": {
+      "address": "1723 N Halsted St, Chicago, IL 60614",
+      "city": "Chicago",
+      "lat": 41.9134194160823,
+      "lng": -87.6482384681229
+    },
+    "cuisine_types": [
+      "New American",
+      "Modern European"
+    ],
+    "price": "$$$$",
+    "avg_rating": 4.4,
+    "phone": "+13128670110",
+    "url": "https://www.yelp.com/biz/alinea-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "TC8tG6To87DUzC365njvXw",
+    "name": "River Roast",
+    "menu_url": "https://www.riverroastchicago.com/menus/all-day",
+    "location": {
+      "address": "315 N La Salle Dr, Chicago, IL 60654",
+      "city": "Chicago",
+      "lat": 41.887957929885,
+      "lng": -87.63227535993691
+    },
+    "cuisine_types": [
+      "American",
+      "Cocktail Bars",
+      "Venues & Event Spaces"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.0,
+    "phone": "+13128220100",
+    "url": "https://www.yelp.com/biz/river-roast-chicago-3?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "vvhfPV-Llkd4fE2SHuLVvA",
+    "name": "The Gage",
+    "menu_url": "https://static1.squarespace.com/static/5c62fca87a1fbd4531111740/t/5f7cb74210cb5e4aa0b3d3ac/1602008899185/Gage+MENU+10.5.20.pdf",
+    "location": {
+      "address": "24 S Michigan Ave, Chicago, IL 60603",
+      "city": "Chicago",
+      "lat": 41.881369,
+      "lng": -87.624698
+    },
+    "cuisine_types": [
+      "New American",
+      "Cocktail Bars"
+    ],
+    "price": "$$",
+    "avg_rating": 4.2,
+    "phone": "+13123724243",
+    "url": "https://www.yelp.com/biz/the-gage-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Soup of the Day",
+      "Chicken & Orzo Soup",
+      "Crispy Fried Pickles",
+      "Brandade Fritters",
+      "Yellowtail Ceviche",
+      "Duck Confit Rillettes",
+      "Hand-Cut Steak Tartare",
+      "PEI Mussels",
+      "Wedge Salad",
+      "Autumn Apple Salad",
+      "Super Green",
+      "Buffalo Fried Chicken",
+      "Lobster BLT",
+      "The “Regular” Burger",
+      "The Venison Burger",
+      "Today’s Fish & Chips",
+      "Acanto’s Squash & Taleggio Cappelletti",
+      "Sautéed Ora King Salmon",
+      "Herb-Roasted Half-Chicken",
+      "Steak Frites",
+      "Truffle Fries",
+      "Chips & Curry",
+      "Roasted Brussels Sprouts",
+      "Buffalo Cauliflower",
+      "Salt-Baked Sweet Beets",
+      "Potato Gnocchi Gratín"
+    ],
+    "popular_dishes": [
+      "Soup of the Day",
+      "Chicken & Orzo Soup",
+      "Crispy Fried Pickles",
+      "Brandade Fritters",
+      "Yellowtail Ceviche"
+    ]
+  },
+  {
+    "id": "Bxd9Y2PsdvIOGIKFQh53RQ",
+    "name": "Giordano's",
+    "menu_url": "http://giordanos.com/the-menu/",
+    "location": {
+      "address": "130 E Randolph St, Chicago, IL 60601",
+      "city": "Chicago",
+      "lat": 41.88513231411071,
+      "lng": -87.62375615999174
+    },
+    "cuisine_types": [
+      "Pizza",
+      "Salad",
+      "Italian"
+    ],
+    "price": "$$",
+    "avg_rating": 3.8,
+    "phone": "+13126161200",
+    "url": "https://www.yelp.com/biz/giordanos-chicago-30?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "0IYXh7l_VppKw5y97FehoA",
+    "name": "Kasama",
+    "menu_url": "https://www.kasamachicago.com/menus",
+    "location": {
+      "address": "1001 N Winchester Ave, Chicago, IL 60622",
+      "city": "Chicago",
+      "lat": 41.899692,
+      "lng": -87.6756
+    },
+    "cuisine_types": [
+      "Filipino",
+      "Bakeries",
+      "New American"
+    ],
+    "price": "$$",
+    "avg_rating": 4.5,
+    "phone": "+17736973790",
+    "url": "https://www.yelp.com/biz/kasama-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Online Order",
+      "please note we are counter service during the day and the dining room is open until 2pm.",
+      "pastries are subject to availability",
+      "There are no specific dish names mentioned in the provided menu text."
+    ],
+    "popular_dishes": [
+      "Online Order",
+      "please note we are counter service during the day and the dining room is open until 2pm.",
+      "pastries are subject to availability",
+      "There are no specific dish names mentioned in the provided menu text."
+    ]
+  },
+  {
+    "id": "ziIfrqtyupmeNlPAOx6jTw",
+    "name": "Quartino Ristorante",
+    "menu_url": "https://quartinoristorante.com/chicago/menus",
+    "location": {
+      "address": "626 N State St, Chicago, IL 60654",
+      "city": "Chicago",
+      "lat": 41.8934479679332,
+      "lng": -87.62835547326355
+    },
+    "cuisine_types": [
+      "Italian",
+      "Wine Bars"
+    ],
+    "price": "$$",
+    "avg_rating": 4.2,
+    "phone": "+13126985000",
+    "url": "https://www.yelp.com/biz/quartino-ristorante-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "italian small plates",
+      "Join ournewsletter.",
+      "Chicago Location",
+      "Texas Location",
+      "About",
+      "Gibsons Restaurant Group",
+      "Private Dining",
+      "Gift Cards",
+      "Request Receipt",
+      "Careers"
+    ],
+    "popular_dishes": [
+      "italian small plates",
+      "Join ournewsletter.",
+      "Chicago Location",
+      "Texas Location",
+      "About"
+    ]
+  },
+  {
+    "id": "XKUZV9O2sRFLDIpAmwmG5g",
+    "name": "Boka",
+    "menu_url": "https://www.bokachicago.com/menu",
+    "location": {
+      "address": "1729 N Halsted St, Chicago, IL 60614",
+      "city": "Chicago",
+      "lat": 41.91356,
+      "lng": -87.647993
+    },
+    "cuisine_types": [
+      "New American"
+    ],
+    "price": "$$$$",
+    "avg_rating": 4.3,
+    "phone": "+13123376070",
+    "url": "https://www.yelp.com/biz/boka-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "(no dish names found)"
+    ],
+    "popular_dishes": [
+      "(no dish names found)"
+    ]
+  },
+  {
+    "id": "Bg7IkuTlqVh_Ezik1gA7yg",
+    "name": "Siam Thai Eatery",
+    "menu_url": "https://www.siamthaieatery.com/food-menu/",
+    "location": {
+      "address": "1329 S Michigan Ave, Chicago, IL 60605",
+      "city": "Chicago",
+      "lat": 41.864942,
+      "lng": -87.623699
+    },
+    "cuisine_types": [
+      "Thai"
+    ],
+    "price": null,
+    "avg_rating": 4.4,
+    "phone": "+13127636193",
+    "url": "https://www.yelp.com/biz/siam-thai-eatery-chicago?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "FOOD MENU",
+      "Raw",
+      "Soup/Salad",
+      "Plates to share",
+      "Rice & Noodle",
+      "DESSERT",
+      "Visit Us - Siam Thai Chicago Eatery",
+      "Opening Hours",
+      "Location"
+    ],
+    "popular_dishes": [
+      "FOOD MENU",
+      "Raw",
+      "Soup/Salad",
+      "Plates to share",
+      "Rice & Noodle"
+    ]
+  }
+]

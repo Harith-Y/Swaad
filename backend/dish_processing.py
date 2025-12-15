@@ -547,15 +547,25 @@ def check_location_match(user_location: str, restaurant_location: str) -> bool:
     u_loc = user_location.lower().strip()
     r_loc = restaurant_location.lower().strip()
     
-    # Fast path 1: Direct substring match
-    u_loc_parts = u_loc.replace(',', ' ').split()
-    r_loc_lower = r_loc.replace(',', ' ')
+    # Fast path 1: Direct substring match (improved)
+    # Extract key location terms (city names, not just first word)
+    # Common patterns: "New York", "San Francisco", "Los Angeles"
     
-    # Check if main city/location is in the restaurant location
-    main_location = u_loc_parts[0] if u_loc_parts else u_loc
-    if main_location in r_loc_lower:
-        print(f"[DEBUG] Fast path match succeeded")
-        return True
+    # Check for exact city match (case-insensitive)
+    # Split by comma to get city part
+    u_city = u_loc.split(',')[0].strip()
+    r_city = r_loc.split(',')[0].strip()
+    
+    # Check if user's city appears in restaurant's location
+    # Use word boundaries to avoid "San" matching "San Antonio" when user wants "San Francisco"
+    if u_city and u_city in r_loc:
+        # Verify it's a full city name match, not just a prefix
+        # Check if followed by comma, space at end, or other word boundary
+        import re
+        pattern = r'\b' + re.escape(u_city) + r'\b'
+        if re.search(pattern, r_loc):
+            print(f"[DEBUG] Fast path match: '{u_city}' found in '{r_loc}'")
+            return True
     
     # Fast path 2: Check for country/region mismatches
     # Check for US vs non-US locations
