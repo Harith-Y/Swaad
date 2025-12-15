@@ -172,10 +172,12 @@ def extract_diet_from_query(query: str) -> Optional[str]:
     # STEP 2: Check for dish-based diet detection
     # Extract potential dish names from query
     dish_patterns = [
-        # Specific pattern for "to eat X" - must come first
+        # Specific pattern for "to eat/have/try X" - must come first
         r'(?:i want|i need)\s+to\s+(?:eat|have|try)\s+(?:some\s+)?(.+?)(?:\s+(?:near|in|at|and)|$)',
-        # General patterns
-        r'(?:i want|i need|looking for|get me|find|show me|give me)\s+(?:some\s+)?(.+?)(?:\s+(?:near|in|at|and)|$)',
+        # "I want to X" (where X is dish, not "to eat") - captures the dish after "to"
+        r'(?:i want|i need)\s+to\s+(?!(?:eat|have|try)\s)(?:some\s+)?(.+?)(?:\s+(?:near|in|at|and)|$)',
+        # General patterns (exclude "to" prefix)
+        r'(?:i want|i need|looking for|get me|find|show me|give me)\s+(?!to\s)(?:some\s+)?(.+?)(?:\s+(?:near|in|at|and)|$)',
         r'(?:where.*get|where.*find)\s+(.+?)(?:\s+(?:near|in|at|and)|$)',
         r'(?:is there|do you have|any)\s+(.+?)(?:\s+(?:available|near|in|at)|$)',
     ]
@@ -552,10 +554,12 @@ def is_dish_query(query: str) -> Optional[str]:
         r"where\s+(?:can\s+)?i\s+(?:can\s+)?(?:find|get)\s+(.+?)(?:\s+near|\s+in|\s+at|\s*$)",
         # "do you have X" or "is there X"
         r"^(?:do\s+you\s+have|is\s+there)\s+(?:any\s+)?(.+?)(?:\s+available|\s+near|\s+in|\s+at|\s*$)",
-        # "I want to eat X" - specific pattern to skip "to eat"
-        r"^(?:i\s+want|i'd\s+like|i\s+need)\s+to\s+(?:eat|have|try)\s+(.+?)(?:\s+near|\s+in|\s+at|\s*$)",
-        # "I want X" or "show me X"
-        r"^(?:i\s+want|i'd\s+like|i\s+need|give\s+me|show\s+me|find|get\s+me|looking\s+for)\s+(?:some\s+)?(.+?)(?:\s+near|\s+in|\s+at|\s*$)",
+        # "I want to eat/have/try X" - specific pattern to skip "to eat/have/try"
+        r"^(?:i\s+want|i'd\s+like|i\s+need)\s+to\s+(?:eat|have|try)\s+(?:some\s+)?(.+?)(?:\s+near|\s+in|\s+at|\s*$)",
+        # "I want to X" (where X is dish, not "to eat") - captures the dish after "to"
+        r"^(?:i\s+want|i'd\s+like|i\s+need)\s+to\s+(?!(?:eat|have|try)\s)(?:some\s+)?(.+?)(?:\s+near|\s+in|\s+at|\s*$)",
+        # "I want X" or "show me X" (no "to" involved)
+        r"^(?:i\s+want|i'd\s+like|i\s+need|give\s+me|show\s+me|find|get\s+me|looking\s+for)\s+(?!to\s)(?:some\s+)?(.+?)(?:\s+near|\s+in|\s+at|\s*$)",
         # "can I get X"
         r"^can\s+i\s+get\s+(.+?)(?:\s+near|\s+in|\s+at|\s*$)",
     ]
