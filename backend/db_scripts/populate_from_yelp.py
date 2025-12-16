@@ -33,6 +33,9 @@ import sys
 from typing import List, Dict, Any
 from pathlib import Path
 
+# Add parent directory to path to import backend modules
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 # Import our modules
 from yelp_api_client import YelpAPIClient
 from menu_url_scraper import MenuURLScraper

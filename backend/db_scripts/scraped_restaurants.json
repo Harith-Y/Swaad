@@ -1,0 +1,1643 @@
+[
+  {
+    "id": "RYIY6ITx35uDWNi7W8MRsQ",
+    "name": "To The Moon",
+    "menu_url": "https://www.tothemoon0301.com/menu.php",
+    "location": {
+      "address": "4390 Telegraph Ave, Ste A, Oakland, CA 94609",
+      "city": "Oakland",
+      "lat": 37.832086,
+      "lng": -122.263096
+    },
+    "cuisine_types": [
+      "Korean"
+    ],
+    "price": null,
+    "avg_rating": 4.7,
+    "phone": "+15109073182",
+    "url": "https://www.yelp.com/biz/to-the-moon-oakland-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "TO THE MOON",
+      "Food with Endless Possibilities",
+      "Enjoy the Korean Pocha",
+      "Hours",
+      "Contact"
+    ],
+    "popular_dishes": [
+      "TO THE MOON",
+      "Food with Endless Possibilities",
+      "Enjoy the Korean Pocha",
+      "Hours",
+      "Contact"
+    ]
+  },
+  {
+    "id": "XuIhJp2WukLPI9iJGUXiAQ",
+    "name": "Parche",
+    "menu_url": "https://www.parcheoak.com/menus",
+    "location": {
+      "address": "2295 Broadway, Oakland, CA 94612",
+      "city": "Oakland",
+      "lat": 37.81198231385168,
+      "lng": -122.2666132
+    },
+    "cuisine_types": [
+      "Colombian",
+      "Tapas/Small Plates",
+      "Cocktail Bars"
+    ],
+    "price": null,
+    "avg_rating": 4.5,
+    "phone": "+15109229687",
+    "url": "https://www.yelp.com/biz/parche-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Open Menu",
+      "Our Menus",
+      "check out OUR Sister restaurant",
+      "422 24TH St. Oakland, CA(Cross Streets: Broadway/24th St."
+    ],
+    "popular_dishes": [
+      "Open Menu",
+      "Our Menus",
+      "check out OUR Sister restaurant",
+      "422 24TH St. Oakland, CA(Cross Streets: Broadway/24th St."
+    ]
+  },
+  {
+    "id": "L7I_bhmMacR1lcVUuWwuKg",
+    "name": "Almond & Oak",
+    "menu_url": "https://almondandoak.com/oakland-almond-and-oak-food-menu",
+    "location": {
+      "address": "3311 Grand Ave, Oakland, CA 94610",
+      "city": "Oakland",
+      "lat": 37.8126641,
+      "lng": -122.2473585
+    },
+    "cuisine_types": [
+      "New American",
+      "Cocktail Bars"
+    ],
+    "price": "$$",
+    "avg_rating": 4.4,
+    "phone": "+15102509550",
+    "url": "https://www.yelp.com/biz/almond-and-oak-oakland-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Dinner Menu",
+      "Housemade Herbed Focaccia",
+      "Grilled Chicken Panzanella",
+      "Broccoli di Ciccio",
+      "Oysters",
+      "Quiche",
+      "French Fries",
+      "Cava",
+      "Marinated Olives",
+      "Affogato",
+      "Frank the Saint",
+      "Espresso",
+      "English Breakfast",
+      "Housemade Peppercorn Tonic",
+      "Mimosa",
+      "N/A Michelada",
+      "Champagne, NV Jean Laurent ‘Blanc de Blancs, Reserve’, Champagne, FR",
+      "Laughing Monk Holy Ghost Pilsner",
+      "Coffee",
+      "Fresh Squeezed Orange Juice",
+      "Roasted Butternut Soup",
+      "Mixed Greens",
+      "Fried Brussels Sprouts",
+      "Citrus & Avocado",
+      "House-made Potato Gnocchi",
+      "Coachella Corn Soup",
+      "Caesar",
+      "House-made Burrata",
+      "Grilled Pork Chop",
+      "Farro Risotto"
+    ],
+    "popular_dishes": [
+      "Dinner Menu",
+      "Housemade Herbed Focaccia",
+      "Grilled Chicken Panzanella",
+      "Broccoli di Ciccio",
+      "Oysters"
+    ]
+  },
+  {
+    "id": "EEQ_AjO0ErwoF1vkjm5-tg",
+    "name": "Lucuma Kitchen and Bar",
+    "menu_url": "https://www.lucumakitchen.com/menu",
+    "location": {
+      "address": "1700 Franklin St, Oakland, CA 94612",
+      "city": "Oakland",
+      "lat": 37.806227,
+      "lng": -122.268225
+    },
+    "cuisine_types": [
+      "Peruvian",
+      "Cocktail Bars"
+    ],
+    "price": null,
+    "avg_rating": 4.7,
+    "phone": "+15106078110",
+    "url": "https://www.yelp.com/biz/lucuma-kitchen-and-bar-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Crudo",
+      "Chiquitos",
+      "Los Grandes",
+      "Address",
+      "Contact",
+      "Hours"
+    ],
+    "popular_dishes": [
+      "Crudo",
+      "Chiquitos",
+      "Los Grandes",
+      "Address",
+      "Contact"
+    ]
+  },
+  {
+    "id": "bhnKl105GwMVVlsiUnwr2w",
+    "name": "Wood Tavern",
+    "menu_url": "http://woodtavern.net/menus.html",
+    "location": {
+      "address": "6317 College Ave, Oakland, CA 94618",
+      "city": "Oakland",
+      "lat": 37.850677245435,
+      "lng": -122.252613605212
+    },
+    "cuisine_types": [
+      "New American"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.3,
+    "phone": "+15106546607",
+    "url": "https://www.yelp.com/biz/wood-tavern-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "D_yAQ4tHlWp2CJSqFCeW_w",
+    "name": "MAMA Oakland",
+    "menu_url": "https://mama-oakland.com/menu",
+    "location": {
+      "address": "388 Grand Ave, Oakland, CA 94610",
+      "city": "Oakland",
+      "lat": 37.809145,
+      "lng": -122.254502
+    },
+    "cuisine_types": [
+      "Italian",
+      "Wine Bars"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.3,
+    "phone": "+15109746372",
+    "url": "https://www.yelp.com/biz/mama-oakland-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "3-course menu$42.95 PER PERSON",
+      "november 25th-December 24th",
+      "Warm Leek Sformato",
+      "Chestnut & Celery Root Soup",
+      "Hand Cut Tagliarini",
+      "Ricotta Ravioli",
+      "MAMA’s Beef & Pork Meatballs",
+      "Barolo Braised Beef Short Rib",
+      "Pan Seared Mt. Lassen Trout",
+      "Extra Virgin Olive Oil Cake",
+      "Dark Chocolate Bonet"
+    ],
+    "popular_dishes": [
+      "3-course menu$42.95 PER PERSON",
+      "november 25th-December 24th",
+      "Warm Leek Sformato",
+      "Chestnut & Celery Root Soup",
+      "Hand Cut Tagliarini"
+    ]
+  },
+  {
+    "id": "v7GH_fTmGQGbjB4ignVnqA",
+    "name": "Belotti Ristorante E Bottega",
+    "menu_url": null,
+    "location": {
+      "address": "5403 College Ave, Oakland, CA 94618",
+      "city": "Oakland",
+      "lat": 37.840277044258,
+      "lng": -122.251473292708
+    },
+    "cuisine_types": [
+      "Italian",
+      "Cocktail Bars",
+      "Wine Bars"
+    ],
+    "price": "$$",
+    "avg_rating": 4.4,
+    "phone": "+15107887890",
+    "url": "https://www.yelp.com/biz/belotti-ristorante-e-bottega-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "cgImAqtrpVg7hN_6lsFJrQ",
+    "name": "Farmhouse Kitchen Thai Cuisine",
+    "menu_url": "https://img1.wsimg.com/blobby/go/ac8f95d5-8ffd-4ded-becc-d7c8a14bbcd1/Oak%20WD%20(no%20Lao)%20Farmhouse%20Kitchen%20Thai%20Cu-0020.pdf",
+    "location": {
+      "address": "336 Water St, Oakland, CA 94607",
+      "city": "Oakland",
+      "lat": 37.794215,
+      "lng": -122.275465
+    },
+    "cuisine_types": [
+      "Thai",
+      "Cocktail Bars",
+      "Desserts"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.2,
+    "phone": "+15104190541",
+    "url": "https://www.yelp.com/biz/farmhouse-kitchen-thai-cuisine-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Vegan Fresh Rolls",
+      "Samosa",
+      "Crispy Egg Rolls",
+      "Thai Fish Cakes",
+      "Farmhouse Wings",
+      "Neua Num Tok Rolls",
+      "Ahi Scoops",
+      "Mieng Kum Kung",
+      "Par Dip Fresh Tuna",
+      "Crispy Calamari",
+      "Tom Kha",
+      "Papaya Salad",
+      "Herbal Rice Salad",
+      "Larb",
+      "Crispy Branzino",
+      "Kao Soi Neua Med Spicy",
+      "24 Hours Beef Noodle Soup",
+      "Run Juan Seafood Sizzling",
+      "Crab Fried Rice",
+      "Lobster Pad Thai",
+      "Kang Kua Prawns",
+      "Hat Yai Fried Chicken"
+    ],
+    "popular_dishes": [
+      "Vegan Fresh Rolls",
+      "Samosa",
+      "Crispy Egg Rolls",
+      "Thai Fish Cakes",
+      "Farmhouse Wings"
+    ]
+  },
+  {
+    "id": "aIyO-hJXGwgJt3jpZIzz6Q",
+    "name": "Mensho",
+    "menu_url": "https://mensho.com/menu/",
+    "location": {
+      "address": "4258 Piedmont Ave, Oakland, CA 94611",
+      "city": "Oakland",
+      "lat": 37.828330196536754,
+      "lng": -122.24970135837792
+    },
+    "cuisine_types": [
+      "Ramen"
+    ],
+    "price": "$$",
+    "avg_rating": 4.5,
+    "phone": "+15103935229",
+    "url": "https://www.yelp.com/biz/mensho-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "RAMEN",
+      "ALMOND TANTANMENMENSHO",
+      "PREMIUM RAMENMENSHO",
+      "SHOYU RAMENMENSHO",
+      "WAGYU RAMENMENSHO",
+      "TORIPAITAN RAMENMENSHO TOKYO",
+      "LAMB TONKOTSU RAMENMENSHO TOKYO",
+      "MATCHA RAMENMENSHO SF",
+      "SHRIMP RAMENMENSHO SF",
+      "WAGYU SHOYU RAMENJIKASEI MENSHO",
+      "CHASHUMENJIKASEI MENSHO",
+      "TONKOTSU RAMENMENYA SHONO",
+      "SHIO RAMENMENYA SHONO",
+      "TSUKEMENMENYA SHONO",
+      "MAZESOBAGACHI",
+      "SPICE RAMENSHAKA",
+      "SIDE MENU",
+      "DUCK NORI RICE BOWL",
+      "EGG RICE BOWL",
+      "ENOKI CHIPS",
+      "FRIED CHICKEN RICE BOWL",
+      "UNI CAVIAR",
+      "WAGYU RICE BOWL",
+      "TOPPING",
+      "SPINACH",
+      "FRIED GARLIC",
+      "ROASTED SESAME SELECTED",
+      "SHIITAKE MUSHROOM CHASHU",
+      "CILANTRO",
+      "GREEN ONION"
+    ],
+    "popular_dishes": [
+      "RAMEN",
+      "ALMOND TANTANMENMENSHO",
+      "PREMIUM RAMENMENSHO",
+      "SHOYU RAMENMENSHO",
+      "WAGYU RAMENMENSHO"
+    ]
+  },
+  {
+    "id": "5x-d9REDONrMabzr9GBm4A",
+    "name": "Sirene",
+    "menu_url": "https://sirene-oak.com/wp-content/uploads/2025/02/Sirene-Menu-Feb25.pdf",
+    "location": {
+      "address": "3308 Grand Ave, Oakland, CA 94610",
+      "city": "Oakland",
+      "lat": 37.81288111268736,
+      "lng": -122.24685092588078
+    },
+    "cuisine_types": [
+      "Seafood",
+      "Bars"
+    ],
+    "price": null,
+    "avg_rating": 4.3,
+    "phone": "+15102008750",
+    "url": "https://www.yelp.com/biz/sirene-oakland-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "FZLtUsoXT3Za0YBtmiZIIA",
+    "name": "Limón",
+    "menu_url": "https://www.limonrestaurants.com/menus",
+    "location": {
+      "address": "2450 Valdez St, Oakland, CA 94612",
+      "city": "Oakland",
+      "lat": 37.814434096326906,
+      "lng": -122.26335112184417
+    },
+    "cuisine_types": [
+      "Peruvian",
+      "Tapas/Small Plates",
+      "Latin American"
+    ],
+    "price": "$$",
+    "avg_rating": 4.3,
+    "phone": "+15108087324",
+    "url": "https://www.yelp.com/biz/lim%C3%B3n-oakland-4?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Sampler",
+      "Two handmade empanadas with our family favorite fillings:",
+      "Substitute each side +2",
+      "Glass",
+      "WHITE WINE",
+      "RED WINE",
+      "LAGERS",
+      "ALES",
+      "IPAS",
+      "SPARKLING",
+      "All ceviches are served with choclo, cancha & sweet potato. Add taro chips +4",
+      "Glass 10 | Pitcher 40",
+      "Outside dessert fee: $3 per plate.",
+      "Monday - Friday | 3 p.m. - 6 p.m."
+    ],
+    "popular_dishes": [
+      "Sampler",
+      "Two handmade empanadas with our family favorite fillings:",
+      "Substitute each side +2",
+      "Glass",
+      "WHITE WINE"
+    ]
+  },
+  {
+    "id": "VAG7WU0cY7276r0gdDaB9A",
+    "name": "Pomet",
+    "menu_url": "https://pomet-oakland.com/menu/",
+    "location": {
+      "address": "4029 Piedmont Ave, Oakland, CA 94611",
+      "city": "Oakland",
+      "lat": 37.82608151329989,
+      "lng": -122.2532584
+    },
+    "cuisine_types": [
+      "New American"
+    ],
+    "price": "$$$$",
+    "avg_rating": 4.4,
+    "phone": "+15104502541",
+    "url": "https://www.yelp.com/biz/pomet-oakland-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Sample Dinner Menu",
+      "salt & vinegar chips",
+      "little gem",
+      "K & J ORCHARDS BARTLETT & SHINKO pear",
+      "RIVERDOG FARM graffiti eggplant dip",
+      "whipped smoked salmon",
+      "crispy turnip tots",
+      "FULL BELLY",
+      "Korean fried LIBERTY duck leg",
+      "five spice WOLFE RANCH quail",
+      "ugly mushroom caramelle",
+      "pappardelle",
+      "Hokkaido milk bread rolls",
+      "pasture raised NY strip steak",
+      "MP STEMPLE CREEK char siu short rib",
+      "petrale sole",
+      "LIBERTY duck breast",
+      "K & J ORCHARDS Bartlett Pear Tart",
+      "Boca Negra",
+      "Carrot Cake",
+      "K & J ORCHARDS Seasonal Semifreddo"
+    ],
+    "popular_dishes": [
+      "Sample Dinner Menu",
+      "salt & vinegar chips",
+      "little gem",
+      "K & J ORCHARDS BARTLETT & SHINKO pear",
+      "RIVERDOG FARM graffiti eggplant dip"
+    ]
+  },
+  {
+    "id": "5T8x532FlUIRzx3iMp8A2g",
+    "name": "Popoca Oakland",
+    "menu_url": "https://www.popocaoakland.com/menu",
+    "location": {
+      "address": "906 Washington St, Oakland, CA 94607",
+      "city": "Oakland",
+      "lat": 37.80155102308705,
+      "lng": -122.27428669385664
+    },
+    "cuisine_types": [
+      "Salvadoran",
+      "Bars"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.4,
+    "phone": "+15104571724",
+    "url": "https://www.yelp.com/biz/popoca-oakland-oakland-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Open Menu",
+      "Folder:",
+      "Back",
+      "MENUS",
+      "DINNER MENU",
+      "DRINK MENU"
+    ],
+    "popular_dishes": [
+      "Open Menu",
+      "Folder:",
+      "Back",
+      "MENUS",
+      "DINNER MENU"
+    ]
+  },
+  {
+    "id": "O_4l6IJZmMyDxNkX173aEw",
+    "name": "Bistro 4293",
+    "menu_url": "https://www.bistro4293.com/menu",
+    "location": {
+      "address": "4293 Piedmont Ave, Oakland, CA 94611",
+      "city": "Oakland",
+      "lat": 37.8288515,
+      "lng": -122.2495138
+    },
+    "cuisine_types": [
+      "Mediterranean",
+      "Salad",
+      "Middle Eastern"
+    ],
+    "price": null,
+    "avg_rating": 4.6,
+    "phone": "+15107755039",
+    "url": "https://www.yelp.com/biz/bistro-4293-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "0 items –$0.00",
+      "Our Address",
+      "Search",
+      "Main Courses",
+      "Fire-Kissed Octopus",
+      "Mediterranean Sea Bass",
+      "Caviar Salmon",
+      "Vegetarian  Roasted Cauliflower Rainbow  Plate",
+      "Khojaly Lamb Shank",
+      "Med-Style Lamb Chops",
+      "Tika Kebab",
+      "Karabakh Lula Kebab",
+      "Wagyu Burger",
+      "Saffron Flame Chicken",
+      "Khan Plov",
+      "Cold Starters",
+      "Hummus Trio",
+      "Tzatziki",
+      "Mangal",
+      "Mediterranean Harvest Plate",
+      "Eggplant Rolls",
+      "Curated Cheese & Honey Platter",
+      "Bistro 4293 Mix Plate",
+      "Hot Starters",
+      "Fried Prawns",
+      "Fried Calamari",
+      "Blintz Stuffed with Minced Beef",
+      "Fried Dushbara",
+      "Lamb Lollipop",
+      "Baku Meat Dolma"
+    ],
+    "popular_dishes": [
+      "0 items –$0.00",
+      "Our Address",
+      "Search",
+      "Main Courses",
+      "Fire-Kissed Octopus"
+    ]
+  },
+  {
+    "id": "Q7RiDz9I2PpltrOnnIfDyg",
+    "name": "Bardo Lounge & Supper Club",
+    "menu_url": "https://www.bardooakland.com/menus",
+    "location": {
+      "address": "3343 Lakeshore Ave, Oakland, CA 94610",
+      "city": "Oakland",
+      "lat": 37.81118100106717,
+      "lng": -122.2435560048935
+    },
+    "cuisine_types": [
+      "Lounges",
+      "New American",
+      "Cocktail Bars"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.4,
+    "phone": "+15108368737",
+    "url": "https://www.yelp.com/biz/bardo-lounge-and-supper-club-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Open Menu",
+      "Folder:",
+      "Back",
+      "Events",
+      "Large Party Dining",
+      "Private Mezzanine",
+      "Full Buyout"
+    ],
+    "popular_dishes": [
+      "Open Menu",
+      "Folder:",
+      "Back",
+      "Events",
+      "Large Party Dining"
+    ]
+  },
+  {
+    "id": "Wb4iWVbfibV2XP8Faj6G8A",
+    "name": "Jaji",
+    "menu_url": null,
+    "location": {
+      "address": "422 24th St, Oakland, CA 94612",
+      "city": "Oakland",
+      "lat": 37.81386084701676,
+      "lng": -122.26633520283428
+    },
+    "cuisine_types": [
+      "Afghan"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.4,
+    "phone": "+15103737988",
+    "url": "https://www.yelp.com/biz/jaji-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "6MXjFD232pQ38pgY9tY66g",
+    "name": "The Wolf",
+    "menu_url": "https://www.thewolfoakland.com/menu-3",
+    "location": {
+      "address": "3853 Piedmont Ave, Oakland, CA 94611",
+      "city": "Oakland",
+      "lat": 37.82471,
+      "lng": -122.2551
+    },
+    "cuisine_types": [
+      "New American",
+      "Bars",
+      "Coffee & Tea"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.2,
+    "phone": "+15108797953",
+    "url": "https://www.yelp.com/biz/the-wolf-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Open Menu",
+      "(no dish names found)"
+    ],
+    "popular_dishes": [
+      "Open Menu",
+      "(no dish names found)"
+    ]
+  },
+  {
+    "id": "T6O31-zPkeIOxYW1plsjJg",
+    "name": "Bombera",
+    "menu_url": null,
+    "location": {
+      "address": "3459 Champion St, Oakland, CA 94602",
+      "city": "Oakland",
+      "lat": 37.79944445995523,
+      "lng": -122.21514645746
+    },
+    "cuisine_types": [
+      "Mexican"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.1,
+    "phone": "",
+    "url": "https://www.yelp.com/biz/bombera-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "q9wA22X27_rBYSgteZwJyg",
+    "name": "Bocanova",
+    "menu_url": null,
+    "location": {
+      "address": "1111 Broadway, Oakland, CA 94607",
+      "city": "Oakland",
+      "lat": 37.802826,
+      "lng": -122.272905
+    },
+    "cuisine_types": [
+      "Latin American"
+    ],
+    "price": "$$$",
+    "avg_rating": 4.4,
+    "phone": "+15104971111",
+    "url": "https://www.yelp.com/biz/bocanova-oakland-6?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "cQ00bfG7i-IKUlrJMVy86w",
+    "name": "Kitchen Story",
+    "menu_url": null,
+    "location": {
+      "address": "5422 College Ave, Oakland, CA 94618",
+      "city": "Oakland",
+      "lat": 37.84073,
+      "lng": -122.25119
+    },
+    "cuisine_types": [
+      "Breakfast & Brunch",
+      "Asian Fusion",
+      "New American"
+    ],
+    "price": "$$",
+    "avg_rating": 4.0,
+    "phone": "+15109229443",
+    "url": "https://www.yelp.com/biz/kitchen-story-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "PGGtbjr8m4V54tWMgqYxmQ",
+    "name": "Marica",
+    "menu_url": "https://www.maricaoakland.com/_files/ugd/d9e146_ffe238e56fea4ad39e936ceb87a84c58.pdf",
+    "location": {
+      "address": "5301 College Ave, Oakland, CA 94618",
+      "city": "Oakland",
+      "lat": 37.83798,
+      "lng": -122.2517
+    },
+    "cuisine_types": [
+      "Seafood",
+      "New American"
+    ],
+    "price": "$$",
+    "avg_rating": 4.4,
+    "phone": "+15109858388",
+    "url": "https://www.yelp.com/biz/marica-oakland-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Caesar Salad",
+      "Shrimp Corncakes",
+      "Mushroom Toast",
+      "Grilled Prawns",
+      "Wok Fried Calamari",
+      "Kennebec Shoestring Fries",
+      "Seafood Stew",
+      "Twice Cooked Maine Lobster",
+      "Dayboat Scallops & Salmon",
+      "Grilled Salmon",
+      "New York Steak",
+      "Korean Sweet & Spicy Pork Ribs",
+      "Spaghetti and Balls",
+      "Grand Marnier Creme Brûlée",
+      "Berry Panna cotta",
+      "Chocolate Souffle",
+      "Violet 75",
+      "A Grape in the Rye",
+      "Ginger Limeade",
+      "Margarita",
+      "Laura’s Paloma",
+      "Manhattan",
+      "Rye Old Fashioned"
+    ],
+    "popular_dishes": [
+      "Caesar Salad",
+      "Shrimp Corncakes",
+      "Mushroom Toast",
+      "Grilled Prawns",
+      "Wok Fried Calamari"
+    ]
+  },
+  {
+    "id": "Kz7lYk5k2MYzbPYtuXuZPw",
+    "name": "Willows & Pine",
+    "menu_url": "https://willowsandpine-restaurant.com/oakland-dimond-district-willows-and-pine-restaurant-and-catering-food-menu",
+    "location": {
+      "address": "3525 Fruitvale Ave, Oakland, CA 94602",
+      "city": "Oakland",
+      "lat": 37.80087677197878,
+      "lng": -122.21607375105772
+    },
+    "cuisine_types": [
+      "Cajun/Creole",
+      "Venues & Event Spaces",
+      "Cocktail Bars"
+    ],
+    "price": "$$",
+    "avg_rating": 4.5,
+    "phone": "+15108423564",
+    "url": "https://www.yelp.com/biz/willows-and-pine-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Facebook page",
+      "First Course",
+      "Peach Cobbler or Carmel Apple  French Toast",
+      "Beef Bacon 4 Slices",
+      "House Salad (VG)",
+      "Short Ribs",
+      "Jambalaya",
+      "Banana Pudding Waffle",
+      "Chicken Pot Pie",
+      "Navy Bean & Smoked Turkey",
+      "House Salad",
+      "Grilled Short Rib & Cheese",
+      "Start stop menu items carousel",
+      "Second Course",
+      "Third Course",
+      "Fourth Course",
+      "Banana Pudding  Waffles",
+      "Biscuits and Chicken Pot Pie Gravy",
+      "Vegan Chicken & Waffles",
+      "Watermelon Salad",
+      "Smothered Potatoes",
+      "Hot Links-2",
+      "Biscuit",
+      "Grits",
+      "Sweet Grits",
+      "Kids French Toast Sticks",
+      "Scrambled Eggs",
+      "Chicken Fried Oyster  Mushrooms",
+      "Honey Crack",
+      "Shrimp in Voodoo Sauce"
+    ],
+    "popular_dishes": [
+      "Facebook page",
+      "First Course",
+      "Peach Cobbler or Carmel Apple  French Toast",
+      "Beef Bacon 4 Slices",
+      "House Salad (VG)"
+    ]
+  },
+  {
+    "id": "REPRNjxIbhW53zOAF9Ga9A",
+    "name": "Ate O Clock",
+    "menu_url": null,
+    "location": {
+      "address": "2411 Chestnut St, Oakland, CA 94607",
+      "city": "Oakland",
+      "lat": 37.817286393625366,
+      "lng": -122.2823998
+    },
+    "cuisine_types": [
+      "Soul Food",
+      "Pop-Up Restaurants",
+      "Comfort Food"
+    ],
+    "price": null,
+    "avg_rating": 5.0,
+    "phone": "+15103977681",
+    "url": "https://www.yelp.com/biz/ate-o-clock-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "R0jjX7eCInDiWPAwQdGm5A",
+    "name": "Acre",
+    "menu_url": null,
+    "location": {
+      "address": "5655 College Ave, Oakland, CA 94618",
+      "city": "Oakland",
+      "lat": 37.84342469429355,
+      "lng": -122.2518736
+    },
+    "cuisine_types": [
+      "Pizza",
+      "Cocktail Bars",
+      "Italian"
+    ],
+    "price": null,
+    "avg_rating": 3.8,
+    "phone": "+15102503790",
+    "url": "https://www.yelp.com/biz/acre-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "YJhy12quTnSYXSKmZuXaPA",
+    "name": "Saltbreaker",
+    "menu_url": "https://www.saltbreakeralameda.com/menu/",
+    "location": {
+      "address": "2350 Saratoga St, Alameda, CA 94501",
+      "city": "Alameda",
+      "lat": 37.784311348763026,
+      "lng": -122.30215032433006
+    },
+    "cuisine_types": [
+      "Cocktail Bars",
+      "Desserts",
+      "Salad"
+    ],
+    "price": "$$",
+    "avg_rating": 4.5,
+    "phone": "+15102638232",
+    "url": "https://www.yelp.com/biz/saltbreaker-alameda?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Private Dining",
+      "Contact Us",
+      "The Yard",
+      "Reservations",
+      "Gallery",
+      "Areas We Serve",
+      "Littles",
+      "NO BOOZE COCKTAILS",
+      "2350 Saratoga St, Alameda CA 94501"
+    ],
+    "popular_dishes": [
+      "Private Dining",
+      "Contact Us",
+      "The Yard",
+      "Reservations",
+      "Gallery"
+    ]
+  },
+  {
+    "id": "D2wNghkuR1c9t0teBNEkeA",
+    "name": "Shewhat",
+    "menu_url": null,
+    "location": {
+      "address": "6101 Shattuck Ave, Oakland, CA 94609",
+      "city": "Oakland",
+      "lat": 37.84673451266816,
+      "lng": -122.26558895789805
+    },
+    "cuisine_types": [
+      "Ethiopian",
+      "Eritrean"
+    ],
+    "price": "$$",
+    "avg_rating": 4.9,
+    "phone": "+15102509533",
+    "url": "https://www.yelp.com/biz/shewhat-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "MSCdge818J5_UjOENeLw4Q",
+    "name": "The Saap Avenue",
+    "menu_url": "https://thesaapavenue.com/menu",
+    "location": {
+      "address": "4395 Piedmont Ave, Ste 2, Oakland, CA 94611",
+      "city": "Oakland",
+      "lat": 37.8302453,
+      "lng": -122.2478265
+    },
+    "cuisine_types": [
+      "Laotian",
+      "Cocktail Bars",
+      "Salad"
+    ],
+    "price": "$$",
+    "avg_rating": 4.3,
+    "phone": "+15103616498",
+    "url": "https://www.yelp.com/biz/the-saap-avenue-oakland-4?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "_ZesJAIG0c0YM5Hy8rSHIA",
+    "name": "Understory",
+    "menu_url": "https://understoryoakland.com/menu/",
+    "location": {
+      "address": "3340 International Blvd, Oakland, CA 94601",
+      "city": "Oakland",
+      "lat": 37.777074,
+      "lng": -122.223969
+    },
+    "cuisine_types": [
+      "Filipino",
+      "Coffee & Tea",
+      "Breakfast & Brunch"
+    ],
+    "price": "$$",
+    "avg_rating": 4.5,
+    "phone": "+15103153763",
+    "url": "https://www.yelp.com/biz/understory-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "No dish names are present in the provided menu text."
+    ],
+    "popular_dishes": [
+      "No dish names are present in the provided menu text."
+    ]
+  },
+  {
+    "id": "LHd3X9Of8ymOE5X3_fd0eA",
+    "name": "Moo Bong Ri Korean Restaurant",
+    "menu_url": "https://moobongri.menu11.com/telegraph/order",
+    "location": {
+      "address": "4390 Telegraph Ave, Ste K, Oakland, CA 94609",
+      "city": "Oakland",
+      "lat": 37.832094781567775,
+      "lng": -122.2630403
+    },
+    "cuisine_types": [
+      "Korean",
+      "Soup",
+      "Chicken Wings"
+    ],
+    "price": "$$",
+    "avg_rating": 4.5,
+    "phone": "+15106544606",
+    "url": "https://www.yelp.com/biz/moo-bong-ri-korean-restaurant-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "SMALL PLATESCategories",
+      "MOOBONGRI SAUSAGECategories",
+      "SAUSAGE SOUPSCategories",
+      "SOUPCategories",
+      "SPECIALCategories",
+      "SAUTEE / CASSEROLECategories",
+      "CHICKENCategoriesAll The Chicken allowed 25 to 30 Minutes",
+      "COLD NOODLESCategories",
+      "BEVERAGECategories",
+      "Hours",
+      "Map",
+      "Special Instructions:",
+      "Moo Bong Ri - Oakland",
+      "Connect with Us",
+      "High Contrast",
+      "Text",
+      "Others"
+    ],
+    "popular_dishes": [
+      "SMALL PLATESCategories",
+      "MOOBONGRI SAUSAGECategories",
+      "SAUSAGE SOUPSCategories",
+      "SOUPCategories",
+      "SPECIALCategories"
+    ]
+  },
+  {
+    "id": "8RP7xcay0r24_a8vq6pLig",
+    "name": "Joodooboo",
+    "menu_url": "https://www.joodooboo.co/s/order",
+    "location": {
+      "address": "4201 Market St, Oakland, CA 94608",
+      "city": "Oakland",
+      "lat": 37.83254,
+      "lng": -122.27374
+    },
+    "cuisine_types": [
+      "Korean",
+      "Delis"
+    ],
+    "price": "$$",
+    "avg_rating": 4.6,
+    "phone": "+15105001001",
+    "url": "https://www.yelp.com/biz/joodooboo-oakland-3?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "QRw-nB06c4ZdDpnZt3uR4A",
+    "name": "Southie",
+    "menu_url": "http://southieoakland.com/?page_id=5",
+    "location": {
+      "address": "6311 College Ave, Oakland, CA 94618",
+      "city": "Oakland",
+      "lat": 37.85058939889611,
+      "lng": -122.2526136374845
+    },
+    "cuisine_types": [
+      "Sandwiches",
+      "New American",
+      "Breakfast & Brunch"
+    ],
+    "price": "$$",
+    "avg_rating": 4.3,
+    "phone": "+15106540100",
+    "url": "https://www.yelp.com/biz/southie-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Open Menu",
+      "thank you so much                                             for your patience and support.",
+      "wishing you and your’s                                             a safe and happy holiday season.",
+      "southie"
+    ],
+    "popular_dishes": [
+      "Open Menu",
+      "thank you so much                                             for your patience and support.",
+      "wishing you and your’s                                             a safe and happy holiday season.",
+      "southie"
+    ]
+  },
+  {
+    "id": "lV3iAE_Eh7fUqqVmKaJShg",
+    "name": "The Salty Pearl",
+    "menu_url": "https://www.saltypearl.us/menus",
+    "location": {
+      "address": "550 2nd St, Oakland, CA 94607",
+      "city": "Oakland",
+      "lat": 37.79730756733172,
+      "lng": -122.2788407
+    },
+    "cuisine_types": [
+      "Seafood",
+      "Wine Bars",
+      "Beer Bar"
+    ],
+    "price": null,
+    "avg_rating": 4.6,
+    "phone": "",
+    "url": "https://www.yelp.com/biz/the-salty-pearl-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Open Menu",
+      "(no dish names found)"
+    ],
+    "popular_dishes": [
+      "Open Menu",
+      "(no dish names found)"
+    ]
+  },
+  {
+    "id": "3Um1V2HkTmrzutUkbU22WQ",
+    "name": "Yonsei Handrolls",
+    "menu_url": "https://www.yonseihandrolls.com/menu",
+    "location": {
+      "address": "1738 Telegraph Ave, Oakland, CA 94612",
+      "city": "Oakland",
+      "lat": 37.8073537,
+      "lng": -122.2699536
+    },
+    "cuisine_types": [
+      "Japanese"
+    ],
+    "price": null,
+    "avg_rating": 4.4,
+    "phone": "+15105886924",
+    "url": "https://www.yelp.com/biz/yonsei-handrolls-oakland-3?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Open Menu",
+      "Folder:",
+      "Back",
+      "Locations",
+      "Albany",
+      "Oakland",
+      "Menus",
+      "Albany Menu",
+      "Oakland Menu",
+      "Large Parties",
+      "Tomodachi Table",
+      "Events"
+    ],
+    "popular_dishes": [
+      "Open Menu",
+      "Folder:",
+      "Back",
+      "Locations",
+      "Albany"
+    ]
+  },
+  {
+    "id": "U8WtaJi0kAeOHn6CiB3cwQ",
+    "name": "Oken",
+    "menu_url": "https://static1.squarespace.com/static/674ccbd32502920e4f87fcf9/t/682cee599b2b9c4303a3d0ee/1747775065788/05.13.25.OKENmenuWEBSITE.pdf",
+    "location": {
+      "address": "6200 Claremont Ave, Oakland, CA 94618",
+      "city": "Oakland",
+      "lat": 37.849552,
+      "lng": -122.252014
+    },
+    "cuisine_types": [
+      "Japanese",
+      "Korean",
+      "Chinese"
+    ],
+    "price": null,
+    "avg_rating": 4.7,
+    "phone": "+15108444130",
+    "url": "https://www.yelp.com/biz/oken-oakland-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "ES3L73Pwlw64P3CxXNvd4Q",
+    "name": "Commis",
+    "menu_url": "http://www.commisrestaurant.com/menu",
+    "location": {
+      "address": "3859 Piedmont Ave, Oakland, CA 94611",
+      "city": "Oakland",
+      "lat": 37.8247190353393,
+      "lng": -122.254890761991
+    },
+    "cuisine_types": [
+      "New American"
+    ],
+    "price": "$$$$",
+    "avg_rating": 4.3,
+    "phone": "+15106533902",
+    "url": "https://www.yelp.com/biz/commis-oakland-3?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "CtBx4yk_QM8ClITgw94TPQ",
+    "name": "Burma Superstar",
+    "menu_url": "https://burmasuperstar.getbento.com/menu/",
+    "location": {
+      "address": "4721 Telegraph Ave, Oakland, CA 94609",
+      "city": "Oakland",
+      "lat": 37.836020140837,
+      "lng": -122.262829670553
+    },
+    "cuisine_types": [
+      "Burmese"
+    ],
+    "price": "$$",
+    "avg_rating": 4.1,
+    "phone": "+15106522900",
+    "url": "https://www.yelp.com/biz/burma-superstar-oakland-6?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Vegetable",
+      "Beef",
+      "Plain",
+      "Tofu",
+      "Bone-In Catfish",
+      "Glass",
+      "Small"
+    ],
+    "popular_dishes": [
+      "Vegetable",
+      "Beef",
+      "Plain",
+      "Tofu",
+      "Bone-In Catfish"
+    ]
+  },
+  {
+    "id": "nNk28Wnm9kgPAfqOIFugPQ",
+    "name": "Mägo",
+    "menu_url": "https://www.magorestaurant.com/menus/",
+    "location": {
+      "address": "3762 Piedmont Ave, Oakland, CA 94611",
+      "city": "Oakland",
+      "lat": 37.823307,
+      "lng": -122.256157
+    },
+    "cuisine_types": [
+      "Colombian"
+    ],
+    "price": "$$$$",
+    "avg_rating": 4.3,
+    "phone": "+15103447214",
+    "url": "https://www.yelp.com/biz/m%C3%A4go-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Cocktails- 18",
+      "December 10th, 2025",
+      "$90 (Tuesday-Thursday)",
+      "$125 (Friday-Saturday)",
+      "Email Signup",
+      "Reservations"
+    ],
+    "popular_dishes": [
+      "Cocktails- 18",
+      "December 10th, 2025",
+      "$90 (Tuesday-Thursday)",
+      "$125 (Friday-Saturday)",
+      "Email Signup"
+    ]
+  },
+  {
+    "id": "1aQn5XzAk_lVwxn997fphQ",
+    "name": "Mua",
+    "menu_url": null,
+    "location": {
+      "address": "2442 Webster St, Ste A, Oakland, CA 94612",
+      "city": "Oakland",
+      "lat": 37.8140830993652,
+      "lng": -122.264350891113
+    },
+    "cuisine_types": [
+      "Bars",
+      "New American",
+      "Chicken Wings"
+    ],
+    "price": "$$$",
+    "avg_rating": 3.9,
+    "phone": "+15102381100",
+    "url": "https://www.yelp.com/biz/mua-oakland-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "u0xH3J_XRPpOpr80L3fcCA",
+    "name": "À Côté",
+    "menu_url": "https://www.acoterestaurant.com/menus",
+    "location": {
+      "address": "5478 College Ave, Oakland, CA 94618",
+      "city": "Oakland",
+      "lat": 37.842131,
+      "lng": -122.251216
+    },
+    "cuisine_types": [
+      "French",
+      "Spanish",
+      "Italian"
+    ],
+    "price": "$$$",
+    "avg_rating": 3.9,
+    "phone": "+15106556469",
+    "url": "https://www.yelp.com/biz/%C3%A0-c%C3%B4t%C3%A9-oakland-6?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Open Menu",
+      "desSerT",
+      "wINe List",
+      "SnAcKs",
+      "Firsts",
+      "fRom The Wood OveN",
+      "Tuesday – Thursday5-7pm",
+      "(Available for Dine-in Customers only)",
+      "hOuse Cocktails",
+      "Zero Proof",
+      "Wine by The glaSs",
+      "Sparkling",
+      "White, Orange & Rosé",
+      "Red",
+      "Beer",
+      "Bottled",
+      "Draft",
+      "Non-Alcoholic",
+      "Dessert Cocktail",
+      "lAte hArvEst                                                                  aNd fOrtifiEd wiNe",
+      "AmarO + digEstif",
+      "address",
+      "phone number",
+      "email",
+      "hours",
+      "Follow Us!"
+    ],
+    "popular_dishes": [
+      "Open Menu",
+      "desSerT",
+      "wINe List",
+      "SnAcKs",
+      "Firsts"
+    ]
+  },
+  {
+    "id": "oEkQBVm3tmgDTe9zFGuWKA",
+    "name": "Saffron Kitchen",
+    "menu_url": "https://saffronk.com/menu/",
+    "location": {
+      "address": "5940 College Ave, Oakland, CA 94618",
+      "city": "Oakland",
+      "lat": 37.84798,
+      "lng": -122.25182
+    },
+    "cuisine_types": [
+      "Mediterranean",
+      "Afghan",
+      "Cocktail Bars"
+    ],
+    "price": "$$",
+    "avg_rating": 4.7,
+    "phone": "+15107359220",
+    "url": "https://www.yelp.com/biz/saffron-kitchen-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "ymvyjEu9mDnOFgcGPJQaNg",
+    "name": "Mesa Maguey",
+    "menu_url": "https://mesaoakland.com/our-menu/",
+    "location": {
+      "address": "4031 Broadway, Oakland, CA 94611",
+      "city": "Oakland",
+      "lat": 37.828176,
+      "lng": -122.256716
+    },
+    "cuisine_types": [
+      "Tacos",
+      "Cocktail Bars"
+    ],
+    "price": "$$",
+    "avg_rating": 4.6,
+    "phone": "+15108444192",
+    "url": "https://www.yelp.com/biz/mesa-maguey-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "You didn't provide the menu text. Please provide the menu text",
+      "and I'll extract the dish names for you."
+    ],
+    "popular_dishes": [
+      "You didn't provide the menu text. Please provide the menu text",
+      "and I'll extract the dish names for you."
+    ]
+  },
+  {
+    "id": "yeFgxW0T0qSlTLh1xCN1JA",
+    "name": "Doña",
+    "menu_url": "https://www.donaoakland.com/s/dona_menu_122819.pdf",
+    "location": {
+      "address": "3770 Piedmont Ave, Oakland, CA 94611",
+      "city": "Oakland",
+      "lat": 37.823460966401115,
+      "lng": -122.25596888690194
+    },
+    "cuisine_types": [
+      "Mexican"
+    ],
+    "price": "$$",
+    "avg_rating": 3.9,
+    "phone": "+15104500522",
+    "url": "https://www.yelp.com/biz/do%C3%B1a-oakland-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "zQyZqgq7XkZ9xl7S4BYmmg",
+    "name": "Black Forest Kitchen",
+    "menu_url": null,
+    "location": {
+      "address": "478 25th St, Oakland, CA 94612",
+      "city": "Oakland",
+      "lat": 37.81472127480889,
+      "lng": -122.2671832
+    },
+    "cuisine_types": [
+      "Pop-Up Restaurants",
+      "Fast Food"
+    ],
+    "price": null,
+    "avg_rating": 4.7,
+    "phone": "+15106803063",
+    "url": "https://www.yelp.com/biz/black-forest-kitchen-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "wu596lAazmcSqAxrSqCpkw",
+    "name": "Huangcheng Noodle House",
+    "menu_url": "https://huangcheng-noodle-house.cafe-agora.com/menu",
+    "location": {
+      "address": "911 Washington St, Oakland, CA 94607",
+      "city": "Oakland",
+      "lat": 37.80151958623863,
+      "lng": -122.27464153967904
+    },
+    "cuisine_types": [
+      "Chinese",
+      "Noodles"
+    ],
+    "price": "$$",
+    "avg_rating": 4.5,
+    "phone": "+17024813124",
+    "url": "https://www.yelp.com/biz/huangcheng-noodle-house-oakland-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "8ofxAA9xFkXO4t4__m4Bbw",
+    "name": "Okkon",
+    "menu_url": null,
+    "location": {
+      "address": "478 25th St, Oakland, CA 94612",
+      "city": "Oakland",
+      "lat": 37.814707,
+      "lng": -122.2671832
+    },
+    "cuisine_types": [
+      "Japanese",
+      "Pop-Up Restaurants"
+    ],
+    "price": "$$",
+    "avg_rating": 4.4,
+    "phone": "+15105900482",
+    "url": "https://www.yelp.com/biz/okkon-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [],
+    "popular_dishes": []
+  },
+  {
+    "id": "uaHOLdKTHx_GmsIlYN1pQg",
+    "name": "Belotti Bottega",
+    "menu_url": "http://belottirb.com/bottega/",
+    "location": {
+      "address": "4001B Piedmont Ave, Oakland, CA 94611",
+      "city": "Oakland",
+      "lat": 37.8258771,
+      "lng": -122.2533349
+    },
+    "cuisine_types": [
+      "Italian",
+      "Pasta Shops",
+      "Caterers"
+    ],
+    "price": "$$",
+    "avg_rating": 4.5,
+    "phone": "+15103507619",
+    "url": "https://www.yelp.com/biz/belotti-bottega-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Order Online",
+      "Catering",
+      "Fresh Pasta, Sauces, Spuntini",
+      "Eat In / Take Out",
+      "LOCATIONS",
+      "HOURS",
+      "Subscribe to our mailing list"
+    ],
+    "popular_dishes": [
+      "Order Online",
+      "Catering",
+      "Fresh Pasta, Sauces, Spuntini",
+      "Eat In / Take Out",
+      "LOCATIONS"
+    ]
+  },
+  {
+    "id": "x057NPwgCiBnxw4dMplh9w",
+    "name": "Sfizio",
+    "menu_url": "https://www.sfiziopasta.com/menu",
+    "location": {
+      "address": "6099 Claremont Ave, Oakland, CA 94618",
+      "city": "Oakland",
+      "lat": 37.84928540336103,
+      "lng": -122.25256811509048
+    },
+    "cuisine_types": [
+      "Italian"
+    ],
+    "price": "$$",
+    "avg_rating": 4.2,
+    "phone": "+15102298365",
+    "url": "https://www.yelp.com/biz/sfizio-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "There are no dish names in the provided menu text."
+    ],
+    "popular_dishes": [
+      "There are no dish names in the provided menu text."
+    ]
+  },
+  {
+    "id": "oQ2M416FwdHc9NRKDeCHng",
+    "name": "Portal Oakland",
+    "menu_url": "https://irp-cdn.multiscreensite.com/17ee78e1/files/uploaded/PortalBrunchLunchMenuWEB.pdf",
+    "location": {
+      "address": "1611 2nd Ave, Oakland, CA 94606",
+      "city": "Oakland",
+      "lat": 37.7993046,
+      "lng": -122.2546307
+    },
+    "cuisine_types": [
+      "New American",
+      "Breakfast & Brunch",
+      "Burgers"
+    ],
+    "price": "$$",
+    "avg_rating": 4.1,
+    "phone": "+15106637678",
+    "url": "https://www.yelp.com/biz/portal-oakland-oakland-2?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "PORTAL PLATE",
+      "BREAKFAST SANDWICH",
+      "CHILAQUILES",
+      "CORNED BEEF HASH",
+      "MINI BURGERS",
+      "KNOTS",
+      "CHICKEN WINGS",
+      "FRIED BRUSSELS SPROUTS",
+      "PORTAL BURGER",
+      "BEYOND BURGER",
+      "GARBAGE BREAD",
+      "BEYOND GARBAGE BREAD",
+      "MIXED GREENS",
+      "CLASSIC CAESAR",
+      "COBB",
+      "PORK BELL Y SALAD",
+      "STU FFED CHALLAH FRENCH TOAST",
+      "GCCB",
+      "PORTAL BENEDICT",
+      "THE COWBOY",
+      "TEMPEH SCRAMBLE",
+      "PLAIN",
+      "HERBED GARLIC",
+      "FRIE D CHICKEN",
+      "ROASTED VEGGIE",
+      "SPINAC H & CHEDDAR STUFFED ORGANIC TURKEY"
+    ],
+    "popular_dishes": [
+      "PORTAL PLATE",
+      "BREAKFAST SANDWICH",
+      "CHILAQUILES",
+      "CORNED BEEF HASH",
+      "MINI BURGERS"
+    ]
+  },
+  {
+    "id": "vZpuRwoCD4upNRP5CScjDQ",
+    "name": "Kiraku",
+    "menu_url": "https://kirakuberkeley.com/wp-content/uploads/2021/06/Food-Menu-Eng-1PAGE-6.23.2021.pdf",
+    "location": {
+      "address": "2566B Telegraph Ave, Berkeley, CA 94704",
+      "city": "Berkeley",
+      "lat": 37.863768063655826,
+      "lng": -122.2588919009019
+    },
+    "cuisine_types": [
+      "Tapas/Small Plates",
+      "Izakaya"
+    ],
+    "price": "$$",
+    "avg_rating": 4.4,
+    "phone": "+15108482758",
+    "url": "https://www.yelp.com/biz/kiraku-berkeley?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Tsumami Sampler",
+      "Black Pork Belly Skewer",
+      "Takana Pickles",
+      "Iburigakko",
+      "Takowasabi",
+      "Seaweed",
+      "Eihire Aburi",
+      "Spicy Jellyfish",
+      "Saba Shio",
+      "Aburi Mentaiko",
+      "Jumbo Squid",
+      "Karasumi",
+      "Baby Squid",
+      "Wrapped Salmon",
+      "Black Cod",
+      "Kiraku Salad",
+      "Corn Tempura",
+      "Agedashi Tofu",
+      "Omelet Salad",
+      "Butcher's Croquettes",
+      "Sashimi Salad",
+      "Nasu Miso",
+      "Organic Chicken Karaage",
+      "Rock Shrimp Tempura",
+      "Kimchi",
+      "Grilled Rice Ball",
+      "Edamame",
+      "Chazuke",
+      "Garlic Edamame",
+      "Moro Q"
+    ],
+    "popular_dishes": [
+      "Tsumami Sampler",
+      "Black Pork Belly Skewer",
+      "Takana Pickles",
+      "Iburigakko",
+      "Takowasabi"
+    ]
+  },
+  {
+    "id": "n2tVm6VGkRYqaK64cT4MoA",
+    "name": "Payakk",
+    "menu_url": "https://www.payakk.com/menu",
+    "location": {
+      "address": "5761 Thornhill Dr, Oakland, CA 94611",
+      "city": "Oakland",
+      "lat": 37.834943685541454,
+      "lng": -122.21218798181556
+    },
+    "cuisine_types": [
+      "Thai",
+      "Tapas/Small Plates"
+    ],
+    "price": null,
+    "avg_rating": 4.6,
+    "phone": "+15108444101",
+    "url": "https://www.yelp.com/biz/payakk-oakland?adjust_creative=-eRmXThHs7Pi5_LggNaIlw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=-eRmXThHs7Pi5_LggNaIlw",
+    "menu_items": [
+      "Open Menu",
+      "Login"
+    ],
+    "popular_dishes": [
+      "Open Menu",
+      "Login"
+    ]
+  }
+]

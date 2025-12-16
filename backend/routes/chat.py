@@ -949,10 +949,14 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
         # STEP 3: Search for restaurants that have this dish
         try:
             pc_index = get_pinecone_index()
-            # Search all restaurants for this dish
+            # Use dish embedding to find restaurants with similar dishes
+            model = get_embedding_model()
+            dish_embedding = model.encode(dish_query).tolist()
+            
+            # Search restaurants using dish embedding (semantic search)
             all_restaurants = pc_index.query(
-                vector=[0.0] * 384,  # Dummy vector to get all restaurants
-                top_k=100,
+                vector=dish_embedding,
+                top_k=500,  # Fetch more restaurants to ensure we find all with this dish
                 include_metadata=True,
                 namespace="restaurants"
             )

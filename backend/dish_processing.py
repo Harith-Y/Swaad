@@ -583,26 +583,54 @@ def check_location_match(user_location: str, restaurant_location: str) -> bool:
         print(f"[DEBUG] Fast path rejection: country mismatch (US vs non-US)")
         return False
     
-    # Fast path 3: Check for obvious mismatches (different well-known cities)
-    known_cities = [
-        'new york', 'brooklyn', 'manhattan', 'queens', 'bronx',
-        'san francisco', 'los angeles', 'chicago', 'boston',
-        'seattle', 'portland', 'austin', 'miami', 'atlanta'
-    ]
+    # Fast path 3: Regional grouping for nearby cities
+    # Some cities are close enough to be considered the same region
+    city_regions = {
+        # Bay Area
+        'san francisco': 'bay_area',
+        'san jose': 'bay_area',
+        'oakland': 'bay_area',
+        'berkeley': 'bay_area',
+        'palo alto': 'bay_area',
+        'mountain view': 'bay_area',
+        'sunnyvale': 'bay_area',
+        # NYC Metro
+        'new york': 'nyc_metro',
+        'brooklyn': 'nyc_metro',
+        'manhattan': 'nyc_metro',
+        'queens': 'nyc_metro',
+        'bronx': 'nyc_metro',
+        'staten island': 'nyc_metro',
+        # Other major cities (no regional grouping)
+        'los angeles': 'la',
+        'chicago': 'chicago',
+        'boston': 'boston',
+        'seattle': 'seattle',
+        'portland': 'portland',
+        'austin': 'austin',
+        'miami': 'miami',
+        'atlanta': 'atlanta'
+    }
     
-    user_city = None
-    restaurant_city = None
+    user_region = None
+    restaurant_region = None
     
-    for city in known_cities:
+    for city, region in city_regions.items():
         if city in u_loc:
-            user_city = city
+            user_region = region
         if city in r_loc:
-            restaurant_city = city
+            restaurant_region = region
     
-    # If both cities are identified and different, no match (skip Groq)
-    if user_city and restaurant_city and user_city != restaurant_city:
-        print(f"[DEBUG] Fast path rejection: {user_city} != {restaurant_city}")
-        return False
+    # If both regions are identified
+    if user_region and restaurant_region:
+        # Same region = match
+        if user_region == restaurant_region:
+            print(f"[DEBUG] Fast path match: same region ({user_region})")
+            return True
+        # Different regions = no match
+        else:
+            print(f"[DEBUG] Fast path rejection: {user_region} != {restaurant_region}")
+            return False
 
     # Fast path 4: State code mismatch (e.g., CA vs NY)
     # Extract state codes (2 letters after comma)
