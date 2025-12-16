@@ -16,8 +16,19 @@ function ChatInterface() {
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [loadingMessage, setLoadingMessage] = useState('')
   const messagesEndRef = useRef(null)
   const carouselRefs = useRef({})
+  
+  const loadingMessages = [
+    '🔍 Searching for the best restaurants for you...',
+    '🍽️ Analyzing dishes that match your taste...',
+    '⭐ Finding top-rated options in your area...',
+    '🎯 Matching your preferences with our database...',
+    '👨‍🍳 Discovering chef specials you\'ll love...',
+    '📍 Checking restaurants near you...',
+    '🌟 Curating personalized recommendations...'
+  ]
 
   const users = [
     { id: 'default', name: 'Default User - New York (Non-Veg, Shellfish Allergy)' },
@@ -58,6 +69,14 @@ function ChatInterface() {
     // Add user message
     setMessages(prev => [...prev, { role: 'user', content: userMessage, type: 'text' }])
     setLoading(true)
+    
+    // Rotate through loading messages
+    let messageIndex = 0
+    setLoadingMessage(loadingMessages[0])
+    const messageInterval = setInterval(() => {
+      messageIndex = (messageIndex + 1) % loadingMessages.length
+      setLoadingMessage(loadingMessages[messageIndex])
+    }, 2000) // Change message every 2 seconds
 
     try {
       const response = await axios.post(`${API_URL}/api/chat`, {
@@ -88,7 +107,9 @@ function ChatInterface() {
         type: 'text'
       }])
     } finally {
+      clearInterval(messageInterval)
       setLoading(false)
+      setLoadingMessage('')
     }
   }
 
@@ -158,7 +179,8 @@ function ChatInterface() {
         {loading && (
           <div className="message assistant">
             <div className="message-avatar">🤖</div>
-            <div className="message-content">
+            <div className="message-content loading-content">
+              <div className="loading-message">{loadingMessage}</div>
               <div className="typing-indicator">
                 <span></span>
                 <span></span>
