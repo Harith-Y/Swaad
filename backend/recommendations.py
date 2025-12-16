@@ -195,9 +195,17 @@ def filter_and_rank_recommendations(
         if allergies:
             menu_items_before_allergy = len(menu_items)
             menu_items = filter_dishes_by_allergy(menu_items, allergies)
-            if not menu_items:
+            
+            # Log allergy filtering results
+            if menu_items:
+                print(f"[DEBUG] Allergy filter for {meta.get('name')}: {len(menu_items)}/{menu_items_before_allergy} dishes safe (allergies: {allergies})")
+            else:
                 print(f"[DEBUG] Filtered out {meta.get('name')} - all {menu_items_before_allergy} dishes contain allergies: {allergies}")
                 continue
+            
+            # Double-check: if we had few items before and they were all filtered, be extra cautious
+            if menu_items_before_allergy <= 5 and len(menu_items) < menu_items_before_allergy:
+                print(f"[DEBUG] Warning: {meta.get('name')} had {menu_items_before_allergy} dishes, {len(menu_items)} passed allergy filter - check may be inconsistent")
         
         # Parse location and coordinates
         location = meta.get("location")

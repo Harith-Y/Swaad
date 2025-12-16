@@ -105,14 +105,34 @@ def allergy_filter(menu_items: List[str], allergies: List[str]) -> bool:
     """
     Check if menu items are safe for user allergies.
     Returns True if safe (no allergens found), False if allergens detected.
+    Uses expanded keyword lists for common allergens.
     """
     if not allergies:
         return True
 
+    # Expanded allergen keyword mapping
+    allergen_keywords = {
+        'shellfish': ['shellfish', 'shrimp', 'prawn', 'crab', 'lobster', 'clam', 'oyster', 
+                     'mussel', 'scallop', 'squid', 'calamari', 'octopus', 'crayfish', 'crawfish'],
+        'nuts': ['nut', 'peanut', 'almond', 'walnut', 'cashew', 'pistachio', 'pecan', 'hazelnut'],
+        'dairy': ['dairy', 'milk', 'cheese', 'cream', 'butter', 'yogurt', 'whey', 'casein'],
+        'eggs': ['egg'],
+        'gluten': ['gluten', 'wheat', 'bread', 'pasta', 'flour'],
+        'soy': ['soy', 'tofu', 'edamame', 'miso'],
+    }
+
     menu_text = " ".join(menu_items).lower()
+    
     for allergen in allergies:
-        if allergen.lower() in menu_text:
-            return False
+        allergen_lower = allergen.lower().strip()
+        
+        # Get expanded keyword list for this allergen
+        keywords = allergen_keywords.get(allergen_lower, [allergen_lower])
+        
+        # Check if any keyword matches
+        for keyword in keywords:
+            if keyword in menu_text:
+                return False
 
     return True
 
@@ -120,9 +140,22 @@ def allergy_filter(menu_items: List[str], allergies: List[str]) -> bool:
 def filter_dishes_by_allergy(dishes: List[str], allergies: List[str]) -> List[str]:
     """
     Filter dishes that are safe for the given allergies using Groq.
+    Uses caching to ensure consistent results across multiple calls.
     """
     if not dishes or not allergies:
         return dishes
+
+    # Create cache key for consistent results
+    cache_key = f"{','.join(sorted(dishes))}___{','.join(sorted(allergies))}"
+    
+    # Check if we've already filtered this exact combination
+    if not hasattr(filter_dishes_by_allergy, '_cache'):
+        filter_dishes_by_allergy._cache = {}
+    
+    if cache_key in filter_dishes_by_allergy._cache:
+        cached_result = filter_dishes_by_allergy._cache[cache_key]
+        print(f"[DEBUG] Using cached allergy filter result: {len(cached_result)}/{len(dishes)} dishes safe")
+        return cached_result
 
     try:
         client = get_groq_client()
@@ -139,11 +172,12 @@ def filter_dishes_by_allergy(dishes: List[str], allergies: List[str]) -> List[st
 
 Rules:
 1. Analyze the likely ingredients of each dish.
-2. If a dish likely contains an allergen (e.g. "Pesto" contains nuts/dairy, "Carbonara" contains egg/dairy/pork), exclude it.
-3. Be strict. Safety first.
-4. Return ONLY the numbers of the SAFE dishes.
-5. Return comma-separated numbers (e.g. "1,3,5").
-6. If none are safe, return "none".
+2. If a dish likely contains an allergen (e.g., "Pesto" contains nuts, "Calamari" is shellfish, "Shrimp" is shellfish), exclude it.
+3. For shellfish allergy: exclude all seafood dishes with shellfish (shrimp, crab, lobster, clams, oysters, mussels, squid, calamari, etc.)
+4. Be VERY strict. Safety first. When in doubt, exclude the dish.
+5. Return ONLY the numbers of the SAFE dishes.
+6. Return comma-separated numbers (e.g. "1,3,5").
+7. If none are safe, return "none".
 
 List:
 {dishes_text}
@@ -158,8 +192,10 @@ Response:"""
             )
 
             result = completion.choices[0].message.content.strip().lower()
+            print(f"[DEBUG] Groq allergy filter response for batch: {result}")
 
             if result == "none":
+                print(f"[DEBUG] Groq says none of {len(batch)} dishes are safe for {allergies}")
                 continue
 
             try:
@@ -167,18 +203,29 @@ Response:"""
                 for idx in indices:
                     if 0 <= idx < len(batch):
                         safe_dishes.append(batch[idx])
-            except Exception:
-                # Fallback
+                print(f"[DEBUG] Groq marked {len(indices)} dishes as safe from batch of {len(batch)}")
+            except Exception as parse_error:
+                print(f"[ERROR] Failed to parse Groq response '{result}': {parse_error}")
+                # Conservative fallback: use keyword filter but be strict
                 for d in batch:
                     if allergy_filter(d, allergies):
                         safe_dishes.append(d)
+                    else:
+                        print(f"[DEBUG] Keyword filter rejected: '{d}' (contains {allergies})")
 
+        # Cache the result for consistency
+        filter_dishes_by_allergy._cache[cache_key] = safe_dishes
+        print(f"[DEBUG] Allergy filter final result: {len(safe_dishes)}/{len(dishes)} dishes safe for {allergies}")
         return safe_dishes
 
     except Exception as e:
         print(f"[ERROR] Groq allergy filter failed: {e}")
-        # Fallback
-        return [d for d in dishes if allergy_filter(d, allergies)]
+        # Conservative fallback: use keyword filter
+        safe_dishes = [d for d in dishes if allergy_filter(d, allergies)]
+        # Cache even fallback results
+        filter_dishes_by_allergy._cache[cache_key] = safe_dishes
+        print(f"[DEBUG] Fallback allergy filter: {len(safe_dishes)}/{len(dishes)} dishes safe")
+        return safe_dishes
 
 
 def classify_dish_diet_with_groq(dish_name: str) -> str:

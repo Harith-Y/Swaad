@@ -1039,13 +1039,29 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
 
             # Search for restaurants that have this dish
             restaurants_with_dish = []
+            
+            # Extract key terms from dish query for flexible matching
+            # E.g., "thai curry" -> look for dishes containing "curry"
+            dish_query_lower = dish_query.lower().strip()
+            dish_keywords = set(dish_query_lower.split())
+            # Remove generic words
+            generic_words = {'thai', 'chinese', 'indian', 'japanese', 'vietnamese', 'korean', 
+                           'spicy', 'hot', 'mild', 'delicious', 'tasty', 'good', 'fresh',
+                           'the', 'a', 'an', 'with', 'and', 'or'}
+            dish_keywords = dish_keywords - generic_words
+            
+            print(f"[DEBUG] Searching for dishes with keywords: {dish_keywords}")
+            
             for m in matches:
                 meta = m.get("metadata") if isinstance(m, dict) else getattr(m, "metadata", {})
                 menu_items = meta.get("menu_items", [])
 
-                # Check if dish exists in menu
+                # Check if dish exists in menu using flexible matching
                 for menu_item in menu_items:
-                    if dish_query.lower() in menu_item.lower() or menu_item.lower() in dish_query.lower():
+                    menu_item_lower = menu_item.lower()
+                    
+                    # Strategy 1: Exact substring match (e.g., "pad thai" in "Chicken Pad Thai")
+                    if dish_query_lower in menu_item_lower or menu_item_lower in dish_query_lower:
                         restaurants_with_dish.append({
                             "name": meta.get("name"),
                             "rating": meta.get("avg_rating"),
@@ -1054,7 +1070,24 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
                             "dish": menu_item,
                             "metadata": meta
                         })
-                        break  # Only add restaurant once
+                        print(f"[DEBUG] Exact match found: '{menu_item}' contains '{dish_query}'")
+                        break
+                    
+                    # Strategy 2: Keyword matching (e.g., "curry" matches "Green Curry", "Massaman Curry")
+                    if dish_keywords:
+                        menu_words = set(menu_item_lower.split())
+                        # Check if any significant keyword matches
+                        if any(keyword in menu_words or keyword in menu_item_lower for keyword in dish_keywords):
+                            restaurants_with_dish.append({
+                                "name": meta.get("name"),
+                                "rating": meta.get("avg_rating"),
+                                "price_range": meta.get("price_range"),
+                                "cuisine_types": meta.get("cuisine_types", []),
+                                "dish": menu_item,
+                                "metadata": meta
+                            })
+                            print(f"[DEBUG] Keyword match found: '{menu_item}' matches keywords {dish_keywords}")
+                            break
 
             if not restaurants_with_dish:
                 # Dish not found in restaurants - but we have dish info from DB/Groq

@@ -16,6 +16,56 @@ from dish_processing import get_groq_client
 _taste_infer_cache: Dict[str, List[float]] = {}
 _ingredient_flavor_map: Optional[Dict[str, Dict]] = None
 
+# Hard-coded taste profiles for common dishes (especially Thai/Asian)
+# Format: [sweet, salty, sour, bitter, umami, spicy]
+COMMON_DISH_TASTE_PROFILES = {
+    # Thai dishes
+    "pad thai": [0.4, 0.5, 0.3, 0.0, 0.6, 0.2],
+    "pad see ew": [0.3, 0.6, 0.1, 0.0, 0.7, 0.2],
+    "pad kee mao": [0.2, 0.5, 0.1, 0.0, 0.6, 0.7],  # Drunken noodles - spicy
+    "drunken noodles": [0.2, 0.5, 0.1, 0.0, 0.6, 0.7],
+    "green curry": [0.3, 0.4, 0.2, 0.0, 0.5, 0.8],
+    "red curry": [0.3, 0.4, 0.1, 0.0, 0.5, 0.9],
+    "yellow curry": [0.4, 0.4, 0.1, 0.0, 0.5, 0.5],
+    "massaman curry": [0.5, 0.4, 0.1, 0.0, 0.6, 0.4],
+    "panang curry": [0.3, 0.4, 0.1, 0.0, 0.6, 0.7],
+    "tom yum": [0.1, 0.5, 0.8, 0.0, 0.6, 0.8],  # Hot and sour
+    "tom kha": [0.2, 0.4, 0.4, 0.0, 0.5, 0.3],  # Coconut soup
+    "thai curry": [0.3, 0.4, 0.2, 0.0, 0.5, 0.7],  # Generic curry
+    
+    # Vietnamese dishes
+    "pho": [0.2, 0.4, 0.1, 0.0, 0.8, 0.1],
+    "pho bo": [0.2, 0.4, 0.1, 0.0, 0.8, 0.1],
+    "pho ga": [0.2, 0.4, 0.1, 0.0, 0.7, 0.1],
+    "banh mi": [0.3, 0.5, 0.2, 0.0, 0.6, 0.3],
+    "spring rolls": [0.2, 0.3, 0.2, 0.0, 0.4, 0.1],
+    "vietnamese spring rolls": [0.2, 0.3, 0.2, 0.0, 0.4, 0.1],
+    
+    # Chinese dishes
+    "fried rice": [0.2, 0.5, 0.0, 0.0, 0.6, 0.2],
+    "lo mein": [0.2, 0.6, 0.1, 0.0, 0.7, 0.1],
+    "chow mein": [0.2, 0.6, 0.1, 0.0, 0.7, 0.2],
+    "kung pao": [0.3, 0.6, 0.2, 0.0, 0.6, 0.8],
+    "general tso": [0.6, 0.5, 0.2, 0.0, 0.5, 0.5],
+    "mapo tofu": [0.1, 0.6, 0.0, 0.0, 0.8, 0.9],
+    "dumplings": [0.1, 0.5, 0.1, 0.0, 0.6, 0.2],
+    "steamed dumplings": [0.1, 0.5, 0.1, 0.0, 0.6, 0.1],
+    
+    # Japanese dishes  
+    "ramen": [0.2, 0.6, 0.1, 0.0, 0.9, 0.3],
+    "sushi": [0.1, 0.4, 0.2, 0.0, 0.7, 0.0],
+    "teriyaki": [0.6, 0.5, 0.1, 0.0, 0.6, 0.1],
+    "tempura": [0.1, 0.3, 0.0, 0.0, 0.4, 0.0],
+    
+    # Indian dishes
+    "butter chicken": [0.3, 0.4, 0.2, 0.0, 0.5, 0.5],
+    "tikka masala": [0.3, 0.4, 0.2, 0.0, 0.6, 0.6],
+    "biryani": [0.2, 0.5, 0.1, 0.0, 0.6, 0.5],
+    "vindaloo": [0.2, 0.4, 0.3, 0.0, 0.5, 0.9],
+    "korma": [0.4, 0.4, 0.1, 0.0, 0.5, 0.3],
+    "saag paneer": [0.1, 0.5, 0.1, 0.0, 0.5, 0.4],
+}
+
 
 def load_ingredient_flavor_map() -> Dict[str, Dict]:
     """Load ingredient flavor data from CSV."""
@@ -57,8 +107,24 @@ def infer_taste_from_text(text: str) -> List[float]:
     if text in _taste_infer_cache:
         return _taste_infer_cache[text]
     
+    text_lower = text.lower().strip()
+    
+    # STEP 1: Check common dish profiles first (exact match)
+    if text_lower in COMMON_DISH_TASTE_PROFILES:
+        result = COMMON_DISH_TASTE_PROFILES[text_lower]
+        print(f"[DEBUG] Found taste profile for '{text}' in common dishes: {[round(x, 2) for x in result]}")
+        _taste_infer_cache[text] = result
+        return result
+    
+    # STEP 2: Check for partial matches in common dishes (e.g., "Spicy Pad Thai" -> "pad thai")
+    for dish_name, taste_profile in COMMON_DISH_TASTE_PROFILES.items():
+        if dish_name in text_lower or text_lower in dish_name:
+            print(f"[DEBUG] Partial match for '{text}' with '{dish_name}': {[round(x, 2) for x in taste_profile]}")
+            _taste_infer_cache[text] = taste_profile
+            return taste_profile
+    
+    # STEP 3: Fall back to ingredient-based matching
     flavor_map = load_ingredient_flavor_map()
-    text_lower = text.lower()
     
     matched_flavors = []
     matched_ingredients = []
