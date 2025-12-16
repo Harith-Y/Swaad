@@ -344,12 +344,12 @@ def filter_and_rank_recommendations(
         if dishes_with_taste:
             # Use pre-calculated taste vectors
             recommended_dishes = dish_recommendations_for_restaurant(
-                dishes_with_taste, user_taste_vec, diet_type, top_n=5
+                dishes_with_taste, user_taste_vec, diet_type, allergies=allergies, top_n=5
             )
         else:
             # Fallback to calculating on-the-fly
             recommended_dishes = dish_recommendations_for_restaurant(
-                menu_items, user_taste_vec, diet_type, top_n=5
+                menu_items, user_taste_vec, diet_type, allergies=allergies, top_n=5
             )
         
         # Build restaurant object
