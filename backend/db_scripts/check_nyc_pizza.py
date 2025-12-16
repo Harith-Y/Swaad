@@ -9,9 +9,13 @@ pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 index = pc.Index("menu-buddy")
 
 # Get all restaurants
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer("all-MiniLM-L6-v2")
+query_vec = model.encode("pizza restaurant").tolist()
+
 results = index.query(
-    vector=[0]*384,
-    top_k=500,
+    vector=query_vec,
+    top_k=10000,  # Increased to get all restaurants
     namespace="restaurants",
     include_metadata=True
 )

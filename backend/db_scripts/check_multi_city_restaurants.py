@@ -19,7 +19,7 @@ model = SentenceTransformer("all-MiniLM-L6-v2")
 query_vec = model.encode("restaurant").tolist()
 results = index.query(
     vector=query_vec,
-    top_k=1000,  # Get all
+    top_k=10000,  # Get all (increased limit)
     include_metadata=True,
     namespace="restaurants"
 )
