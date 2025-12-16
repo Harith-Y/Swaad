@@ -96,7 +96,29 @@ class RestaurantPopulator:
                     if rest_id and rest_id not in location_ids and rest_id not in self.seen_ids:
                         location_ids.add(rest_id)
                         self.seen_ids.add(rest_id)
-                        location_restaurants.append(rest)
+                        
+                        # Extract and normalize data from Yelp response
+                        location_data = rest.get("location", {})
+                        categories = rest.get("categories", [])
+                        
+                        normalized_rest = {
+                            "id": rest_id,
+                            "name": rest.get("name", ""),
+                            "avg_rating": rest.get("rating", 0.0),  # PRESERVE RATING from search
+                            "location": {
+                                "address": ", ".join(location_data.get("display_address", [])),
+                                "city": location_data.get("city", ""),
+                                "lat": rest.get("coordinates", {}).get("latitude"),
+                                "lng": rest.get("coordinates", {}).get("longitude")
+                            },
+                            "cuisine_types": [cat.get("title") for cat in categories],
+                            "price": rest.get("price"),
+                            "phone": rest.get("phone", ""),
+                            "url": rest.get("url", ""),
+                            "menu_url": rest.get("attributes", {}).get("menu_url") if rest.get("attributes") else None,
+                        }
+                        
+                        location_restaurants.append(normalized_rest)
                         new_count += 1
                 
                 print(f"   Found {len(results)} results, {new_count} new")
@@ -136,8 +158,12 @@ class RestaurantPopulator:
             try:
                 details = self.yelp_client.get_business_details(rest_id)
                 if details:
-                    rest["phone"] = details.get("phone")
+                    rest["phone"] = details.get("phone", rest.get("phone", ""))
                     rest["hours"] = details.get("hours")
+                    
+                    # Preserve or update rating
+                    if "avg_rating" not in rest or rest["avg_rating"] == 0.0:
+                        rest["avg_rating"] = details.get("rating", 0.0)
                     
                     # Get menu URL from attributes
                     menu_url = details.get("attributes", {}).get("menu_url")
