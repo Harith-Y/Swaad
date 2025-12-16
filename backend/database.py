@@ -76,6 +76,98 @@ USER_METADATA_MAP = {
             "diet_type": "mix",
         },
         "pending_query": None,
+    },
+    "dummy4": {
+        "location": "San Jose, CA",
+        "allergies": ["dairy"],
+        "favorite_dishes": [
+            {"name": "Carne Asada Tacos", "category": "mains"},
+            {"name": "BBQ Pulled Pork Sandwich", "category": "mains"},
+            {"name": "Churros", "category": "desserts"}
+        ],
+        "diet_type": "non-veg",
+        "flavor_profile": {
+            "appetizer": {"spicy": 0.7, "sweet": 0.2, "umami": 0.6, "sour": 0.4, "salty": 0.7},
+            "mains": {"spicy": 0.8, "sweet": 0.3, "umami": 0.7, "sour": 0.3, "salty": 0.8},
+            "desserts": {"spicy": 0.2, "sweet": 0.9, "umami": 0.1, "sour": 0.1, "salty": 0.2},
+            "allergies": ["dairy"],
+            "favorite_dishes": [
+                {"name": "Carne Asada Tacos", "category": "mains"},
+                {"name": "BBQ Pulled Pork Sandwich", "category": "mains"},
+                {"name": "Churros", "category": "desserts"}
+            ],
+            "diet_type": "non-veg",
+        },
+        "pending_query": None,
+    },
+    "dummy5": {
+        "location": "Oakland, CA",
+        "allergies": ["soy"],
+        "favorite_dishes": [
+            {"name": "Veggie Burger", "category": "mains"},
+            {"name": "Falafel Wrap", "category": "mains"},
+            {"name": "Vegan Brownie", "category": "desserts"}
+        ],
+        "diet_type": "veg",
+        "flavor_profile": {
+            "appetizer": {"spicy": 0.4, "sweet": 0.3, "umami": 0.5, "sour": 0.4, "salty": 0.5},
+            "mains": {"spicy": 0.5, "sweet": 0.3, "umami": 0.6, "sour": 0.4, "salty": 0.6},
+            "desserts": {"spicy": 0.1, "sweet": 0.8, "umami": 0.2, "sour": 0.2, "salty": 0.2},
+            "allergies": ["soy"],
+            "favorite_dishes": [
+                {"name": "Veggie Burger", "category": "mains"},
+                {"name": "Falafel Wrap", "category": "mains"},
+                {"name": "Vegan Brownie", "category": "desserts"}
+            ],
+            "diet_type": "veg",
+        },
+        "pending_query": None,
+    },
+    "dummy6": {
+        "location": "Brooklyn, NY",
+        "allergies": ["eggs"],
+        "favorite_dishes": [
+            {"name": "Margherita Pizza", "category": "mains"},
+            {"name": "Pasta Carbonara", "category": "mains"},
+            {"name": "Tiramisu", "category": "desserts"}
+        ],
+        "diet_type": "mix",
+        "flavor_profile": {
+            "appetizer": {"spicy": 0.3, "sweet": 0.2, "umami": 0.7, "sour": 0.3, "salty": 0.7},
+            "mains": {"spicy": 0.4, "sweet": 0.2, "umami": 0.8, "sour": 0.3, "salty": 0.8},
+            "desserts": {"spicy": 0.1, "sweet": 0.8, "umami": 0.2, "sour": 0.2, "salty": 0.2},
+            "allergies": ["eggs"],
+            "favorite_dishes": [
+                {"name": "Margherita Pizza", "category": "mains"},
+                {"name": "Pasta Carbonara", "category": "mains"},
+                {"name": "Tiramisu", "category": "desserts"}
+            ],
+            "diet_type": "mix",
+        },
+        "pending_query": None,
+    },
+    "dummy7": {
+        "location": "Manhattan, NY",
+        "allergies": ["peanuts"],
+        "favorite_dishes": [
+            {"name": "Ribeye Steak", "category": "mains"},
+            {"name": "Salmon Sashimi", "category": "appetizer"},
+            {"name": "Crème Brûlée", "category": "desserts"}
+        ],
+        "diet_type": "non-veg",
+        "flavor_profile": {
+            "appetizer": {"spicy": 0.3, "sweet": 0.2, "umami": 0.8, "sour": 0.2, "salty": 0.6},
+            "mains": {"spicy": 0.4, "sweet": 0.2, "umami": 0.9, "sour": 0.2, "salty": 0.7},
+            "desserts": {"spicy": 0.1, "sweet": 0.9, "umami": 0.3, "sour": 0.1, "salty": 0.2},
+            "allergies": ["peanuts"],
+            "favorite_dishes": [
+                {"name": "Ribeye Steak", "category": "mains"},
+                {"name": "Salmon Sashimi", "category": "appetizer"},
+                {"name": "Crème Brûlée", "category": "desserts"}
+            ],
+            "diet_type": "non-veg",
+        },
+        "pending_query": None,
     }
 }
 

@@ -20,9 +20,13 @@ function ChatInterface() {
   const carouselRefs = useRef({})
 
   const users = [
-    { id: 'default', name: 'Default User (Non-Veg, Shellfish Allergy)' },
-    { id: 'dummy2', name: 'User 2 (Veg, Nuts Allergy)' },
-    { id: 'dummy3', name: 'User 3 (Mix, Gluten Allergy)' }
+    { id: 'default', name: 'Default User - New York (Non-Veg, Shellfish Allergy)' },
+    { id: 'dummy2', name: 'User 2 - Chicago (Veg, Nuts Allergy)' },
+    { id: 'dummy3', name: 'User 3 - San Francisco (Mix, Gluten Allergy)' },
+    { id: 'dummy4', name: 'User 4 - San Jose (Non-Veg, Dairy Allergy)' },
+    { id: 'dummy5', name: 'User 5 - Oakland (Veg, Soy Allergy)' },
+    { id: 'dummy6', name: 'User 6 - Brooklyn (Mix, Egg Allergy)' },
+    { id: 'dummy7', name: 'User 7 - Manhattan (Non-Veg, Peanut Allergy)' }
   ]
 
   const scrollToBottom = () => {
