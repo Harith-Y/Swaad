@@ -124,6 +124,55 @@ def extract_cuisine_from_query(query: str) -> Optional[str]:
     return None
 
 
+def build_cuisine_filter(cuisine_type: str) -> Optional[Dict[str, Any]]:
+    """
+    Build Pinecone metadata filter for cuisine type.
+    
+    Maps detected cuisine to actual cuisine_types values in Pinecone.
+    Uses case-insensitive matching.
+    
+    Args:
+        cuisine_type: Detected cuisine (e.g., 'thai', 'italian')
+    
+    Returns:
+        Pinecone filter dict or None
+    """
+    if not cuisine_type:
+        return None
+    
+    # Map cuisine type to Yelp cuisine_types values (case-insensitive)
+    # Yelp uses title case like "Thai", "Italian", "Chinese"
+    cuisine_mapping = {
+        'thai': ['Thai'],
+        'italian': ['Italian', 'Pizza'],
+        'chinese': ['Chinese'],
+        'japanese': ['Japanese', 'Sushi Bars', 'Ramen'],
+        'indian': ['Indian'],
+        'mexican': ['Mexican'],
+        'korean': ['Korean'],
+        'vietnamese': ['Vietnamese'],
+        'american': ['American (Traditional)', 'American (New)', 'Burgers'],
+        'french': ['French'],
+        'greek': ['Greek'],
+        'mediterranean': ['Mediterranean'],
+        'middle eastern': ['Middle Eastern', 'Falafel'],
+        'spanish': ['Spanish'],
+    }
+    
+    cuisine_values = cuisine_mapping.get(cuisine_type.lower())
+    if not cuisine_values:
+        return None
+    
+    # Build $in filter for cuisine_types array field
+    # This will match if ANY of the values appear in the cuisine_types array
+    filter_dict = {
+        "cuisine_types": {"$in": cuisine_values}
+    }
+    
+    print(f"[DEBUG] Built Pinecone filter for {cuisine_type}: {filter_dict}")
+    return filter_dict
+
+
 def extract_diet_from_query(query: str) -> Optional[str]:
     """
     Extract diet preference from the query text.
@@ -214,25 +263,35 @@ def extract_diet_from_query(query: str) -> Optional[str]:
 
         for dish in detected_dishes:
             classification = classify_dish_diet_with_groq(dish)
+            print(f"[DEBUG] Classified '{dish}' as '{classification}'")
             if classification == "veg":
                 veg_count += 1
             else:
                 nonveg_count += 1
 
-        # If all dishes are veg, return veg
-        if veg_count > 0 and nonveg_count == 0:
-            print(f"[DEBUG] All detected dishes are vegetarian -> diet: veg")
-            return "veg"
-
-        # If all dishes are non-veg, return non-veg
+        # IMPORTANT: Only override user's diet preference if dishes are EXPLICITLY non-veg
+        # (i.e., contain meat/seafood keywords). Do NOT override for ambiguous dishes.
+        # Ambiguous examples: "curry", "biryani", "noodles" - could be veg or non-veg
+        
+        # If all dishes are non-veg, return non-veg (override to non-veg is safe)
         if nonveg_count > 0 and veg_count == 0:
             print(f"[DEBUG] All detected dishes are non-vegetarian -> diet: non-veg")
             return "non-veg"
 
+        # If all dishes are veg but ambiguous (like "curry"), DON'T override
+        # Only override to veg if user explicitly said "veg" or dishes are clearly veg-specific
+        # For ambiguous cases, use user profile default (don't return "veg")
+        
         # If mixed, return None (use user profile default)
         if veg_count > 0 and nonveg_count > 0:
             print(f"[DEBUG] Mixed veg/non-veg dishes detected -> using user profile default")
             return None
+        
+        # If only veg dishes detected, DON'T override user's preference
+        # User might be non-veg but asking for a dish that COULD be made non-veg
+        # e.g., "thai curry" could be chicken curry for a non-veg user
+        print(f"[DEBUG] Ambiguous dish classification (detected as veg but not explicit) -> using user profile default")
+        return None
 
     return None
 
@@ -841,13 +900,21 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
         # Create embedding for restaurant name
         restaurant_embedding = model.encode(restaurant_name_query).tolist()
 
+        # Build cuisine filter if detected
+        cuisine_filter = build_cuisine_filter(query_cuisine) if query_cuisine else None
+
         # Search in restaurants namespace
-        result = pc_index.query(
-            vector=restaurant_embedding,
-            top_k=5,
-            include_metadata=True,
-            namespace="restaurants"
-        )
+        query_params = {
+            "vector": restaurant_embedding,
+            "top_k": 5,
+            "include_metadata": True,
+            "namespace": "restaurants"
+        }
+        if cuisine_filter:
+            query_params["filter"] = cuisine_filter
+            print(f"[DEBUG] Applying cuisine filter to restaurant search: {cuisine_filter}")
+        
+        result = pc_index.query(**query_params)
 
         matches = result.get("matches", []) if isinstance(result, dict) else getattr(result, "matches", [])
 
@@ -953,13 +1020,21 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
             model = get_embedding_model()
             dish_embedding = model.encode(dish_query).tolist()
             
+            # Build cuisine filter if detected
+            cuisine_filter = build_cuisine_filter(query_cuisine) if query_cuisine else None
+            
             # Search restaurants using dish embedding (semantic search)
-            all_restaurants = pc_index.query(
-                vector=dish_embedding,
-                top_k=500,  # Fetch more restaurants to ensure we find all with this dish
-                include_metadata=True,
-                namespace="restaurants"
-            )
+            query_params = {
+                "vector": dish_embedding,
+                "top_k": 500,  # Fetch more restaurants to ensure we find all with this dish
+                "include_metadata": True,
+                "namespace": "restaurants"
+            }
+            if cuisine_filter:
+                query_params["filter"] = cuisine_filter
+                print(f"[DEBUG] Applying cuisine filter to dish search: {cuisine_filter}")
+            
+            all_restaurants = pc_index.query(**query_params)
             matches = all_restaurants.get("matches", []) if isinstance(all_restaurants, dict) else getattr(all_restaurants, "matches", [])
 
             # Search for restaurants that have this dish
@@ -1215,15 +1290,35 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
         # Use location from query if available, otherwise use fallback_location
         location_to_filter = query_location if query_location else fallback_location
         
+        # Build cuisine filter if detected
+        cuisine_filter = build_cuisine_filter(query_cuisine) if query_cuisine else None
+        
         # Increase top_k significantly when location filter is active
         if location_to_filter:
             top_k = max(final_max_results * 10, 50)  # Fetch 10x more to account for location filtering
             print(f"[DEBUG] Location filter active, fetching top_k={top_k} (will filter to {final_max_results})")
         else:
             top_k = max(final_max_results, 10)
+        
+        # Adjust top_k if cuisine filter is applied (fewer restaurants will match)
+        if cuisine_filter:
+            top_k = max(top_k, 100)  # Ensure we get enough cuisine-specific results
+            print(f"[DEBUG] Cuisine filter active, adjusted top_k={top_k}")
             
         print(f"[DEBUG] Querying Pinecone with top_k={top_k}")
-        query_res = pc_index.query(vector=qvec, top_k=top_k, include_metadata=True, namespace="restaurants")
+        
+        # Build query parameters
+        query_params = {
+            "vector": qvec,
+            "top_k": top_k,
+            "include_metadata": True,
+            "namespace": "restaurants"
+        }
+        if cuisine_filter:
+            query_params["filter"] = cuisine_filter
+            print(f"[DEBUG] Applying Pinecone cuisine filter: {cuisine_filter}")
+        
+        query_res = pc_index.query(**query_params)
         matches = query_res.get("matches", []) if isinstance(query_res, dict) else getattr(query_res, "matches", [])
         print(f"[DEBUG] Pinecone returned {len(matches)} matches")
         
