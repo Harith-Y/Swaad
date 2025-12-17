@@ -579,6 +579,108 @@ Response (only "yes" or "no"):"""
         return True
 
 
+def get_metro_region_cities(user_location: str) -> list:
+    """
+    Get list of cities in the same metro region for Pinecone filtering.
+    Returns a list of city names to include in the filter.
+    """
+    if not user_location:
+        return []
+    
+    u_loc = user_location.lower().strip()
+    
+    # Metro region mappings - all cities in each region
+    metro_regions = {
+        'bay_area': [
+            'San Francisco', 'San Jose', 'Oakland', 'Berkeley', 'Palo Alto', 
+            'Mountain View', 'Sunnyvale', 'Santa Clara', 'Fremont', 'Hayward',
+            'Alameda', 'San Leandro', 'Milpitas', 'Cupertino', 'Campbell',
+            'Los Gatos', 'Saratoga', 'Los Altos', 'Menlo Park', 'Redwood City',
+            'San Carlos', 'Burlingame', 'San Bruno', 'Daly City', 'Pacifica',
+            'San Mateo', 'Foster City', 'Belmont', 'San Rafael', 'Novato',
+            'Sausalito', 'Mill Valley', 'Tiburon', 'Walnut Creek', 'Concord',
+            'Pleasant Hill', 'Lafayette', 'Orinda', 'Moraga', 'Dublin',
+            'Pleasanton', 'Livermore', 'San Ramon', 'Danville', 'Albany',
+            'El Cerrito', 'Richmond', 'San Pablo', 'Emeryville', 'Piedmont',
+            'Union City', 'Newark', 'Castro Valley', 'Gilroy', 'Morgan Hill',
+            'Santa Cruz', 'Capitola', 'Aptos', 'Scotts Valley', 'Soquel',
+            'Watsonville', 'Half Moon Bay', 'Woodside'
+        ],
+        'nyc_metro': [
+            'New York', 'Brooklyn', 'Manhattan', 'Queens', 'Bronx', 'Staten Island',
+            'Astoria', 'Long Island City', 'Flushing', 'Forest Hills', 'Jamaica',
+            'Elmhurst', 'Jackson Heights', 'Williamsburg', 'DUMBO', 'Greenpoint',
+            'Park Slope', 'Carroll Gardens', 'Cobble Hill', 'Boerum Hill',
+            'Fort Greene', 'Clinton Hill', 'Prospect Heights', 'Crown Heights',
+            'Bushwick', 'Bedford-Stuyvesant', 'East New York', 'Canarsie',
+            'Bay Ridge', 'Sunset Park', 'Borough Park', 'Bensonhurst',
+            'Coney Island', 'Brighton Beach', 'Sheepshead Bay', 'Midwood',
+            'Flatbush', 'East Flatbush', 'Brownsville', 'Howard Beach',
+            'Ozone Park', 'Richmond Hill', 'Woodhaven', 'Ridgewood',
+            'Maspeth', 'Middle Village', 'Rego Park', 'Corona', 'Bayside',
+            'Whitestone', 'College Point', 'Little Neck', 'Glen oaks',
+            'Bellerose', 'Rosedale', 'Springfield Gardens', 'South Ozone Park',
+            'Sunnyside', 'Woodside', 'Jersey City', 'Hoboken', 'Weehawken',
+            'North Bergen', 'West New York', 'Guttenberg', 'Secaucus',
+            'Bayonne', 'Union City', 'Edgewater', 'Fort Lee', 'Cliffside Park',
+            'Palisades Park', 'Ridgefield', 'Englewood', 'Teaneck', 'Hackensack',
+            'Great Neck', 'Manhasset', 'Port Washington', 'Roslyn', 'Glen Cove',
+            'Westbury', 'Garden City', 'Mineola', 'Hempstead', 'Levittown',
+            'Hicksville', 'Plainview', 'Syosset', 'Jericho', 'Woodbury',
+            'Massapequa', 'Seaford', 'Wantagh', 'Bellmore', 'Merrick',
+            'Freeport', 'Rockville Centre', 'Lynbrook', 'Valley Stream',
+            'Elmont', 'Floral Park', 'New Hyde Park', 'Nutley', 'Rahway',
+            'Woodbridge', 'New York City'
+        ],
+        'chicago_metro': [
+            'Chicago', 'Evanston', 'Skokie', 'Wilmette', 'Winnetka', 'Glencoe',
+            'Highland Park', 'Lake Forest', 'Deerfield', 'Northbrook', 'Glenview',
+            'Morton Grove', 'Niles', 'Park Ridge', 'Des Plaines', 'Mount Prospect',
+            'Arlington Heights', 'Buffalo Grove', 'Wheeling', 'Palatine',
+            'Schaumburg', 'Hoffman Estates', 'Elk Grove Village', 'Rosemont',
+            'Oak Park', 'River Forest', 'Forest Park', 'Berwyn', 'Cicero',
+            'Oak Lawn', 'Burbank', 'Bridgeview', 'Palos Hills', 'Palos Heights',
+            'Orland Park', 'Tinley Park', 'Oak Forest', 'Country Club Hills',
+            'Flossmoor', 'Homewood', 'Matteson', 'Park Forest', 'Richton Park',
+            'Elmhurst', 'Villa Park', 'Lombard', 'Glen Ellyn', 'Wheaton',
+            'Carol Stream', 'Glendale Heights', 'Addison', 'Wood Dale',
+            'Bensenville', 'Itasca', 'Roselle', 'Bloomingdale', 'Downers Grove',
+            'Westmont', 'Clarendon Hills', 'Hinsdale', 'Western Springs',
+            'La Grange', 'La Grange Park', 'Brookfield', 'Riverside',
+            'Lyons', 'Summit', 'Bedford Park', 'Burr Ridge', 'Willowbrook',
+            'Darien', 'Woodridge', 'Bolingbrook', 'Romeoville', 'Lemont',
+            'Naperville', 'Lisle', 'Aurora', 'Oswego', 'Plainfield', 'Joliet',
+            'Lockport', 'Shorewood', 'Minooka', 'Channahon', 'Elwood',
+            'Blue Island', 'Calumet City', 'Dolton', 'Harvey', 'South Holland',
+            'Lansing', 'Munster', 'Hammond', 'East Chicago', 'Whiting',
+            'Highland', 'Griffith', 'Schererville', 'Dyer', 'St. John',
+            'Cedar Lake', 'Crown Point', 'Merrillville', 'Hobart', 'Gary',
+            'Schiller Park', 'Elmwood Park', 'Oak Brook'
+        ]
+    }
+    
+    # Check which metro region the user location belongs to
+    for city_key in ['san francisco', 'oakland', 'berkeley', 'san jose', 'palo alto']:
+        if city_key in u_loc:
+            return metro_regions['bay_area']
+    
+    for city_key in ['new york', 'brooklyn', 'manhattan', 'queens', 'bronx', 'staten island', 'nyc']:
+        if city_key in u_loc:
+            return metro_regions['nyc_metro']
+    
+    if 'chicago' in u_loc:
+        return metro_regions['chicago_metro']
+    
+    # For non-metro cities, try to extract the city name and return just that
+    # Split by comma and take first part (usually city name)
+    city_name = u_loc.split(',')[0].strip()
+    if city_name:
+        # Title case for matching Pinecone metadata
+        return [city_name.title()]
+    
+    return []
+
+
 def check_location_match(user_location: str, restaurant_location: str) -> bool:
     """
     Check if user location matches restaurant location using Groq.

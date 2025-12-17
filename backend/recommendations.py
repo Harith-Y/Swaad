@@ -157,10 +157,15 @@ def filter_and_rank_recommendations(
     query_text: Optional[str] = None,
     location_filter: Optional[str] = None,
     cuisine_filter: Optional[str] = None,
-    query_ingredients: Optional[List[str]] = None
+    query_ingredients: Optional[List[str]] = None,
+    skip_location_check: bool = False  # Set to True when Pinecone filtered by location
 ) -> List[Dict]:
     """
     Filter and rank restaurant recommendations from Pinecone matches.
+    
+    Args:
+        skip_location_check: If True, skip post-query location filtering
+                           (use when location was already filtered at Pinecone level)
     """
     from dish_processing import check_location_match
     
@@ -219,7 +224,8 @@ def filter_and_rank_recommendations(
                     location = loc_json
         
         # Filter by location if provided (FIRST PRIORITY)
-        if location_filter and location:
+        # Skip if location was already filtered at Pinecone level
+        if location_filter and location and not skip_location_check:
             loc_str = location
             if isinstance(location, dict):
                 # Try to extract standard fields or join all values

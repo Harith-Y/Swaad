@@ -173,6 +173,64 @@ def build_cuisine_filter(cuisine_type: str) -> Optional[Dict[str, Any]]:
     return filter_dict
 
 
+def build_location_filter(user_location: str) -> Optional[Dict[str, Any]]:
+    """
+    Build Pinecone metadata filter for location/city.
+    
+    Args:
+        user_location: User's location string (e.g., "San Francisco", "New York")
+        
+    Returns:
+        Pinecone filter dict with $in operator for cities in the same metro region
+    """
+    if not user_location:
+        return None
+    
+    from dish_processing import get_metro_region_cities
+    
+    # Get list of cities in the same metro region
+    cities = get_metro_region_cities(user_location)
+    
+    if not cities:
+        print(f"[DEBUG] No metro region found for location: {user_location}")
+        return None
+    
+    # Pinecone metadata filter format: {"field": {"$in": [values]}}
+    filter_dict = {
+        "city": {"$in": cities}
+    }
+    
+    print(f"[DEBUG] Built location filter for '{user_location}': {len(cities)} cities in region")
+    return filter_dict
+
+
+def combine_filters(*filters) -> Optional[Dict[str, Any]]:
+    """
+    Combine multiple Pinecone filters using $and operator.
+    
+    Args:
+        *filters: Variable number of filter dicts
+        
+    Returns:
+        Combined filter dict with $and operator, or None if no filters
+    """
+    # Filter out None values
+    valid_filters = [f for f in filters if f is not None]
+    
+    if not valid_filters:
+        return None
+    if len(valid_filters) == 1:
+        return valid_filters[0]
+    
+    # Combine using $and
+    combined = {
+        "$and": valid_filters
+    }
+    
+    print(f"[DEBUG] Combined {len(valid_filters)} filters")
+    return combined
+
+
 def extract_diet_from_query(query: str) -> Optional[str]:
     """
     Extract diet preference from the query text.
@@ -900,8 +958,10 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
         # Create embedding for restaurant name
         restaurant_embedding = model.encode(restaurant_name_query).tolist()
 
-        # Build cuisine filter if detected
+        # Build filters
         cuisine_filter = build_cuisine_filter(query_cuisine) if query_cuisine else None
+        location_filter = build_location_filter(fallback_location) if fallback_location else None
+        combined_filter = combine_filters(cuisine_filter, location_filter)
 
         # Search in restaurants namespace
         query_params = {
@@ -910,9 +970,9 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
             "include_metadata": True,
             "namespace": "restaurants"
         }
-        if cuisine_filter:
-            query_params["filter"] = cuisine_filter
-            print(f"[DEBUG] Applying cuisine filter to restaurant search: {cuisine_filter}")
+        if combined_filter:
+            query_params["filter"] = combined_filter
+            print(f"[DEBUG] Applying combined filter to restaurant search: {combined_filter}")
         
         result = pc_index.query(**query_params)
 
@@ -1020,8 +1080,10 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
             model = get_embedding_model()
             dish_embedding = model.encode(dish_query).tolist()
             
-            # Build cuisine filter if detected
+            # Build filters
             cuisine_filter = build_cuisine_filter(query_cuisine) if query_cuisine else None
+            location_filter = build_location_filter(fallback_location) if fallback_location else None
+            combined_filter = combine_filters(cuisine_filter, location_filter)
             
             # Search restaurants using dish embedding (semantic search)
             query_params = {
@@ -1030,9 +1092,9 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
                 "include_metadata": True,
                 "namespace": "restaurants"
             }
-            if cuisine_filter:
-                query_params["filter"] = cuisine_filter
-                print(f"[DEBUG] Applying cuisine filter to dish search: {cuisine_filter}")
+            if combined_filter:
+                query_params["filter"] = combined_filter
+                print(f"[DEBUG] Applying combined filter to dish search: {combined_filter}")
             
             all_restaurants = pc_index.query(**query_params)
             matches = all_restaurants.get("matches", []) if isinstance(all_restaurants, dict) else getattr(all_restaurants, "matches", [])
@@ -1105,40 +1167,7 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
                 dish_not_found_name = dish_query
             else:
                 # Dish found - return restaurants that have it
-                print(f"[DEBUG] Found '{dish_query}' at {len(restaurants_with_dish)} restaurants")
-
-                # Apply location filtering
-                from dish_processing import check_location_match
-                if fallback_location:
-                    print(f"[DEBUG] Applying location filter to dish results: {fallback_location}")
-                    filtered_restaurants = []
-                    for rest in restaurants_with_dish:
-                        loc_json = rest["metadata"].get("location_json", "{}")
-                        try:
-                            import json
-                            location = json.loads(loc_json) if isinstance(loc_json, str) else loc_json
-                            loc_str = location
-                            if isinstance(location, dict):
-                                parts = []
-                                for key in ["address", "city", "state", "zip_code", "country"]:
-                                    if key in location and location[key]:
-                                        parts.append(str(location[key]))
-                                if parts:
-                                    loc_str = ", ".join(parts)
-                                else:
-                                    loc_str = ", ".join([str(v) for v in location.values() if isinstance(v, (str, int))])
-                            
-                            if check_location_match(fallback_location, str(loc_str)):
-                                print(f"[DEBUG] Location match: {rest['name']} in {loc_str}")
-                                filtered_restaurants.append(rest)
-                            else:
-                                print(f"[DEBUG] Filtered out {rest['name']} - wrong location: {loc_str}")
-                        except Exception as e:
-                            print(f"[DEBUG] Error checking location for {rest['name']}: {e}")
-                            continue
-                    
-                    restaurants_with_dish = filtered_restaurants
-                    print(f"[DEBUG] After location filter: {len(restaurants_with_dish)} restaurants")
+                print(f"[DEBUG] Found '{dish_query}' at {len(restaurants_with_dish)} restaurants (already filtered by location at Pinecone level)")
 
                 # Check if location filtering removed all results
                 if len(restaurants_with_dish) == 0:
@@ -1243,7 +1272,21 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
             pc_index = get_pinecone_index()
             # Search for the restaurant
             restaurant_vec = embed_text(restaurant_name)
-            query_res = pc_index.query(vector=restaurant_vec, top_k=20, include_metadata=True, namespace="restaurants")
+            
+            # Build location filter
+            location_filter = build_location_filter(fallback_location) if fallback_location else None
+            
+            query_params = {
+                "vector": restaurant_vec,
+                "top_k": 20,
+                "include_metadata": True,
+                "namespace": "restaurants"
+            }
+            if location_filter:
+                query_params["filter"] = location_filter
+                print(f"[DEBUG] Applying location filter to specific restaurant search")
+            
+            query_res = pc_index.query(**query_params)
             matches = query_res.get("matches", []) if isinstance(query_res, dict) else getattr(query_res, "matches", [])
 
             # Find the matching restaurant
@@ -1344,13 +1387,19 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
         # Use location from query if available, otherwise use fallback_location
         location_to_filter = query_location if query_location else fallback_location
         
-        # Build cuisine filter if detected
+        # Build filters
         cuisine_filter = build_cuisine_filter(query_cuisine) if query_cuisine else None
+        location_filter = build_location_filter(location_to_filter) if location_to_filter else None
+        combined_filter = combine_filters(cuisine_filter, location_filter)
         
-        # Increase top_k significantly when location filter is active
-        if location_to_filter:
-            top_k = max(final_max_results * 10, 50)  # Fetch 10x more to account for location filtering
-            print(f"[DEBUG] Location filter active, fetching top_k={top_k} (will filter to {final_max_results})")
+        # If we have Pinecone location filter, we can use a smaller top_k since filtering happens at index level
+        if location_filter:
+            top_k = max(final_max_results * 2, 30)  # 2x more for buffer (Pinecone filters before returning)
+            print(f"[DEBUG] Location filter active (Pinecone-level), fetching top_k={top_k}")
+        elif location_to_filter:
+            # Post-query filtering (legacy fallback)
+            top_k = max(final_max_results * 10, 50)
+            print(f"[DEBUG] Post-query location filter active, fetching top_k={top_k}")
         else:
             top_k = max(final_max_results, 10)
         
@@ -1368,9 +1417,9 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
             "include_metadata": True,
             "namespace": "restaurants"
         }
-        if cuisine_filter:
-            query_params["filter"] = cuisine_filter
-            print(f"[DEBUG] Applying Pinecone cuisine filter: {cuisine_filter}")
+        if combined_filter:
+            query_params["filter"] = combined_filter
+            print(f"[DEBUG] Applying Pinecone combined filter: {combined_filter}")
         
         query_res = pc_index.query(**query_params)
         matches = query_res.get("matches", []) if isinstance(query_res, dict) else getattr(query_res, "matches", [])
@@ -1382,10 +1431,17 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
             print(f"[DEBUG] Detected ingredients in query: {query_ingredients}")
 
         # Filter and rank recommendations
+        # Note: If location_filter was applied at Pinecone level, location_to_filter will be used only for logging
         if location_to_filter:
-            print(f"[DEBUG] Applying location filter: {location_to_filter}")
+            if location_filter:
+                print(f"[DEBUG] Location filtered at Pinecone level: {location_to_filter}")
+            else:
+                print(f"[DEBUG] Applying post-query location filter: {location_to_filter}")
         else:
             print(f"[DEBUG] No location filter applied")
+
+        # Determine if we should skip post-query location check
+        skip_location_check = bool(location_filter)  # True if Pinecone filtered by location
 
         ranked = filter_and_rank_recommendations(
             matches=matches,
@@ -1397,7 +1453,8 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
             query_text=request.query,
             location_filter=location_to_filter,
             cuisine_filter=query_cuisine,
-            query_ingredients=query_ingredients
+            query_ingredients=query_ingredients,
+            skip_location_check=skip_location_check
         )
 
         print(f"[DEBUG] Total ranked restaurants: {len(ranked)}")
@@ -1414,7 +1471,8 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
                 max_results=final_max_results,
                 query_text=request.query,
                 location_filter=location_to_filter,
-                cuisine_filter=None  # Retry without cuisine filter
+                cuisine_filter=None,  # Retry without cuisine filter
+                skip_location_check=skip_location_check
             )
             print(f"[DEBUG] Found {len(ranked)} restaurants without cuisine filter")
             
