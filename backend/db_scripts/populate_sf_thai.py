@@ -9,7 +9,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from master_populate import RestaurantPopulator
-from restaurant_to_pinecone import upload_to_pinecone
+from restaurant_to_pinecone import upload_to_pinecone, create_pinecone_vector, get_embedding_model, load_ingredient_flavor_map
 
 
 def main():
@@ -89,13 +89,54 @@ def main():
         enhanced = populator.enhance_and_scrape(restaurants)
         
         if enhanced:
-            print(f"\n📤 Uploading {len(enhanced)} restaurants to Pinecone...")
-            upload_result = upload_to_pinecone(enhanced)
-            print(f"✅ Upload complete!")
-        
-        print(f"\n🎉 SUCCESS!")
-        print(f"   Thai restaurants populated: {len(enhanced)}")
-        print(f"   User 3 (dummy3) can now get Thai curry in SF!")
+            print(f"\n� Processing {len(enhanced)} restaurants for upload...")
+            
+            # Initialize embedding model and ingredient map
+            print("   Loading embedding model...")
+            get_embedding_model()
+            print("   Loading ingredient-flavor map...")
+            load_ingredient_flavor_map()
+            
+            # Transform restaurants to Pinecone vectors
+            vectors = []
+            for rest in enhanced:
+                try:
+                    # Ensure required fields exist
+                    if not rest.get("id"):
+                        continue
+                    
+                    # Normalize data structure
+                    restaurant_data = {
+                        "id": rest["id"],
+                        "name": rest.get("name", ""),
+                        "avg_rating": rest.get("avg_rating", rest.get("rating", 0.0)),
+                        "price_range": rest.get("price"),
+                        "cuisine_types": rest.get("cuisine_types", []),
+                        "location": rest.get("location", {}),
+                        "menu_items": rest.get("menu_items", []),
+                        "popular_dishes": rest.get("popular_dishes", []),
+                        "taste_vector": [0.0] * 6  # Will be calculated in create_pinecone_vector
+                    }
+                    
+                    vector = create_pinecone_vector(restaurant_data)
+                    if vector and vector.get("values"):
+                        vectors.append(vector)
+                    else:
+                        print(f"   ⚠️  Skipping {rest.get('name')}: no embedding generated")
+                        
+                except Exception as e:
+                    print(f"   ⚠️  Error processing {rest.get('name', 'unknown')}: {e}")
+                    continue
+            
+            if vectors:
+                print(f"\n📤 Uploading {len(vectors)} restaurants to Pinecone...")
+                upload_result = upload_to_pinecone(vectors)
+                print(f"✅ Upload complete!")
+                print(f"\n🎉 SUCCESS!")
+                print(f"   Thai restaurants uploaded: {len(vectors)}")
+                print(f"   User 3 (dummy3) can now get Thai curry in SF!")
+            else:
+                print(f"\n❌ No valid vectors created from {len(enhanced)} restaurants")
         
     except Exception as e:
         print(f"\n❌ Error: {e}")
