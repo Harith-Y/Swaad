@@ -1140,71 +1140,92 @@ async def chat_endpoint(request: ChatRequest) -> Dict[str, Any]:
                     restaurants_with_dish = filtered_restaurants
                     print(f"[DEBUG] After location filter: {len(restaurants_with_dish)} restaurants")
 
-                # Rank by rating and taste similarity
-                from recommendations import dish_recommendations_for_restaurant
-                ranked_restaurants = []
-                for rest in restaurants_with_dish[:10]:  # Limit to top 10
-                    # Get the matched dish
-                    matched_dish = rest.get("dish", dish_query)
+                # Check if location filtering removed all results
+                if len(restaurants_with_dish) == 0:
+                    # No restaurants found in user's location - fall back to taste-based recommendations
+                    print(f"[DEBUG] No '{dish_query}' found in {fallback_location}, falling back to taste-based recommendations")
+                    
+                    # Use dish taste profile for general recommendations
+                    dish_taste_vec = dish_in_db.get("taste_vector", [0.0] * 6)
+                    user_taste_vec = combine_vectors(user_taste_vec, dish_taste_vec, secondary_weight=0.6)
+                    
+                    # Continue to general restaurant recommendations below
+                    # Set flag so response message is appropriate
+                    dish_not_found = True
+                    dish_not_found_name = dish_query
+                    
+                    # Don't return here - let it fall through to general recommendations
+                else:
+                    # We have restaurants! Proceed with dish-specific recommendations
+                    dish_not_found = False
 
-                    # Get all recommended dishes (including the matched one)
-                    menu_items = rest["metadata"].get("menu_items", [])
-                    all_dishes = dish_recommendations_for_restaurant(
-                        menu_items=menu_items,
-                        user_taste_vec=user_taste_vec,
-                        diet_type=diet_type,
-                        allergies=allergies,
-                        top_n=10  # Get more to ensure we have the matched dish
-                    )
+                # Only proceed with dish-specific results if we have restaurants
+                if not dish_not_found and len(restaurants_with_dish) > 0:
+                    # Rank by rating and taste similarity
+                    from recommendations import dish_recommendations_for_restaurant
+                    ranked_restaurants = []
+                    for rest in restaurants_with_dish[:10]:  # Limit to top 10
+                        # Get the matched dish
+                        matched_dish = rest.get("dish", dish_query)
 
-                    # Find the matched dish in the recommendations (it will have proper similarity)
-                    recommended_dishes = []
-                    matched_dish_obj = None
-                    
-                    for dish in all_dishes:
-                        dish_name = dish.get("name") if isinstance(dish, dict) else dish
-                        if dish_name.lower() == matched_dish.lower():
-                            matched_dish_obj = dish
-                            break
-                    
-                    # Put matched dish first (with its calculated similarity)
-                    if matched_dish_obj:
-                        recommended_dishes.append(matched_dish_obj)
-                    else:
-                        # Calculate similarity for matched dish if not in recommendations
-                        dish_taste_vec = infer_taste_from_text_hybrid(matched_dish, semantic=USE_SEMANTIC_DISH_TASTE)
-                        similarity = taste_similarity(user_taste_vec, dish_taste_vec)
-                        recommended_dishes.append({
-                            "name": matched_dish, 
-                            "similarity": round(similarity * 100, 1)
-                        })
-                    
-                    # Add other dishes
-                    for dish in all_dishes:
-                        dish_name = dish.get("name") if isinstance(dish, dict) else dish
-                        if dish_name.lower() != matched_dish.lower():
-                            recommended_dishes.append(dish)
-                            if len(recommended_dishes) >= 5:  # Limit to 5 total
+                        # Get all recommended dishes (including the matched one)
+                        menu_items = rest["metadata"].get("menu_items", [])
+                        all_dishes = dish_recommendations_for_restaurant(
+                            menu_items=menu_items,
+                            user_taste_vec=user_taste_vec,
+                            diet_type=diet_type,
+                            allergies=allergies,
+                            top_n=10  # Get more to ensure we have the matched dish
+                        )
+
+                        # Find the matched dish in the recommendations (it will have proper similarity)
+                        recommended_dishes = []
+                        matched_dish_obj = None
+                        
+                        for dish in all_dishes:
+                            dish_name = dish.get("name") if isinstance(dish, dict) else dish
+                            if dish_name.lower() == matched_dish.lower():
+                                matched_dish_obj = dish
                                 break
+                        
+                        # Put matched dish first (with its calculated similarity)
+                        if matched_dish_obj:
+                            recommended_dishes.append(matched_dish_obj)
+                        else:
+                            # Calculate similarity for matched dish if not in recommendations
+                            dish_taste_vec = infer_taste_from_text_hybrid(matched_dish, semantic=USE_SEMANTIC_DISH_TASTE)
+                            similarity = taste_similarity(user_taste_vec, dish_taste_vec)
+                            recommended_dishes.append({
+                                "name": matched_dish, 
+                                "similarity": round(similarity * 100, 1)
+                            })
+                        
+                        # Add other dishes
+                        for dish in all_dishes:
+                            dish_name = dish.get("name") if isinstance(dish, dict) else dish
+                            if dish_name.lower() != matched_dish.lower():
+                                recommended_dishes.append(dish)
+                                if len(recommended_dishes) >= 5:  # Limit to 5 total
+                                    break
 
-                    ranked_restaurants.append({
-                        "name": rest["name"],
-                        "rating": rest["rating"],
-                        "price_range": rest["price_range"],
-                        "cuisine_types": rest["cuisine_types"],
-                        "recommended_dishes": recommended_dishes
-                    })
+                        ranked_restaurants.append({
+                            "name": rest["name"],
+                            "rating": rest["rating"],
+                            "price_range": rest["price_range"],
+                            "cuisine_types": rest["cuisine_types"],
+                            "recommended_dishes": recommended_dishes
+                        })
 
-                # Sort by rating
-                ranked_restaurants.sort(key=lambda x: x.get("rating", 0), reverse=True)
+                    # Sort by rating
+                    ranked_restaurants.sort(key=lambda x: x.get("rating", 0), reverse=True)
 
-                return {
-                    "response": {
-                        "text": f"Great choice! I found '{dish_query}' at {len(restaurants_with_dish)} restaurants. Here are the top-rated ones:"
-                    },
-                    "chat_id": request.chat_id,
-                    "menu_buddy": {"recommendations": ranked_restaurants[:final_max_results]}
-                }
+                    return {
+                        "response": {
+                            "text": f"Great choice! I found '{dish_query}' at {len(restaurants_with_dish)} restaurants in {fallback_location}. Here are the top-rated ones:"
+                        },
+                        "chat_id": request.chat_id,
+                        "menu_buddy": {"recommendations": ranked_restaurants[:final_max_results]}
+                    }
 
         except Exception as e:
             print(f"[DEBUG] Error in dish query: {e}")

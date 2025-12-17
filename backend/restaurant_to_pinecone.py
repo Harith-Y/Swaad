@@ -209,6 +209,7 @@ def create_pinecone_vector(restaurant: Dict[str, Any]) -> Dict[str, Any]:
     metadata = {
         "name": restaurant.get("name"),
         "avg_rating": float(restaurant.get("avg_rating", 0.0)),
+        "city": location.get("city", ""),  # Extract city to top-level for filtering
         "cuisine_types": restaurant.get("cuisine_types", []),
         "location_json": json.dumps(location),
         "coordinates_json": json.dumps({
@@ -247,6 +248,35 @@ def upload_to_pinecone(vectors: List[Dict[str, Any]], batch_size: int = 100):
         raise ValueError("PINECONE_API_KEY not found in environment variables")
 
     print(f"Connecting to Pinecone index: {index_name}")
+    
+    # Validate vectors before upload
+    valid_vectors = []
+    skipped_count = 0
+    
+    for vec in vectors:
+        # Check if vector has required 'values' field
+        if not vec.get("values"):
+            print(f"[WARNING] Skipping vector {vec.get('id', 'unknown')}: missing 'values' field")
+            skipped_count += 1
+            continue
+        
+        # Check if values is a valid list
+        if not isinstance(vec["values"], list) or len(vec["values"]) == 0:
+            print(f"[WARNING] Skipping vector {vec.get('id', 'unknown')}: invalid 'values' format")
+            skipped_count += 1
+            continue
+        
+        valid_vectors.append(vec)
+    
+    if skipped_count > 0:
+        print(f"⚠️  Skipped {skipped_count} invalid vectors (missing embeddings)")
+    
+    if not valid_vectors:
+        print("❌ No valid vectors to upload!")
+        return None
+    
+    print(f"📤 Uploading {len(valid_vectors)} valid vectors...")
+    
     pc = Pinecone(api_key=api_key)
 
     # Check if index exists, create if not
@@ -265,13 +295,17 @@ def upload_to_pinecone(vectors: List[Dict[str, Any]], batch_size: int = 100):
     index = pc.Index(index_name)
 
     # Upload in batches
-    total = len(vectors)
+    total = len(valid_vectors)
     for i in range(0, total, batch_size):
-        batch = vectors[i:i + batch_size]
+        batch = valid_vectors[i:i + batch_size]
         index.upsert(vectors=batch, namespace="restaurants")  # Always use restaurants namespace
         print(f"Uploaded batch {i // batch_size + 1}/{(total + batch_size - 1) // batch_size} ({len(batch)} vectors)")
 
-    print(f"Successfully uploaded {total} vectors to Pinecone (namespace: restaurants)")
+    print(f"✅ Successfully uploaded {total} vectors to Pinecone (namespace: restaurants)")
+    
+    if skipped_count > 0:
+        print(f"⚠️  Note: {skipped_count} restaurants were skipped due to missing data")
+    
     return index
 
 
