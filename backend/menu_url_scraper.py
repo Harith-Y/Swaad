@@ -109,7 +109,7 @@ class MenuURLScraper:
                         # Look for dish name in headings or strong tags
                         name_elem = item.find(['h3', 'h4', 'h5', 'strong', 'span'])
                         if name_elem:
-                            dish_name = name_elem.get_text(strip=True)
+                            dish_name = self._clean_dish_name(name_elem.get_text(strip=True))
                             if self._is_valid_dish_name(dish_name):
                                 dishes.append(dish_name)
             
@@ -117,7 +117,7 @@ class MenuURLScraper:
             if len(dishes) < 5:
                 headings = soup.find_all(['h2', 'h3', 'h4', 'h5'])
                 for heading in headings:
-                    text = heading.get_text(strip=True)
+                    text = self._clean_dish_name(heading.get_text(strip=True))
                     if self._is_valid_dish_name(text):
                         dishes.append(text)
             
@@ -227,13 +227,22 @@ class MenuURLScraper:
         
         try:
             prompt = f"""Extract ONLY the actual dish names from this menu text. 
-Do not include:
-- Category names (appetizers, entrees, desserts, etc.)
-- Cuisine types (Italian, Chinese, Thai, etc.)
-- Descriptions or prices
-- Generic food categories (pizza, pasta, burgers, etc.)
 
-Return ONLY a comma-separated list of specific dish names.
+Rules:
+- Extract complete dish names ONLY (e.g., "Single Cheeseburger", "Chicken Tikka Masala")
+- Do NOT include:
+  * Category names (appetizers, entrees, desserts, sides, etc.)
+  * Cuisine types (Italian, Chinese, Thai, etc.)
+  * Prices, dollar amounts, or numbers
+  * Descriptions or ingredients lists
+  * Generic categories (pizza, pasta, burgers, salads, etc.)
+  * Modifiers or add-ons ("add bacon", "with cheese", "extra sauce")
+  * Formatting characters (*, •, ~, |, etc.)
+  * Incomplete phrases ("with eggs", "and fries", etc.)
+- Clean formatting: Remove all special characters, bullets, asterisks
+- Each dish should be a complete, standalone menu item name
+
+Return ONLY a comma-separated list of clean dish names.
 
 Menu text:
 {text}
@@ -251,6 +260,8 @@ Dish names (comma-separated):"""
             
             # Parse comma-separated dishes
             dishes = [d.strip() for d in content.split(',')]
+            # Clean and validate dishes
+            dishes = [self._clean_dish_name(d) for d in dishes]
             dishes = [d for d in dishes if self._is_valid_dish_name(d)]
             
             return dishes[:30]
@@ -259,27 +270,63 @@ Dish names (comma-separated):"""
             print(f"   ❌ AI extraction error: {e}")
             return []
     
+    def _clean_dish_name(self, dish: str) -> str:
+        """Clean dish name by removing formatting artifacts"""
+        if not dish:
+            return ""
+        
+        # Remove common formatting characters and bullets
+        dish = re.sub(r'[*•~|◦○●▪▫■□◘◙]', '', dish)
+        
+        # Remove prices ($X.XX or X.XX)
+        dish = re.sub(r'\$?\d+\.\d{2}', '', dish)
+        dish = re.sub(r'\s+\d+\s*$', '', dish)  # Remove trailing numbers
+        
+        # Remove common modifiers/add-ons
+        dish = re.sub(r'\b(add|with|extra|topped with)\b.*', '', dish, flags=re.IGNORECASE)
+        
+        # Clean up whitespace
+        dish = ' '.join(dish.split())
+        
+        return dish.strip()
+    
     def _is_valid_dish_name(self, dish: str) -> bool:
         """Validate if text is a dish name (not category or junk)"""
         if not dish or len(dish) < 3:
             return False
         
-        # Remove prices
-        dish_clean = re.sub(r'\$?\d+(\.\d{2})?', '', dish).strip()
-        if len(dish_clean) < 3:
+        # Check if too long (likely description)
+        if len(dish) > 100:
             return False
         
-        # Check if too long (likely description)
-        if len(dish_clean) > 100:
-            return False
+        # Check if too short after cleaning
+        if len(dish) < 5:
+            # Very short names must have at least 2 words or be a known dish
+            words = dish.split()
+            if len(words) < 2:
+                return False
         
         # Check if it's a category word
-        dish_lower = dish_clean.lower()
+        dish_lower = dish.lower()
         if dish_lower in self.category_words:
             return False
         
+        # Filter out incomplete phrases
+        incomplete_patterns = [
+            r'^(with|and|or|the)\b',  # Starts with connector
+            r'^(add|extra|topped)\b',  # Starts with modifier
+            r'\b(only|available|served)$',  # Ends with qualifier
+        ]
+        for pattern in incomplete_patterns:
+            if re.search(pattern, dish_lower):
+                return False
+        
         # Must contain at least some letters
-        if not re.search(r'[a-zA-Z]{2,}', dish_clean):
+        if not re.search(r'[a-zA-Z]{2,}', dish):
+            return False
+        
+        # Must not be all numbers/symbols
+        if len(re.findall(r'[a-zA-Z]', dish)) < 3:
             return False
         
         return True
