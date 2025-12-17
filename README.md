@@ -13,7 +13,7 @@ A full-stack application for taste-based food discovery.
 
 Before you begin, ensure you have the following installed on your system:
 
-- **Python 3.7+** (Python 3.8 or higher recommended)
+- **Python 3.10+** (Python 3.10 or higher recommended)
   - Check your version: `python3 --version` or `python --version`
   - Download from [python.org](https://www.python.org/downloads/) if needed
 - **Node.js 16+** and **npm** (Node Package Manager)
@@ -40,7 +40,7 @@ cd swaad
 
 ### Step 2: Configure Environment Variables
 
-Create a `.env` file in the **project root** (same level as `README.md`).
+Create a `.env` file in the **backend** directory (or project root, depending on your setup).
 
 You can use:
 
@@ -87,19 +87,50 @@ SHOW_SIMILARITY_PERCENTAGE=true
 
 ---
 
-## ▶️ Starting the Application (Demo)
+## 📁 Project Structure
+
+The project is organized into a backend API and a frontend web application.
+
+```
+swaad/
+├── backend/                 # FastAPI backend
+│   ├── config.py            # Configuration & env vars
+│   ├── main.py              # App entry point
+│   ├── routes/              # API endpoints
+│   ├── db_scripts/          # Data population & maintenance scripts
+│   ├── ... (modularized components)
+│   └── README.md            # Detailed backend documentation
+├── frontend/                # React/Vite frontend
+│   ├── src/                 # Source code
+│   └── ...
+├── start_all.sh             # Master start script
+├── test_chat_api.sh         # API testing script
+└── ...
+```
+
+---
+
+## 🏗️ Backend Architecture
+
+The backend has been recently refactored into a modular architecture for better maintainability and scalability.
+
+- **Modular Design:** The monolithic `main.py` has been split into focused modules (`dish_processing.py`, `taste_analysis.py`, `recommendations.py`, etc.).
+- **Simplified API:** Authentication has been removed to focus on the core chat and recommendation features.
+- **Documentation:** See `backend/README.md` for a detailed breakdown of each module and its responsibilities.
+
+---
+
+## ▶️ Starting the Application
 
 ### 🚀 Method 1: Automated Script (Recommended)
 
-Run the start script which will automatically create a virtual environment and install all dependencies:
+Run the master start script which will automatically set up environments and start both backend and frontend:
 
 ```bash
-./start.sh
+./start_all.sh
 ```
 
 Once complete, open your browser and go to **http://localhost:3000** – you're all set! 🎉
-
----
 
 ### 🔧 Method 2: Manual Installation
 
@@ -107,32 +138,44 @@ If the script doesn't work or you prefer manual setup, run these commands from t
 
 1. **Create and activate virtual environment:**
    ```bash
+   cd backend
    python3 -m venv venv
-   source venv/bin/activate
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
 2. **Install backend dependencies:**
    ```bash
-   pip install -r ./backend/requirements.txt
+   pip install -r requirements.txt
    ```
 
 3. **Start the backend server:**
    ```bash
-   python ./backend/main.py
+   python main.py
    ```
 
-4. **Open a new terminal, activate venv, and install frontend dependencies:**
+4. **Open a new terminal, go to frontend, and install dependencies:**
    ```bash
-   source venv/bin/activate
-   npm install --prefix ./frontend
+   cd ../frontend
+   npm install
    ```
 
 5. **Start the frontend server:**
    ```bash
-   npm run dev --prefix ./frontend
+   npm run dev
    ```
 
 6. **Open your browser and go to** **http://localhost:3000** – done! 🎉
+
+---
+
+## 🛠️ Helper Scripts
+
+| Script | Description |
+|--------|-------------|
+| `./start_all.sh` | Starts both backend and frontend servers. |
+| `./test_chat_api.sh` | Tests the chat API endpoint with a sample query. |
+| `./git-pull-helper.sh` | Helper for pulling latest changes from git. |
+| `backend/db_scripts/*.py` | Various scripts for data cleaning, population, and maintenance. |
 
 ---
 
@@ -269,6 +312,18 @@ If the script doesn't work or you prefer manual setup, run these commands from t
 - **Performance:** Parallel processing of taste vector calculations
 - **Accuracy:** Groq-inferred taste vectors show ~95%+ match accuracy for savory dishes
 - **Debugging:** Comprehensive logging for taste vector calculation pipeline
+
+---
+
+## 💾 Data Population & Maintenance
+
+The `backend/db_scripts/` directory contains various utility scripts for managing the database and data quality.
+
+- **Data Cleaning:** `clean_menu_data.py`, `cleanup_all_duplicates.py`
+- **Data Population:** `populate_from_yelp.py`, `populate_with_yelp_ai.py`
+- **Validation:** `check_json.py`, `check_metadata.py`
+
+See the scripts directory for more details on how to run these tools.
 
 ---
 
